@@ -5,9 +5,9 @@
 ### О проекте:
 
 ### Используемые технологии:
-Python 3.10
-Django 4.1
-Django Rest Framework 3.14.0
+- Python 3.10
+- Django 4.1
+- Django Rest Framework 3.14.0
 
 ## Использование
 
@@ -50,10 +50,10 @@ pip install -r requirements.txt
 cd crm_backend
 ```
 * Если у вас windows
-```sh
-python manage.py runserver
-```
+    ```sh
+    python manage.py runserver
+    ```
 * Если у вас Linux/MacOS
-```sh
-python3 manage.py runserver
-```
+    ```sh
+    python3 manage.py runserver
+    ```
