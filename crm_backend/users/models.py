@@ -8,12 +8,16 @@ class Role(models.TextChoices):
     HR = 'HR'
 
 
-class Category(models.TextChoices):
-    DEVELOPER = 'Разработчик'
-    HR = 'Кадровик'
-    ACCOUNTANT = 'Бухгалтер'
-    SERVICE = 'Обслуживающий персонал'
-    MANAGMENT = 'Управление'
+class Category(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Название')
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        ordering = ['id']
+
+    def __str__(self):
+        return self.name
 
 
 class UserManager(BaseUserManager):
@@ -47,10 +51,9 @@ class User(AbstractUser):
         choices=Role.choices,
         default=Role.APPLICANT
     )
-    category = models.CharField(
-        max_length=50,
-        choices=Category.choices,
-        default=Category.SERVICE
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL,
+        verbose_name='Категория', null=True
     )
     REQUIRED_FIELDS = []
     objects = UserManager()
