@@ -4,11 +4,13 @@ from django.db import models
 
 
 class Role(models.TextChoices):
+    ''' Два типа пользователей сервиса: Соискатели и HR. '''
     APPLICANT = 'Соискатель'
     HR = 'HR'
 
 
 class Category(models.Model):
+    ''' Категория соискателя: разработка, бухгалтерия, обслуживание и т.д. '''
     name = models.CharField(max_length=100, verbose_name='Название')
 
     class Meta:
@@ -21,6 +23,7 @@ class Category(models.Model):
 
 
 class UserManager(BaseUserManager):
+    ''' Кастомный менеджер для кастомной модели пользователя. '''
     def create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError('The Email must be set')
@@ -42,6 +45,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+    ''' Кастомная модель пользователя. '''
+    username = None
     USERNAME_FIELD = 'email'
     email = models.EmailField(max_length=254, unique=True)
     first_name = models.CharField(max_length=150, verbose_name='Имя')
@@ -49,7 +54,8 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=11,
         choices=Role.choices,
-        default=Role.APPLICANT
+        default=Role.APPLICANT,
+        verbose_name='Роль'
     )
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL,

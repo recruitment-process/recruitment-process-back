@@ -4,18 +4,33 @@ from django.contrib.auth.admin import UserAdmin
 from .models import Category, User
 
 
-class CategoryInline(admin.StackedInline):
-    model = Category
-
-
 @admin.register(User)
-class UserAdmin(UserAdmin):
-    inlines = [CategoryInline, ]
+class CustomUserAdmin(UserAdmin):
+    ''' Переопределены поля формы для исключения поля username. '''
+    model = User
+
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Personal info', {
+            'fields': ('first_name', 'last_name', 'role', 'category',)
+        }),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
+                                    'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2'),
+        }),
+    )
+
     list_display = ('email', 'first_name', 'last_name',
                     'role', 'category', 'is_staff')
     list_filter = ('email', 'first_name', 'last_name', 'role', 'category')
     search_fields = ('email', 'first_name', 'last_name', )
     empty_value_display = '-пусто-'
+    ordering = ('-id',)
 
 
 @admin.register(Category)
