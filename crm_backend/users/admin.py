@@ -12,7 +12,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal info', {
-            'fields': ('first_name', 'last_name', 'role', 'category',)
+            'fields': ('first_name', 'last_name', 'role', 'category', 'photo')
         }),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
                                     'groups', 'user_permissions')}),
@@ -24,7 +24,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('email', 'password1', 'password2'),
         }),
     )
-
+    readonly_fields = ('last_login', 'date_joined',)
     list_display = ('email', 'first_name', 'last_name',
                     'role', 'category', 'is_staff')
     list_filter = ('email', 'first_name', 'last_name', 'role', 'category')
@@ -39,3 +39,4 @@ class CategoryAdmin(admin.ModelAdmin):
     list_filter = ('name', )
     search_fields = ('name',)
     empty_value_display = '-пусто-'
+    ordering = ('name',)

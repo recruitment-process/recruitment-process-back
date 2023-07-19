@@ -61,6 +61,8 @@ class User(AbstractUser):
         Category, on_delete=models.SET_NULL,
         verbose_name='Категория', null=True
     )
+    photo = models.ImageField(
+        upload_to='users/', null=True, blank=True, verbose_name='Фото')
     REQUIRED_FIELDS = []
     objects = UserManager()
 
