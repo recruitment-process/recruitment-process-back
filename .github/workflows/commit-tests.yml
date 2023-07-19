@@ -2,12 +2,16 @@ name: Commit tests
 
 on:
   push:
+    paths-ignore:
+      - '**.md'
     branches: 
       - develop
       - feature/alter-user-model
       - auth
       - feature/recruitment
   pull_request:
+    paths-ignore:
+      - '**.md'
     branches: [ develop ]
 
 jobs:
