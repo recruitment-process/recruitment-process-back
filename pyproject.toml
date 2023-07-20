@@ -15,7 +15,7 @@ This is customized info
 """
 commit_parser = "^(?P<change_type>feature|bug fix|add test|docs|chore|ci):\\s(?P<message>.*)?"
 changelog_pattern = "^(feature|bug fix|add test|docs|chore|ci)?(!)?"
-change_type_map = {"feature" = "Feat", "bug fix" = "Fix", "add test" = "Test", "ci" = "CI", "docs" = Docs}
+change_type_map = {"feature" = "Feat", "bug fix" = "Fix", "add test" = "Test", "ci" = "CI", "docs" = "Docs"}
 
 [[tool.commitizen.customize.questions]]
 type = "list"
