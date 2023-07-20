@@ -4,13 +4,14 @@
 
 ### О проекте:
 
-### Используемые технологии:
-- Python 3.10
-- Django 4.1
-- Django Rest Framework 3.14.0
+### Оглавление:
+- [Запуск приложения](#Клонируйте-реппозиторий)
+- [Установка pre-commit](#установка-pre-commit)
+    - [Установка pre-commit](#установка-pre-commit-1)
+    - [Установка hooks](#установка-hooks)
+- [Используемые технологии:](#используемые-технологии)
 
-## Использование
-
+## Запуск приложения
 #### Клонируйте реппозиторий
 
 ```sh
@@ -23,7 +24,7 @@ git clone git@github.com:recruitment-process/recruitment-process-back.git
 cd recruitment-process-back
 ```
 
-```
+```sh
 python -m venv venv
 ```
 
@@ -57,3 +58,39 @@ cd crm_backend
     ```sh
     python3 manage.py runserver
     ```
+### Установка pre-commit hooks
+
+Для того, чтобы при каждом коммите выполнялись pre-commit проверки, необходимо:
+- Установить pre-commit
+- Установить pre-commit hooks
+
+#### Установка pre-commit
+Модуль pre-commit уже добавлен в requirements и должен установиться автоматически с виртуальным окружением.
+
+Проверить установлен ли pre-commit можно командой (при активированном виртуальном окружении):
+```sh
+pre-commit --version
+>> pre-commit 3.2.0
+```
+
+Если этого не произошло, то необходимо установить pre-commit:
+```sh
+pip install pre-commit
+```
+
+#### Установка hooks
+Установка хуков:
+```sh
+pre-commit install --all
+```
+В дальнейшем, при выполнении команды git commit будут выполняться проверки, перечисленные в файле .pre-commit-config.yaml.
+
+Если не видно, какая именно ошибка мешает выполнить commit, можно запустить хуки вручную командой:
+```sh
+pre-commit run --all-files
+```
+
+### Используемые технологии:
+- Python 3.10
+- Django 4.1
+- Django Rest Framework 3.14.0
