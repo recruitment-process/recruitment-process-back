@@ -51,6 +51,10 @@ class User(AbstractUser):
     email = models.EmailField(max_length=254, unique=True)
     first_name = models.CharField(max_length=150, verbose_name='Имя')
     last_name = models.CharField(max_length=150, verbose_name='Фамилия')
+    patronymic = models.CharField(max_length=150, verbose_name='Отчество',
+                                  null=True, blank=True,)
+    telegram = models.CharField(max_length=150, verbose_name='Telegram',
+                                null=True, blank=True,)
     role = models.CharField(
         max_length=11,
         choices=Role.choices,
@@ -62,7 +66,7 @@ class User(AbstractUser):
         verbose_name='Категория', null=True
     )
     photo = models.ImageField(
-        upload_to='users/', null=True, blank=True, verbose_name='Фото')
+        upload_to='users/photo/', null=True, blank=True, verbose_name='Фото')
     REQUIRED_FIELDS = []
     objects = UserManager()
 
