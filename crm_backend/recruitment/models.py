@@ -1,31 +1,53 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from multiselectfield import MultiSelectField
+from django.core.validators import RegexValidator
+from .utils import (EXPERIENCE, EMPLOYMENT_TYPE, SCHEDULE_WORK)
+
+User = get_user_model()
+
+
+class Company(models.Model):
+    ''' Информация о компании '''
+    company_title = models.CharField(
+        max_length=100,
+        verbose_name='Название компании',
+    )
+    about_company = models.TextField(
+        verbose_name = 'О компании',
+        help_text='Введите информацию о компани'
+    )
+
+    company_address = models.CharField(
+        max_length=100,
+        verbose_name='Адрес компании',
+    )
+
+    email = models.EmailField(verbose_name='Эл.почта',)
+
+    phoneNumberRegex = RegexValidator(regex=r"^\+?1?\d{8,15}$")
+
+    phoneNumber = models.CharField(
+        validators=[phoneNumberRegex],
+        max_length=16,
+    )
+
+    link_hr = models.URLField(max_length=100, verbose_name = 'Ссылка на HR',)
+
+
+    class Meta:
+        ordering = ['company_title']
+        verbose_name = 'Основная информация о компании'
+
+    def __str__(self):
+        return self.company_title
 
 
 class Vacancy(models.Model):
     ''' Информация о вакансии '''
-    EXPERIENCE = (
-        ('1', 'Нет опыта'),
-        ('2', '1-3 года'),
-        ('3', '3-6 лет'),
-        ('4', 'Более 6 лет'),
-    )
 
-    EMPLOYMENT_TYPE = (
-        ('PO', 'Полная'),
-        ('CH', 'Частичная'),
-        ('PR', 'Проектная'),
-        ('ST', 'Стажировка'),
-        ('VO', 'Волонтерство'),
-    )
-
-    SCHEDULE_WORK = (
-        ('P', 'Полный день'),
-        ('S', 'Сменный график'),
-        ('G', 'Гибкий график'),
-        ('U', 'Удаленная работа'),
-        ('W', 'Вахтовый метод'),
-    )
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, verbose_name='Компания', related_name='vacancys')
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Автор', related_name='vacancys')
 
     vacancy_title = models.CharField(
         max_length=100,
@@ -82,31 +104,3 @@ class Vacancy(models.Model):
 
     def __str__(self):
         return self.vacancy_title
-
-
-
-class Company(models.Model):
-    ''' Информация о компании '''
-    company_title = models.CharField(
-        max_length=100,
-        verbose_name='Название компании',
-    )
-    about_company = models.TextField(
-        verbose_name = 'О компании',
-        help_text='Введите информацию о компани'
-    )
-
-    company_address = models.CharField(
-        max_length=100,
-        verbose_name='Адрес компании',
-    )
-
-    class Meta:
-        ordering = ['company_title']
-        verbose_name = 'Основная информация о компании'
-
-    def __str__(self):
-        return self.company_title
-
-
-
