@@ -11,7 +11,6 @@ from recruitment.constants_choices_resume import (
     RELOCATION,
     SCHEDULE_WORK,
 )
-from users.models import User
 
 
 class Work_Experience(models.Model):
