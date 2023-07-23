@@ -1,16 +1,15 @@
-from django.conf import settings
 from django.contrib import admin
 
-from .models import Applicant_resume, Work_experience, Education
+from .models import Applicant_Resume, Education, Work_Experience
 
 
-@admin.register(Applicant_resume)
-class Applicant_resumeAdmin(admin.ModelAdmin):
+@admin.register(Applicant_Resume)
+class Applicant_ResumeAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(Work_experience)
-class Work_experience(admin.ModelAdmin):
+@admin.register(Work_Experience)
+class Work_Experience(admin.ModelAdmin):
     pass
 
 
