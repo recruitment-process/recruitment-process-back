@@ -13,7 +13,7 @@ from recruitment.constants_choices_resume import (
 )
 
 
-class Work_Experience(models.Model):
+class WorkExperience(models.Model):
     """Опыт работы."""
 
     start_date = models.DateField(verbose_name="Дата устроения")
@@ -45,7 +45,7 @@ class Work_Experience(models.Model):
             )
 
 
-class Applicant_Resume(models.Model):
+class ApplicantResume(models.Model):
     """Резюме"""
 
     applicant = models.ForeignKey(
@@ -75,9 +75,9 @@ class Applicant_Resume(models.Model):
         blank=True,
         verbose_name="Командировка",
     )
-    phoneNumberRegex = RegexValidator(regex=r"^\+?1?\d{8,15}$")
-    phoneNumber = models.CharField(
-        validators=[phoneNumberRegex],
+    phone_number_regex = RegexValidator(regex=r"^\+?1?\d{8,15}$")
+    phone_number = models.CharField(
+        validators=[phone_number_regex],
         max_length=16,
     )
     relocation = models.CharField(
@@ -114,7 +114,7 @@ class Applicant_Resume(models.Model):
         verbose_name="Дата рождения",
     )
     work_experiences = models.ManyToManyField(
-        Work_Experience,
+        WorkExperience,
         verbose_name="Информация об опыте работы",
     )
     about_me = models.TextField(
@@ -151,7 +151,7 @@ class Education(models.Model):
         blank=True,
     )
     resume = models.ForeignKey(
-        Applicant_Resume,
+        ApplicantResume,
         on_delete=models.CASCADE,
         related_name="educations",
         verbose_name="резюме",
