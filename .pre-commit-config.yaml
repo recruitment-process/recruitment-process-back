@@ -13,17 +13,32 @@ repos:
     -   id: check-yaml
     -   id: check-added-large-files
     -   id: check-merge-conflict
+    -   id: check-json
+
+-   repo: https://github.com/commitizen-tools/commitizen
+    rev: master
+    hooks:
+    -   id: commitizen
+        stages: [commit-msg]
 
 -   repo: https://github.com/pycqa/isort
     rev: 5.12.0
     hooks:
-      - id: isort
+    -   id: isort
         exclude: (migrations|crm_backend/crm_backend/settings/)
         args: [--profile, black, --line-length=88]
+
+-   repo: https://github.com/pycqa/flake8
+    rev: 4.0.1
+    hooks:
+    -   id: flake8
+        exclude: (migrations|crm_backend/crm_backend/settings/)
+        additional_dependencies:
+        - flake8-docstrings
 
 -   repo: https://github.com/ambv/black
     rev: 23.7.0
     hooks:
-      - id: black
+    -   id: black
         exclude: (migrations|crm_backend/crm_backend/settings/)
         args: [--line-length=88]
