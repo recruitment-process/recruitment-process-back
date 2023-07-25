@@ -21,11 +21,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "recruitment.apps.RecruitmentConfig",
     "rest_framework",
     "rest_framework.authtoken",
     "users",
     "recruitment",
     "djoser",
+    "multiselectfield",
 ]
 
 MIDDLEWARE = [
@@ -57,7 +59,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "crm_backend.wsgi.application"
-
 
 DATABASES = {
     "default": {
@@ -106,7 +107,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
