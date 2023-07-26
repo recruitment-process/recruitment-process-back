@@ -35,6 +35,9 @@ repos:
         exclude: (migrations|crm_backend/crm_backend/settings/)
         additional_dependencies:
         - flake8-docstrings
+        args:
+        -  --max-line-length=88
+        -  --ignore=D100, D105, D106
 
 -   repo: https://github.com/ambv/black
     rev: 23.7.0
