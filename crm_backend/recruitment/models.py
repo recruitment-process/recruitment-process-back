@@ -1,20 +1,24 @@
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from multiselectfield import MultiSelectField
-from recruitment.constants_choices_resume import (
+from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
+    EXPERIENCE,
     GENDER,
     MARITAL_STATUS,
     RELOCATION,
     SCHEDULE_WORK,
 )
-from .utils import EMPLOYMENT_TYPE, EXPERIENCE, SCHEDULE_WORK
+
+User = get_user_model()
+
 
 class WorkExperience(models.Model):
-    """Опыт работы."""
+    """Модель опыта работы."""
 
     start_date = models.DateField(verbose_name="Дата устроения")
     end_date = models.DateField(
@@ -38,15 +42,15 @@ class WorkExperience(models.Model):
         return f"{self.position} - {self.organization}"
 
     def clean(self):
-        # Проверяем, что end_date не меньше start_date
+        """Функция для проверки корректности end_date и start_date."""
         if self.start_date and self.end_date and self.start_date > self.end_date:
             raise ValidationError(
-                "Дата увольнения не может быть меньше даты устройства."
+                "Дата увольнения не может быть меньше даты устройства на работу!"
             )
 
 
 class ApplicantResume(models.Model):
-    """Резюме"""
+    """Модель резюме."""
 
     applicant = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -58,6 +62,7 @@ class ApplicantResume(models.Model):
         max_length=100,
         verbose_name="Должность",
     )
+
     employment_type = MultiSelectField(
         choices=EMPLOYMENT_TYPE,
         verbose_name="Тип занятости",
@@ -66,6 +71,7 @@ class ApplicantResume(models.Model):
         choices=SCHEDULE_WORK,
         verbose_name="Расписание работы",
     )
+
     salary = models.CharField(
         max_length=50,
         verbose_name="Желаемая зарплата",
@@ -209,19 +215,22 @@ class Company(models.Model):
 
 
 class Vacancy(models.Model):
+    """Модель Вакансий."""
+
     company = models.ForeignKey(
         Company,
         on_delete=models.SET_NULL,
         null=True,
         verbose_name="Компания",
-        related_name="vacancys",
+        related_name="vacancies",
     )
+
     author = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         verbose_name="Автор",
-        related_name="vacancys",
+        related_name="vacancies",
     )
 
     vacancy_title = models.CharField(
@@ -237,17 +246,17 @@ class Vacancy(models.Model):
     )
 
     employment_type = MultiSelectField(
-        max_length=3,
         choices=EMPLOYMENT_TYPE,
         verbose_name="Тип занятости",
         blank=False,
+        default=["PO"],
     )
 
     schedule_work = MultiSelectField(
-        max_length=3,
         choices=SCHEDULE_WORK,
         verbose_name="Расписание работы",
         blank=False,
+        default=["P"],
     )
 
     about_company = models.TextField(
@@ -283,4 +292,3 @@ class Vacancy(models.Model):
 
     def __str__(self):
         return self.vacancy_title
-
