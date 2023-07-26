@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from multiselectfield import MultiSelectField
+from multiselectfield.utils import get_max_length
 from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
@@ -45,7 +46,7 @@ class WorkExperience(models.Model):
         """Функция для проверки корректности end_date и start_date."""
         if self.start_date and self.end_date and self.start_date > self.end_date:
             raise ValidationError(
-                "Дата увольнения не может быть меньше даты устройства на работу!"
+                "Дата увольнения не может быть" " меньше даты устройства на работу!"
             )
 
 
@@ -66,10 +67,12 @@ class ApplicantResume(models.Model):
     employment_type = MultiSelectField(
         choices=EMPLOYMENT_TYPE,
         verbose_name="Тип занятости",
+        max_length=get_max_length(EMPLOYMENT_TYPE, None),
     )
     schedule_work = MultiSelectField(
         choices=SCHEDULE_WORK,
         verbose_name="Расписание работы",
+        max_length=get_max_length(SCHEDULE_WORK, None),
     )
 
     salary = models.CharField(
@@ -250,6 +253,7 @@ class Vacancy(models.Model):
         verbose_name="Тип занятости",
         blank=False,
         default=["PO"],
+        max_length=get_max_length(EMPLOYMENT_TYPE, None),
     )
 
     schedule_work = MultiSelectField(
@@ -257,6 +261,7 @@ class Vacancy(models.Model):
         verbose_name="Расписание работы",
         blank=False,
         default=["P"],
+        max_length=get_max_length(SCHEDULE_WORK, None),
     )
 
     about_company = models.TextField(
