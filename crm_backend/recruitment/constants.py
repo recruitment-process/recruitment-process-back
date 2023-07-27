@@ -1,3 +1,5 @@
+from django.core.validators import RegexValidator
+
 EMPLOYMENT_TYPE = (
     ("PO", "Полная"),
     ("CH", "Частичная"),
@@ -45,3 +47,5 @@ EXPERIENCE = (
     ("3", "3-6 лет"),
     ("4", "Более 6 лет"),
 )
+
+PHONE_NUMBER_REGEX = RegexValidator(regex=r"^\+?1?\d{8,15}$")
