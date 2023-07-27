@@ -20,7 +20,7 @@ User = get_user_model()
 class WorkExperience(models.Model):
     """Модель опыта работы."""
 
-    start_date = models.DateField(verbose_name="Дата устроения")
+    start_date = models.DateField(verbose_name="Дата начала работы")
     end_date = models.DateField(
         verbose_name="Дата увольнения",
         null=True,
@@ -81,7 +81,7 @@ class ApplicantResume(models.Model):
         blank=True,
         verbose_name="Командировка",
     )
-    phone_number_regex = RegexValidator(regex=r"^\+?1?\d{8,15}$")
+    phone_number_regex = RegexValidator(regex=r"^\+?1?\d{10,15}$")
     phone_number = models.CharField(
         validators=[phone_number_regex],
         max_length=16,
@@ -192,7 +192,7 @@ class Company(models.Model):
         verbose_name="Эл.почта",
     )
 
-    phoneNumberRegex = RegexValidator(regex=r"^\+?1?\d{8,15}$")
+    phoneNumberRegex = RegexValidator(regex=r"^\+?1?\d{10,15}$")
 
     phoneNumber = models.CharField(
         validators=[phoneNumberRegex],
@@ -275,8 +275,8 @@ class Vacancy(models.Model):
     )
 
     job_responsibilities = models.TextField(
-        verbose_name="Обязанности кондидата",
-        help_text="Введите обязанности кондидата",
+        verbose_name="Обязанности кандидата",
+        help_text="Введите обязанности кандидата",
     )
 
     technology_stack = (
