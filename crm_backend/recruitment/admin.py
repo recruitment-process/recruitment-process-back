@@ -76,8 +76,8 @@ class CompanyAdmin(admin.ModelAdmin):
         "company_title",
         "company_address",
         "email",
-        "phoneNumber",
+        "phone_number",
         "link_hr",
     )
     list_filter = ("company_title",)
-    search_fields = ("company_title", "email", "phoneNumber", "link_hr")
+    search_fields = ("company_title", "email", "phone_number", "link_hr")
