@@ -18,8 +18,7 @@ from recruitment.constants import (
 class WorkExperience(models.Model):
     """Модель опыта работы."""
 
-    start_date = models.DateField(verbose_name="Дата устроения")
-
+    start_date = models.DateField(verbose_name="Дата начала работы")
     end_date = models.DateField(
         verbose_name="Дата увольнения",
         null=True,
@@ -303,8 +302,8 @@ class Vacancy(models.Model):
     )
 
     job_responsibilities = models.TextField(
-        verbose_name="Обязанности кондидата",
-        help_text="Введите обязанности кондидата",
+        verbose_name="Обязанности кандидата",
+        help_text="Введите обязанности кандидата",
     )
 
     technology_stack = (
