@@ -1,6 +1,9 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import validate_email
 from django.db import models
+
+from .validators import custom_validate_email
 
 
 class Role(models.TextChoices):
@@ -28,6 +31,7 @@ class UserManager(BaseUserManager):
     """Кастомный менеджер для кастомной модели пользователя."""
 
     def create_user(self, email, password, **extra_fields):
+        """Метод создания пользователя."""
         if not email:
             raise ValueError("The Email must be set")
         email = self.normalize_email(email)
@@ -37,6 +41,7 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password, **extra_fields):
+        """Метод создания супер пользователя."""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
@@ -52,7 +57,9 @@ class User(AbstractUser):
 
     username = None
     USERNAME_FIELD = "email"
-    email = models.EmailField(max_length=254, unique=True)
+    email = models.EmailField(
+        max_length=254, unique=True, validators=[validate_email, custom_validate_email]
+    )
     first_name = models.CharField(max_length=150, verbose_name="Имя")
     last_name = models.CharField(max_length=150, verbose_name="Фамилия")
     patronymic = models.CharField(
@@ -86,10 +93,12 @@ class User(AbstractUser):
 
     @property
     def is_applicant(self):
+        """Флаг соискателя."""
         return self.role == Role.APPLICANT
 
     @property
     def is_hr(self):
+        """Флаг HR."""
         return self.role == Role.HR
 
     def __str__(self):
