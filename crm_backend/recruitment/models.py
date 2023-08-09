@@ -12,6 +12,7 @@ from recruitment.constants import (
     PHONE_NUMBER_REGEX,
     RELOCATION,
     SCHEDULE_WORK,
+    VACANCY_STATUS,
 )
 
 
@@ -19,6 +20,7 @@ class WorkExperience(models.Model):
     """Модель опыта работы."""
 
     start_date = models.DateField(verbose_name="Дата начала работы")
+
     end_date = models.DateField(
         verbose_name="Дата увольнения",
         null=True,
@@ -147,6 +149,20 @@ class ApplicantResume(models.Model):
         verbose_name="Коротко о себе",
     )
 
+    current_company = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Текущее место работы",
+    )
+
+    current_job = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Текущяя должность",
+    )
+
     class Meta:
         ordering = ["job_title"]
         verbose_name = "Резюме"
@@ -250,6 +266,7 @@ class Vacancy(models.Model):
         related_name="vacancies",
     )
 
+    # Надо будет переписать на промежуточную таблицу ManyToMany с ссылками на HR'ов
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -286,9 +303,32 @@ class Vacancy(models.Model):
         max_length=get_max_length(SCHEDULE_WORK, None),
     )
 
+    salary = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Оплата труда",
+    )
+
     about_company = models.TextField(
+        blank=True,
+        null=True,
         verbose_name="О компании",
         help_text="Введите информацию о компани",
+    )
+
+    city = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True,
+        verbose_name="Город офиса",
+    )
+
+    address = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Адрес офиса",
     )
 
     pub_date = models.DateTimeField(
@@ -307,11 +347,21 @@ class Vacancy(models.Model):
     )
 
     technology_stack = (
-        # позже можно будет сделать бд со всеми навыками
+        # позже нужно будет сделать бд со всеми навыками
         models.TextField(
             verbose_name="Ключевые навыки",
         )
     )
+
+    status = models.CharField(
+        max_length=1,
+        choices=VACANCY_STATUS,
+        default=VACANCY_STATUS[2][0],
+        verbose_name="Статус вакансии",
+        blank=False,
+    )
+
+    deadline = models.DateField(verbose_name="Срок закрытия вакансии")
 
     class Meta:
         ordering = ["pub_date"]
