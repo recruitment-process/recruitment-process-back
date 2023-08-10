@@ -48,4 +48,10 @@ EXPERIENCE = (
     ("4", "Более 6 лет"),
 )
 
+VACANCY_STATUS = (
+    ("A", "Активные"),
+    ("F", "Завернешшые"),
+    ("D", "Черновики"),
+)
+
 PHONE_NUMBER_REGEX = RegexValidator(regex=r"^\+?1?\d{8,15}$")
