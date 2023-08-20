@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import models
 from multiselectfield import MultiSelectField
 from multiselectfield.utils import get_max_length
@@ -14,6 +15,8 @@ from recruitment.constants import (
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
+from users.models import Category, User
+from users.validators import custom_validate_email
 
 
 class WorkExperience(models.Model):
@@ -67,7 +70,7 @@ class ApplicantResume(models.Model):
         verbose_name="Должность",
     )
 
-    employment_type = MultiSelectField(
+    employment_type = MultiSelectField(  # в модели кандидата
         choices=EMPLOYMENT_TYPE,
         verbose_name="Тип занятости",
         blank=False,
@@ -83,7 +86,7 @@ class ApplicantResume(models.Model):
         max_length=get_max_length(SCHEDULE_WORK, None),
     )
 
-    salary = models.CharField(
+    salary = models.CharField(  # в модели кандидата
         max_length=50,
         verbose_name="Желаемая зарплата",
     )
@@ -123,7 +126,7 @@ class ApplicantResume(models.Model):
         verbose_name="Образование",
     )
 
-    town = models.CharField(
+    town = models.CharField(  # в модели кандидата
         max_length=50,
         verbose_name="Город проживания",
     )
@@ -133,7 +136,7 @@ class ApplicantResume(models.Model):
         verbose_name="Гражданство",
     )
 
-    bday = models.DateField(
+    bday = models.DateField(  # в модели кандидата
         auto_now=False,
         auto_now_add=False,
         verbose_name="Дата рождения",
@@ -370,3 +373,80 @@ class Vacancy(models.Model):
 
     def __str__(self):
         return self.vacancy_title
+
+
+class Candidate(models.Model):
+    """Модель кандидата."""
+
+    first_name = models.CharField(max_length=40, verbose_name="Имя")
+    last_name = models.CharField(max_length=50, verbose_name="Фамилия")
+    patronymic = models.CharField(
+        max_length=60,
+        verbose_name="Отчество",
+        null=True,
+        blank=True,
+    )
+    email = models.EmailField(
+        verbose_name="Почта",
+        max_length=254,
+        unique=True,
+        validators=[validate_email, custom_validate_email],
+        null=True,
+        blank=True,
+    )
+    telegram = models.CharField(
+        max_length=150,
+        verbose_name="Телеграмм",
+        null=True,
+        blank=True,
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        verbose_name="Категория",
+        null=True,
+    )
+    city = models.CharField(
+        max_length=50,
+        verbose_name="Город проживания",
+        null=True,
+        blank=True,
+    )
+    bday = models.DateField(
+        auto_now=False,
+        auto_now_add=False,
+        verbose_name="Дата рождения",
+        null=True,
+        blank=True,
+    )
+    salary = models.CharField(
+        max_length=50,
+        verbose_name="Желаемая зарплата",
+    )
+    employment_type = MultiSelectField(
+        choices=EMPLOYMENT_TYPE,
+        verbose_name="Тип занятости",
+        blank=False,
+        default=["PO"],
+        max_length=get_max_length(EMPLOYMENT_TYPE, None),
+    )
+
+    def __str__(self):
+        return self.last_name
+
+
+class Comment(models.Model):
+    """Модель комментария."""
+
+    candidate = models.ForeignKey(
+        Candidate, on_delete=models.CASCADE, related_name="Кандидат"
+    )
+    text = models.TextField("Текст", help_text="Комментарий")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
+
+    class Meta:
+        ordering = ("-pub_date",)
+
+    def __str__(self):
+        return self.text
