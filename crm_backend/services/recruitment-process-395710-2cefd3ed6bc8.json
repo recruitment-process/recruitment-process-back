@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "recruitment-process-395710",
+  "private_key_id": "2cefd3ed6bc89e81764cf2638f08924073e17303",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEuwIBADANBgkqhkiG9w0BAQEFAASCBKUwggShAgEAAoIBAQCl/EOmcHyvrYtN\nNAjmYu3SEQdB+VnoOI0Mbz2IU1KWbswYsuu079X1MwCDNk2dhYkXFyj6SfIWzPzW\nr4FMlL3KPFgUNPjdx4vY92o5hNMBe0Cndc5vNzrLQ9EVD7OcaRzK/LSK/0yb2DRJ\nHXNWAYjksG8YhYo+Oe4tIWwJKOlgFS73+RcLhWfHxh9hU9FHfDcL4B/TOToJOPMm\n6TxBQW40A+7tHWeE1i6X0w9V/xNbcU0U2F6mdv+SczY0gVtOCezCreOesVCG2kpD\nKuJ96A6MBnjWY0gmcOv/esqHC2EdLqbSkvA/vaD5VLfczDCxiFRtLOx7sgfn2KjH\nwQ8A84zdAgMBAAECgf9+9ajyGiluBtwtf8G8Mrw3aRM7+Yv31opzDOC8VItLRJnb\nn9nktOp+0pGz7YNwmdIm9f1Q7AtsmHac7A6JzLoJWWaAglYPnzzd5G7nuQL0ajov\ndlnTQDuqw26uyLbJTBEuBgiNkKTz5NIt4LGs9U/HDUGNNQTvN6SW4JMy6UtUbye+\nxATIKTAlRlqvT0Z+9NlTJg2y5rq1+3LQ4GQS9vBWceqw6sB6b8mnz1ikQYQHfEJv\n/uEnGgx+vGIYBG5OWchkfAz3KKlb8yqWbLu10XFNo2Xrt3KCmBUCDcE3bMKgL4+c\nbuJb3U3RyAoFXWzs06KsbNWROQ97a+cNA0tVfwECgYEA4/rSkm1eQPQXJH9tmDP3\nk5P1gqyreuAm30mFGp9YUr6WmHGT18jc7ifDQSgpah6p/DmBU0XuoEeFuVOyT3tx\nh8mEmjtBEIB+18rW+ncty3QReCKOhsk8PO7cB0WlECu/J5vIAK9rmxXTe43RCx/J\n5iSGPzwFpF80pG0BMAY68qECgYEAumLYUKK6smbUDGbRkPnwdIYKCVar76yM76T5\n3A7UMKBY7IwfeBX4and9msIazFIGs/gMJRqWPui0Eg22PCN3irMezmDPtHPvPf7g\nUQgrEjawEVnSRP1h9r2kh2iCByQ26fyLSmSHmGDiD6DaDZ9k77i6AcRSmO3GrHCP\n+JqC7L0CgYEAq0ck7pe2aUw5GtWVq/TW+wv9NoitaGqBKd4dXwv6GmhP0gX6kfK5\ncT90ZT5cJvsUsIcvjzWJ+ubhI4QrAaX3fJG8yvbbgh9XrJ4a9x+UyzbPbRdhRwhm\n9kxqCBid01FaktJp54HjcSdrtHauaBIg6IPmTBm3D2/rp+CxNLhpjyECgYBD7PoA\niQ2ZLrhgvKfrOetTy/WkaZ3Hfw7t1yXn+M+D2SwPKRHe5cLeqiVwXQT/KXWf6Ook\nK4hN7OiTG8QqLpLGTXkQpV+M2CN8aIK/hUaNILkR2bYzxlQJZBut7XxVtfD9XTg2\nKGTyN3yrTWeqR0i1xJClTDL94Mni1jLh2w2T0QKBgBFDTByNY8b5lhqSspd7Ld57\nEPz+esJyzaZA21iJr4YwW2qEkgBqZKKQ/IFoh2esnkjYojuP0D78f5+TPqxA6m0x\nTnTQfdFVq0J5pPitAn3Zfky28WJkupBLBpQLrR20gLYF/AP0JyZN227BzhbTcy/Y\nvS9v60SQPxH1axznfavO\n-----END PRIVATE KEY-----\n",
+  "client_email": "crm-calendar@recruitment-process-395710.iam.gserviceaccount.com",
+  "client_id": "102304333415418201776",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/crm-calendar%40recruitment-process-395710.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
