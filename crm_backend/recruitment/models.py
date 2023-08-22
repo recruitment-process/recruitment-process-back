@@ -15,7 +15,7 @@ from recruitment.constants import (
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
-from users.models import Category, User
+from users.models import User
 from users.validators import custom_validate_email
 
 
@@ -376,7 +376,7 @@ class Vacancy(models.Model):
 
 
 class Candidate(models.Model):
-    """Модель кандидата."""
+    """ Модель кандидата. """
 
     first_name = models.CharField(max_length=40, verbose_name="Имя")
     last_name = models.CharField(max_length=50, verbose_name="Фамилия")
@@ -400,12 +400,7 @@ class Candidate(models.Model):
         null=True,
         blank=True,
     )
-    category = models.ForeignKey(
-        Category,
-        on_delete=models.SET_NULL,
-        verbose_name="Категория",
-        null=True,
-    )
+    cur_position = models.CharField(max_length=50, verbose_name="Текущая должность")
     city = models.CharField(
         max_length=50,
         verbose_name="Город проживания",
@@ -435,11 +430,28 @@ class Candidate(models.Model):
         return self.last_name
 
 
-class Comment(models.Model):
-    """Модель комментария."""
+class Note(models.Model):
+    """ Модель Заметок. """
 
     candidate = models.ForeignKey(
         Candidate, on_delete=models.CASCADE, related_name="Кандидат"
+    )
+    text = models.TextField("Текст", help_text="Заметка")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
+
+    class Meta:
+        ordering = ("-pub_date",)
+
+    def __str__(self):
+        return self.text
+    
+
+class Comment(models.Model):
+    """ Модель комментария к заметкам. """
+
+    note = models.ForeignKey(
+        Note, on_delete=models.CASCADE, related_name="Заметка"
     )
     text = models.TextField("Текст", help_text="Комментарий")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
