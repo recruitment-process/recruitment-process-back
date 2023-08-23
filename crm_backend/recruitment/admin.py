@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ApplicantResume, Company, Education, Vacancy, WorkExperience
+from .models import ApplicantResume, Company, Education, Event, Vacancy, WorkExperience
 
 
 @admin.register(ApplicantResume)
@@ -81,3 +81,20 @@ class CompanyAdmin(admin.ModelAdmin):
     )
     list_filter = ("company_title",)
     search_fields = ("company_title", "email", "phone_number", "link_hr")
+
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    """Добавление модели Event в админку."""
+
+    list_display = (
+        "title",
+        "start_date",
+        "end_date",
+        "description",
+        "conference_link",
+        "user",
+        "candidate",
+    )
+    list_filter = ("start_date", "end_date", "title")
+    search_fields = ("start_date", "title", "end_date", "candidate")

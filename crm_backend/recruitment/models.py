@@ -370,3 +370,27 @@ class Vacancy(models.Model):
 
     def __str__(self):
         return self.vacancy_title
+
+
+class Event(models.Model):
+    """Модель создания событий в календаре."""
+
+    title = models.CharField(max_length=255)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    description = models.TextField(
+        blank=True,
+        null=True,
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    conference_link = models.URLField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    candidate = models.ForeignKey(  # Candidate,
+        on_delete=models.CASCADE,
+        related_name="candidate_user",
+        blank=True,
+        null=True,
+    )
