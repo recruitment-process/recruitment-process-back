@@ -91,10 +91,18 @@ class EventAdmin(admin.ModelAdmin):
         "title",
         "start_date",
         "end_date",
-        "description",
+        "start_time",
+        "end_time" "description",
         "conference_link",
         "user",
         "candidate",
     )
-    list_filter = ("start_date", "end_date", "title")
-    search_fields = ("start_date", "title", "end_date", "candidate")
+    list_filter = ("start_date", "end_date", "title", "start_time", "end_time")
+    search_fields = (
+        "start_date",
+        "title",
+        "end_date",
+        "candidate",
+        "start_time",
+        "end_time",
+    )
