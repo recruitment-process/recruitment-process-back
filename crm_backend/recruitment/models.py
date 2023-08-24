@@ -9,7 +9,6 @@ from recruitment.constants import (
     EXPERIENCE,
     GENDER,
     INTERVIEW_STATUS,
-    MARITAL_STATUS,
     PHONE_NUMBER_REGEX,
     RELOCATION,
     SCHEDULE_WORK,
@@ -113,10 +112,9 @@ class ApplicantResume(models.Model):
         verbose_name="Пол",
     )
 
-    marital_status = models.CharField(
-        max_length=1,
-        choices=MARITAL_STATUS,
-        verbose_name="Семейное положение",
+    pub_date = models.DateTimeField(
+        "Дата публикации резюме",
+        auto_now_add=True,
     )
 
     education = models.CharField(
