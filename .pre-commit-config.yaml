@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/commitizen-tools/commitizen
-    rev: 3.5.3
+    rev: 3.6.0
     hooks:
     -   id: commitizen
         stages: [commit-msg]
@@ -16,7 +16,7 @@ repos:
     -   id: check-json
 
 -   repo: https://github.com/commitizen-tools/commitizen
-    rev: master
+    rev: 3.6.0
     hooks:
     -   id: commitizen
         stages: [commit-msg]
@@ -29,7 +29,7 @@ repos:
         args: [--profile, black, --line-length=88]
 
 -   repo: https://github.com/pycqa/flake8
-    rev: 4.0.1
+    rev: 6.1.0
     hooks:
     -   id: flake8
         exclude: (apps|__init__|migrations|crm_backend/crm_backend/settings/)
