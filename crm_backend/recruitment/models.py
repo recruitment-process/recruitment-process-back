@@ -8,6 +8,7 @@ from recruitment.constants import (
     EMPLOYMENT_TYPE,
     EXPERIENCE,
     GENDER,
+    INTERVIEW_STATUS,
     MARITAL_STATUS,
     PHONE_NUMBER_REGEX,
     RELOCATION,
@@ -102,6 +103,7 @@ class ApplicantResume(models.Model):
     relocation = models.CharField(
         max_length=2,
         choices=RELOCATION,
+        default=RELOCATION[3][0],
         verbose_name="Переезд",
     )
 
@@ -161,6 +163,14 @@ class ApplicantResume(models.Model):
         blank=True,
         null=True,
         verbose_name="Текущяя должность",
+    )
+
+    interview_status = models.CharField(
+        max_length=3,
+        choices=INTERVIEW_STATUS,
+        default=INTERVIEW_STATUS[0][0],
+        null=True,
+        verbose_name="Статус",
     )
 
     class Meta:
@@ -285,6 +295,7 @@ class Vacancy(models.Model):
         choices=EXPERIENCE,
         verbose_name="Требуемый опыт работы",
         blank=False,
+        null=True,
     )
 
     employment_type = MultiSelectField(
@@ -293,6 +304,7 @@ class Vacancy(models.Model):
         blank=False,
         default=["PO"],
         max_length=get_max_length(EMPLOYMENT_TYPE, None),
+        null=True,
     )
 
     schedule_work = MultiSelectField(
@@ -301,6 +313,7 @@ class Vacancy(models.Model):
         blank=False,
         default=["P"],
         max_length=get_max_length(SCHEDULE_WORK, None),
+        null=True,
     )
 
     salary = models.CharField(
@@ -338,11 +351,13 @@ class Vacancy(models.Model):
 
     job_conditions = models.TextField(
         verbose_name="Условия работы",
+        null=True,
         help_text="Введите условия работы",
     )
 
     job_responsibilities = models.TextField(
         verbose_name="Обязанности кандидата",
+        null=True,
         help_text="Введите обязанности кандидата",
     )
 
@@ -361,7 +376,10 @@ class Vacancy(models.Model):
         blank=False,
     )
 
-    deadline = models.DateField(verbose_name="Срок закрытия вакансии")
+    deadline = models.DateField(
+        verbose_name="Срок закрытия вакансии",
+        null=True,
+    )
 
     class Meta:
         ordering = ["pub_date"]
