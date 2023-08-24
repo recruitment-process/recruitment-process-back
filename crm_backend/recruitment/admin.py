@@ -92,7 +92,8 @@ class EventAdmin(admin.ModelAdmin):
         "start_date",
         "end_date",
         "start_time",
-        "end_time" "description",
+        "end_time",
+        "description",
         "conference_link",
         "user",
         "candidate",
@@ -101,7 +102,6 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = (
         "start_date",
         "title",
-        "end_date",
         "candidate",
         "start_time",
         "end_time",
