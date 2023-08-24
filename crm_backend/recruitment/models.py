@@ -386,6 +386,12 @@ class Candidate(models.Model):
         null=True,
         blank=True,
     )
+    vacancy = models.ForeignKey(
+        Vacancy,
+        on_delete=models.CASCADE,
+        verbose_name="Вакансия",
+        related_name="candidates",
+    )
     email = models.EmailField(
         verbose_name="Почта",
         max_length=254,
@@ -434,7 +440,7 @@ class Note(models.Model):
     """ Модель Заметок. """
 
     candidate = models.ForeignKey(
-        Candidate, on_delete=models.CASCADE, related_name="Кандидат"
+        Candidate, on_delete=models.CASCADE, verbose_name="Кандидат"
     )
     text = models.TextField("Текст", help_text="Заметка")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
