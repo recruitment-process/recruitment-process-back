@@ -54,4 +54,10 @@ VACANCY_STATUS = (
     ("D", "Черновики"),
 )
 
+FUNNEL_STATUS = (
+    ("1", "Создан"),
+    ("2", "Пройден"),
+    ("3", "Провален"),
+)
+
 PHONE_NUMBER_REGEX = RegexValidator(regex=r"^\+?1?\d{8,15}$")
