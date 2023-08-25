@@ -1,6 +1,15 @@
 from django.contrib import admin
 
-from .models import ApplicantResume, Company, Education, Vacancy, WorkExperience
+from .models import (
+    ApplicantResume,
+    Company,
+    Education,
+    Event,
+    FunnelStage,
+    SubStage,
+    Vacancy,
+    WorkExperience,
+)
 
 
 @admin.register(ApplicantResume)
@@ -81,3 +90,52 @@ class CompanyAdmin(admin.ModelAdmin):
     )
     list_filter = ("company_title",)
     search_fields = ("company_title", "email", "phone_number", "link_hr")
+
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    """Добавление модели Event в админку."""
+
+    list_display = (
+        "title",
+        "start_date",
+        "end_date",
+        "start_time",
+        "end_time" "description",
+        "conference_link",
+        "user",
+        "candidate",
+    )
+    list_filter = ("start_date", "end_date", "title", "start_time", "end_time")
+    search_fields = (
+        "start_date",
+        "title",
+        "end_date",
+        "candidate",
+        "start_time",
+        "end_time",
+    )
+
+    
+class SubStage(admin.TabularInline):
+    """Добавление InLine модели SubStage в админку."""
+
+    model = SubStage
+
+
+@admin.register(FunnelStage)
+class FunnelStageAdmin(admin.ModelAdmin):
+    """Добавление модели FunnelStage в админку."""
+
+    inlines = [
+        SubStage,
+    ]
+    list_display = (
+        "candidate",
+        "name",
+        "date",
+        "status",
+    )
+    list_filter = ("candidate", "name", "date", "status")
+    search_fields = ("candidate",)
+
