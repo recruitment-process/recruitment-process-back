@@ -562,7 +562,9 @@ class Note(models.Model):
         Candidate, on_delete=models.CASCADE, verbose_name="Кандидат"
     )
     text = models.TextField("Текст", help_text="Заметка")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="user_notes"
+    )
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 
     class Meta:
@@ -575,7 +577,7 @@ class Note(models.Model):
 class Comment(models.Model):
     """Модель комментария к заметкам."""
 
-    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name="Заметка")
+    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name="notes")
     text = models.TextField("Текст", help_text="Комментарий")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
