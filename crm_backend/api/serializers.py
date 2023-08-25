@@ -29,8 +29,9 @@ class VacancySerializer(ModelSerializer):
     author = StringRelatedField(read_only=True)
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
-    status = SerializerMethodField()
+    vacancy_status = SerializerMethodField()
     pub_date = DateOnlyField()
+    salary_range = SerializerMethodField()
 
     class Meta:
         model = Vacancy
@@ -40,7 +41,7 @@ class VacancySerializer(ModelSerializer):
             "required_experience",
             "employment_type",
             "schedule_work",
-            "salary",
+            "salary_range",
             "about_company",
             "city",
             "address",
@@ -48,7 +49,7 @@ class VacancySerializer(ModelSerializer):
             "job_conditions",
             "job_responsibilities",
             "technology_stack",
-            "status",
+            "vacancy_status",
             "author",
             "deadline",
         )
@@ -70,13 +71,26 @@ class VacancySerializer(ModelSerializer):
         """
         return get_display_values(obj.employment_type, EMPLOYMENT_TYPE)
 
-    def get_status(self, obj):
+    def get_vacancy_status(self, obj):
+        """
+        Функция преобразования вывода информации.
+
+        Для поля vacancy_status с ключа на значение.
+        """
+        return get_display_values(obj.vacancy_status, VACANCY_STATUS)
+
+    def get_salary_range(self, obj):
         """
         Функция преобразования вывода информации.
 
         Для поля status с ключа на значение.
         """
-        return get_display_values(obj.status, VACANCY_STATUS)
+        if obj.salary:
+            return {
+                "min": obj.salary[0],
+                "max": obj.salary[1],
+            }
+        return None
 
 
 class VacanciesSerializer(ModelSerializer):

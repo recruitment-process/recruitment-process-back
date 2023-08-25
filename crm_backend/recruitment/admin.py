@@ -67,13 +67,22 @@ class VacancyAdmin(admin.ModelAdmin):
         "required_experience",
         "employment_type",
         "schedule_work",
+        "vacancy_status",
     )
-    list_filter = ("vacancy_title", "company", "employment_type", "schedule_work")
+    list_filter = (
+        "vacancy_title",
+        "company",
+        "employment_type",
+        "schedule_work",
+        "vacancy_status",
+    )
     search_fields = (
         "vacancy_title",
         "company",
         "employment_type",
         "schedule_work",
+        "salary",
+        "vacancy_status",
     )
 
 
@@ -104,7 +113,7 @@ class EventAdmin(admin.ModelAdmin):
         "end_time",
         "description",
         "conference_link",
-        "user",
+        "hr",
         "candidate",
     )
     list_filter = ("start_date", "end_date", "title", "start_time", "end_time")

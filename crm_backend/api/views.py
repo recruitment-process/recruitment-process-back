@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .filters import VacancyFilterSet
 from .serializers import (
     ResumeSerializer,
     ResumesSerializer,
@@ -75,6 +76,7 @@ class VacancyViewSet(ModelViewSet):
         SearchFilter,
         OrderingFilter,
     )
+    filterset_class = VacancyFilterSet
     filterset_fields = (
         "vacancy_title",
         "author",
@@ -82,10 +84,9 @@ class VacancyViewSet(ModelViewSet):
         "required_experience",
         "employment_type",
         "schedule_work",
-        "salary",
         "city",
         "pub_date",
-        "status",
+        "vacancy_status",
         "technology_stack",
         "deadline",
     )
@@ -96,7 +97,7 @@ class VacancyViewSet(ModelViewSet):
         "technology_stack",
     )
     ordering_fields = (
-        "status",
+        "vacancy_status",
         "deadline",
         "pub_date",
     )

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
 from multiselectfield import MultiSelectField
@@ -315,8 +316,9 @@ class Vacancy(models.Model):
         null=True,
     )
 
-    salary = models.CharField(
-        max_length=50,
+    salary = ArrayField(
+        models.IntegerField(),
+        size=2,
         blank=True,
         null=True,
         verbose_name="Оплата труда",
@@ -367,7 +369,7 @@ class Vacancy(models.Model):
         )
     )
 
-    status = models.CharField(
+    vacancy_status = models.CharField(
         max_length=1,
         choices=VACANCY_STATUS,
         default=VACANCY_STATUS[2][0],
@@ -394,14 +396,19 @@ class Event(models.Model):
 
     title = models.CharField(max_length=255)
     start_date = models.DateField()
-    end_date = models.DateField()
+    end_date = models.DateField(
+        blank=True,
+        null=True,
+    )
     start_time = models.TimeField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)
     description = models.TextField(
         blank=True,
         null=True,
     )
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    hr = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="events"
+    )
     conference_link = models.URLField(
         max_length=255,
         blank=True,
@@ -410,7 +417,7 @@ class Event(models.Model):
     candidate = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="candidate_user",
+        related_name="candidate_events",
         blank=True,
         null=True,
     )

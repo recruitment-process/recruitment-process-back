@@ -44,9 +44,9 @@ EXPERIENCE = (
 )
 
 VACANCY_STATUS = (
-    ("A", "Активные"),
-    ("F", "Завернешшые"),
-    ("D", "Черновики"),
+    ("A", "activeVacancies"),
+    ("F", "completedVacancies"),
+    ("D", "draftVacancies"),
 )
 
 INTERVIEW_STATUS = (
