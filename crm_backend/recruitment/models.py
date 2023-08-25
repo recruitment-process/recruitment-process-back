@@ -112,7 +112,7 @@ class ApplicantResume(models.Model):
     )
 
     gender = models.CharField(
-        max_length=1,
+        max_length=5,
         choices=GENDER,
         verbose_name="Пол",
     )
@@ -169,7 +169,7 @@ class ApplicantResume(models.Model):
     )
 
     interview_status = models.CharField(
-        max_length=3,
+        max_length=5,
         choices=INTERVIEW_STATUS,
         default=INTERVIEW_STATUS[0][0],
         null=True,

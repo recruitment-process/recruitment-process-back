@@ -3,13 +3,12 @@ from datetime import date
 from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
-    GENDER,
     INTERVIEW_STATUS,
     RELOCATION,
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
-from recruitment.models import ApplicantResume, Vacancy
+from recruitment.models import ApplicantResume, Company, Vacancy, WorkExperience
 from rest_framework.serializers import (
     ChoiceField,
     ModelSerializer,
@@ -27,10 +26,47 @@ from .utils import (
 )
 
 
+class CompanySerializer(ModelSerializer):
+    """Сериализатор для модели Company."""
+
+    class Meta:
+        model = Company
+        fields = "__all__"
+
+
+class WorkExperienceSerializer(ModelSerializer):
+    """Сериализатор карточки опыта работы."""
+
+    experience_length = SerializerMethodField()
+
+    class Meta:
+        model = WorkExperience
+        fields = (
+            "start_date",
+            "end_date",
+            "position",
+            "organization",
+            "experience_length",
+        )
+
+    def get_experience_length(self, obj):
+        """
+        Функция для вычисления продолжительности работы.
+
+        Возвращает количество месяцев и лет работы.
+        """
+        today = date.today()
+        if obj.end_date:
+            experience_length = (today - obj.start_date).days / 30
+            years = experience_length // 12
+            months = experience_length % 12
+            return f"{int(years)} года/лет и {round(months)} месяца(ев)"
+
+
 class VacancySerializer(ModelSerializer):
     """Сериализатор карточки вакансии."""
 
-    company = StringRelatedField(read_only=True)
+    company = CompanySerializer(read_only=True)
     author = StringRelatedField(read_only=True)
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
@@ -64,7 +100,7 @@ class VacancySerializer(ModelSerializer):
         """
         Функция преобразования вывода информации.
 
-        Для поля schedule_work с ключа на значение.
+        Возвращает значение поля schedule_work.
         """
         return get_display_values(obj.schedule_work, SCHEDULE_WORK)
 
@@ -72,7 +108,7 @@ class VacancySerializer(ModelSerializer):
         """
         Функция преобразования вывода информации.
 
-        Для поля employment_type с ключа на значение.
+        Возвращает значение поля employment_type.
         """
         return get_display_values(obj.employment_type, EMPLOYMENT_TYPE)
 
@@ -80,7 +116,7 @@ class VacancySerializer(ModelSerializer):
         """
         Функция преобразования вывода информации.
 
-        Для поля vacancy_status с ключа на значение.
+        Возвращает значение поля vacancy_status.
         """
         return get_display_values(obj.vacancy_status, VACANCY_STATUS)
 
@@ -115,7 +151,7 @@ class VacanciesSerializer(ModelSerializer):
         """
         Функция преобразования вывода информации.
 
-        Для поля schedule_work с ключа на значение.
+        Возвращает значение поля schedule_work.
         """
         return get_display_values(obj.schedule_work, SCHEDULE_WORK)
 
@@ -123,7 +159,7 @@ class VacanciesSerializer(ModelSerializer):
         """
         Функция преобразования вывода информации.
 
-        Для поля employment_type с ключа на значение.
+        Возвращает значение поля employment_type.
         """
         return get_display_values(obj.employment_type, EMPLOYMENT_TYPE)
 
@@ -137,12 +173,12 @@ class ResumeSerializer(ModelSerializer):
 
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
-    gender = SerializerMethodField()
     relocation = ChoiceField(choices=RELOCATION)
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
     salary_expectations = SerializerMethodField()
+    work_experiences = WorkExperienceSerializer(many=True)
 
     class Meta:
         model = ApplicantResume
@@ -173,7 +209,7 @@ class ResumeSerializer(ModelSerializer):
         """
         Функция преобразования вывода информации.
 
-        Для поля schedule_work с ключа на значение.
+        Возвращает значение поля schedule_work.
         """
         return get_display_values(obj.schedule_work, SCHEDULE_WORK)
 
@@ -181,17 +217,9 @@ class ResumeSerializer(ModelSerializer):
         """
         Функция преобразования вывода информации.
 
-        Для поля employment_type с ключа на значение.
+        Возвращает значение поля employment_type.
         """
         return get_display_values(obj.employment_type, EMPLOYMENT_TYPE)
-
-    def get_gender(self, obj):
-        """
-        Функция преобразования вывода информации.
-
-        Для поля gender с ключа на значение.
-        """
-        return get_display_values(obj.gender, GENDER)
 
     def get_age(self, obj):
         """Функция для подсчета возраста соискателя."""
