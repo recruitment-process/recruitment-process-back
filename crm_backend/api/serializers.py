@@ -19,7 +19,12 @@ from rest_framework.serializers import (
 )
 
 from .constants import MAX_AGE, MIN_AGE
-from .utils import DateOnlyField, get_display_values
+from .utils import (
+    DateOnlyField,
+    get_display_values,
+    get_salary_expectations,
+    get_salary_range,
+)
 
 
 class VacancySerializer(ModelSerializer):
@@ -80,17 +85,8 @@ class VacancySerializer(ModelSerializer):
         return get_display_values(obj.vacancy_status, VACANCY_STATUS)
 
     def get_salary_range(self, obj):
-        """
-        Функция преобразования вывода информации.
-
-        Для поля status с ключа на значение.
-        """
-        if obj.salary:
-            return {
-                "min": obj.salary[0],
-                "max": obj.salary[1],
-            }
-        return None
+        """Функция преобразования вывода информации для поля salary."""
+        return get_salary_range(obj)
 
 
 class VacanciesSerializer(ModelSerializer):
@@ -99,6 +95,7 @@ class VacanciesSerializer(ModelSerializer):
     company = StringRelatedField(read_only=True)
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
+    salary_range = SerializerMethodField()
 
     class Meta:
         model = Vacancy
@@ -108,7 +105,7 @@ class VacanciesSerializer(ModelSerializer):
             "required_experience",
             "employment_type",
             "schedule_work",
-            "salary",
+            "salary_range",
             "city",
             "technology_stack",
             "deadline",
@@ -130,6 +127,10 @@ class VacanciesSerializer(ModelSerializer):
         """
         return get_display_values(obj.employment_type, EMPLOYMENT_TYPE)
 
+    def get_salary_range(self, obj):
+        """Функция преобразования вывода информации для поля salary."""
+        return get_salary_range(obj)
+
 
 class ResumeSerializer(ModelSerializer):
     """Сериализатор карточки резюме."""
@@ -141,6 +142,7 @@ class ResumeSerializer(ModelSerializer):
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
+    salary_expectations = SerializerMethodField()
 
     class Meta:
         model = ApplicantResume
@@ -149,7 +151,7 @@ class ResumeSerializer(ModelSerializer):
             "job_title",
             "employment_type",
             "schedule_work",
-            "salary",
+            "salary_expectations",
             "working_trip",
             "phone_number",
             "relocation",
@@ -207,6 +209,10 @@ class ResumeSerializer(ModelSerializer):
             raise ValidationError("Проверьте дату рождения!")
         return obj
 
+    def get_salary_expectations(self, obj):
+        """Функция преобразования вывода информации для поля salary_expectations."""
+        return get_salary_expectations(obj)
+
 
 class ResumesSerializer(ModelSerializer):
     """Сериализатор для карточек резюме."""
@@ -216,7 +222,6 @@ class ResumesSerializer(ModelSerializer):
         fields = (
             "applicant",
             "job_title",
-            "salary",
             "work_experiences",
             "current_company",
             "interview_status",

@@ -21,19 +21,27 @@ class ApplicantResumeAdmin(admin.ModelAdmin):
         "education",
         "gender",
         "bday",
-        "salary",
+        "salary_expectations",
         "town",
         "citizenship",
     )
-    list_filter = ("job_title", "education", "gender", "salary", "town")
+    list_filter = (
+        "job_title",
+        "education",
+        "gender",
+        "salary_expectations",
+        "town",
+        "pub_date",
+    )
     search_fields = (
         "job_title",
         "education",
         "gender",
-        "salary",
+        "salary_expectations",
         "town",
         "citizenship",
     )
+    readonly_fields = ("pub_date",)
     empty_value_display = "-пусто-"
 
 
@@ -75,6 +83,7 @@ class VacancyAdmin(admin.ModelAdmin):
         "employment_type",
         "schedule_work",
         "vacancy_status",
+        "pub_date",
     )
     search_fields = (
         "vacancy_title",
@@ -84,6 +93,7 @@ class VacancyAdmin(admin.ModelAdmin):
         "salary",
         "vacancy_status",
     )
+    readonly_fields = ("pub_date",)
 
 
 @admin.register(Company)

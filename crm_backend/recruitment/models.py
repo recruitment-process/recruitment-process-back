@@ -85,8 +85,11 @@ class ApplicantResume(models.Model):
         max_length=get_max_length(SCHEDULE_WORK, None),
     )
 
-    salary = models.CharField(
-        max_length=50,
+    salary_expectations = ArrayField(
+        models.IntegerField(),
+        size=2,
+        blank=True,
+        null=True,
         verbose_name="Желаемая зарплата",
     )
 
