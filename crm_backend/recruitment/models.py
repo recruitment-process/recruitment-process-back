@@ -7,6 +7,7 @@ from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
     EXPERIENCE,
+    FUNNEL_STATUS,
     GENDER,
     MARITAL_STATUS,
     PHONE_NUMBER_REGEX,
@@ -405,3 +406,60 @@ class Event(models.Model):
 
     def __str__(self):
         return self.title
+
+      
+class FunnelStage(models.Model):
+    """Этапы воронки."""
+
+    name = models.CharField(max_length=100, verbose_name="Название этапа")
+    date = models.DateField(blank=True, null=True, verbose_name="Дата")
+    status = models.CharField(
+        choices=FUNNEL_STATUS,
+        max_length=get_max_length(FUNNEL_STATUS, None),
+        default=FUNNEL_STATUS[0][0],
+        verbose_name="Статус этапа",
+    )
+    candidate = models.ForeignKey(
+        # Candidate,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="Кандидат",
+        related_name="funnel",
+    )
+
+    class Meta:
+        ordering = ["-date"]
+        verbose_name = "Воронка кандидата"
+        verbose_name_plural = "Воронки кандидатов"
+
+    def __str__(self):
+        return self.name
+
+
+class SubStage(models.Model):
+    """Подэтапы воронки."""
+
+    name = models.CharField(max_length=100, verbose_name="Название подэтапа")
+    date = models.DateField(blank=True, null=True, verbose_name="Дата")
+    status = models.CharField(
+        choices=FUNNEL_STATUS,
+        max_length=get_max_length(FUNNEL_STATUS, None),
+        default=FUNNEL_STATUS[0][0],
+        verbose_name="Статус подэтапа",
+    )
+    stage = models.ForeignKey(
+        FunnelStage,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        verbose_name="Этап воронки",
+        related_name="substage",
+    )
+
+    class Meta:
+        ordering = ["-date"]
+        verbose_name = "Подэтап воронки"
+        verbose_name_plural = "Подэтапы воронок"
+
+    def __str__(self):
+        return self.name
