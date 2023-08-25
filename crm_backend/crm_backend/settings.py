@@ -153,3 +153,11 @@ SIMPLE_JWT = {
     "AUTH_COOKIE_PATH": "/",  # The path of the auth cookie.
     "AUTH_COOKIE_SAMESITE": "Lax",  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be "Lax", "Strict", or None to disable the flag.
 }
+
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+DOMAIN_NAME = "meeting-room.ru"
+EMAIL_HOST_USER = "noreply@" + DOMAIN_NAME
+
+TELEGRAM_CHAT_ID = os.getenv("TG_CHAT_ID")
+TELEGRAM_TOKEN = os.getenv("TG_TOKEN")
