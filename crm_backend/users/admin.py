@@ -35,6 +35,8 @@ class CustomUserAdmin(UserAdmin):
                     "is_superuser",
                     "groups",
                     "user_permissions",
+                    "confirmation_code",
+                    "email_status",
                 )
             },
         ),
@@ -52,6 +54,7 @@ class CustomUserAdmin(UserAdmin):
     readonly_fields = (
         "last_login",
         "date_joined",
+        "confirmation_code",
     )
     list_display = ("email", "first_name", "last_name", "role", "category", "is_staff")
     list_filter = ("email", "first_name", "last_name", "role", "category")
@@ -66,6 +69,8 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    """Добавления модели Category в админку."""
+
     list_display = ("name",)
     list_filter = ("name",)
     search_fields = ("name",)

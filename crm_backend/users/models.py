@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import validate_email
@@ -83,6 +85,10 @@ class User(AbstractUser):
     photo = models.ImageField(
         upload_to="users/photo/", null=True, blank=True, verbose_name="Фото"
     )
+    confirmation_code = models.CharField(
+        max_length=40, editable=False, default=str(uuid4())
+    )
+    email_status = models.BooleanField(default=False, verbose_name="Подтверждена почта")
     REQUIRED_FIELDS = []
     objects = UserManager()
 
