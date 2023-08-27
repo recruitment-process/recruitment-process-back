@@ -375,7 +375,7 @@ class Vacancy(models.Model):
     def __str__(self):
         return self.vacancy_title
 
-      
+
 class Event(models.Model):
     """Модель создания событий в календаре."""
 
@@ -410,7 +410,7 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
-      
+
 class FunnelStage(models.Model):
     """Этапы воронки."""
 
@@ -467,9 +467,9 @@ class SubStage(models.Model):
     def __str__(self):
         return self.name
 
-      
+
 class Candidate(models.Model):
-    """ Модель кандидата. """
+    """Модель кандидата."""
 
     first_name = models.CharField(max_length=40, verbose_name="Имя")
     last_name = models.CharField(max_length=50, verbose_name="Фамилия")
@@ -530,13 +530,15 @@ class Candidate(models.Model):
 
 
 class Note(models.Model):
-    """ Модель Заметок. """
+    """Модель Заметок."""
 
     candidate = models.ForeignKey(
         Candidate, on_delete=models.CASCADE, verbose_name="Кандидат"
     )
     text = models.TextField("Текст", help_text="Заметка")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="user_notes"
+    )
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 
     class Meta:
@@ -544,14 +546,12 @@ class Note(models.Model):
 
     def __str__(self):
         return self.text
-    
+
 
 class Comment(models.Model):
-    """ Модель комментария к заметкам. """
+    """Модель комментария к заметкам."""
 
-    note = models.ForeignKey(
-        Note, on_delete=models.CASCADE, related_name="Заметка"
-    )
+    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name="Заметка")
     text = models.TextField("Текст", help_text="Комментарий")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
@@ -560,4 +560,4 @@ class Comment(models.Model):
         ordering = ("-pub_date",)
 
     def __str__(self):
-        return self.text      
+        return self.text

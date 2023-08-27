@@ -101,7 +101,8 @@ class EventAdmin(admin.ModelAdmin):
         "start_date",
         "end_date",
         "start_time",
-        "end_time" "description",
+        "end_time",
+        "description",
         "conference_link",
         "user",
         "candidate",
@@ -116,7 +117,7 @@ class EventAdmin(admin.ModelAdmin):
         "end_time",
     )
 
-    
+
 class SubStage(admin.TabularInline):
     """Добавление InLine модели SubStage в админку."""
 
@@ -138,4 +139,3 @@ class FunnelStageAdmin(admin.ModelAdmin):
     )
     list_filter = ("candidate", "name", "date", "status")
     search_fields = ("candidate",)
-
