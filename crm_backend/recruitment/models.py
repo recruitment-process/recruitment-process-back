@@ -1,3 +1,5 @@
+from typing import Literal
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -18,6 +20,35 @@ from recruitment.constants import (
 )
 from users.models import User
 from users.validators import custom_validate_email
+
+
+class Technology(models.Model):
+    """Модель для списка технологий."""
+
+    name = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Список технологий"
+        verbose_name_plural = "Список технологий"
+
+    def __str__(self):
+        return self.name
+
+
+class TechnologyStack(models.Model):
+    """Модель стека и срока работы по стеку."""
+
+    technology_stack = models.ForeignKey(Technology, on_delete=models.CASCADE)
+    technology_stack_time = models.IntegerField()
+
+    class Meta:
+        ordering = ["technology_stack"]
+        verbose_name = "Стек и срок работы"
+        verbose_name_plural = "Стек и срок работы"
+
+    def __str__(self):
+        return f"{self.technology_stack} - {self.technology_stack_time} года"
 
 
 class WorkExperience(models.Model):
@@ -164,7 +195,7 @@ class ApplicantResume(models.Model):
         max_length=50,
         blank=True,
         null=True,
-        verbose_name="Текущяя должность",
+        verbose_name="Текущая должность",
     )
 
     class Meta:
@@ -350,11 +381,12 @@ class Vacancy(models.Model):
         help_text="Введите обязанности кандидата",
     )
 
-    technology_stack = (
-        # позже нужно будет сделать бд со всеми навыками
-        models.TextField(
-            verbose_name="Ключевые навыки",
-        )
+    technology_stack = models.ForeignKey(
+        TechnologyStack,
+        on_delete=models.CASCADE,
+        null=True,
+        verbose_name="Ключевые навыки",
+        related_name="vacancies",
     )
 
     status = models.CharField(
@@ -375,7 +407,7 @@ class Vacancy(models.Model):
     def __str__(self):
         return self.vacancy_title
 
-      
+
 class Event(models.Model):
     """Модель создания событий в календаре."""
 
@@ -410,7 +442,7 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
-      
+
 class FunnelStage(models.Model):
     """Этапы воронки."""
 
@@ -467,9 +499,9 @@ class SubStage(models.Model):
     def __str__(self):
         return self.name
 
-      
+
 class Candidate(models.Model):
-    """ Модель кандидата. """
+    """Модель кандидата."""
 
     first_name = models.CharField(max_length=40, verbose_name="Имя")
     last_name = models.CharField(max_length=50, verbose_name="Фамилия")
@@ -524,34 +556,46 @@ class Candidate(models.Model):
         default=["PO"],
         max_length=get_max_length(EMPLOYMENT_TYPE, None),
     )
+    technology_stack = models.ForeignKey(
+        TechnologyStack,
+        on_delete=models.CASCADE,
+        null=True,
+        verbose_name="Ключевые навыки",
+        related_name="candidates",
+    )
+
+    class Meta:
+        ordering = ["vacancy"]
+        verbose_name = "Кандидат"
+        verbose_name_plural = "Кандидаты"
 
     def __str__(self):
         return self.last_name
 
 
 class Note(models.Model):
-    """ Модель Заметок. """
+    """Модель Заметок."""
 
     candidate = models.ForeignKey(
         Candidate, on_delete=models.CASCADE, verbose_name="Кандидат"
     )
     text = models.TextField("Текст", help_text="Заметка")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="user_notes"
+    )
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 
     class Meta:
-        ordering = ("-pub_date",)
+        ordering: tuple[Literal["-pub_date"]] = ("-pub_date",)
 
     def __str__(self):
         return self.text
-    
+
 
 class Comment(models.Model):
-    """ Модель комментария к заметкам. """
+    """Модель комментария к заметкам."""
 
-    note = models.ForeignKey(
-        Note, on_delete=models.CASCADE, related_name="Заметка"
-    )
+    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name="Заметка")
     text = models.TextField("Текст", help_text="Комментарий")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
@@ -560,4 +604,4 @@ class Comment(models.Model):
         ordering = ("-pub_date",)
 
     def __str__(self):
-        return self.text      
+        return self.text

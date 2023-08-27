@@ -2,11 +2,14 @@ from django.contrib import admin
 
 from .models import (
     ApplicantResume,
+    Candidate,
     Company,
     Education,
     Event,
     FunnelStage,
     SubStage,
+    Technology,
+    TechnologyStack,
     Vacancy,
     WorkExperience,
 )
@@ -67,6 +70,7 @@ class VacancyAdmin(admin.ModelAdmin):
         "required_experience",
         "employment_type",
         "schedule_work",
+        "technology_stack",
     )
     list_filter = ("vacancy_title", "company", "employment_type", "schedule_work")
     search_fields = (
@@ -101,7 +105,8 @@ class EventAdmin(admin.ModelAdmin):
         "start_date",
         "end_date",
         "start_time",
-        "end_time" "description",
+        "end_time",
+        "description",
         "conference_link",
         "user",
         "candidate",
@@ -116,7 +121,7 @@ class EventAdmin(admin.ModelAdmin):
         "end_time",
     )
 
-    
+
 class SubStage(admin.TabularInline):
     """Добавление InLine модели SubStage в админку."""
 
@@ -139,3 +144,39 @@ class FunnelStageAdmin(admin.ModelAdmin):
     list_filter = ("candidate", "name", "date", "status")
     search_fields = ("candidate",)
 
+
+@admin.register(Technology)
+class TechnologyAdmin(admin.ModelAdmin):
+    """Добавление модели Technology в админку."""
+
+    list_display = ("name",)
+
+
+@admin.register(TechnologyStack)
+class TechnologyStackAdmin(admin.ModelAdmin):
+    """Добавление модели TechnologyStack в админку."""
+
+    list_display = (
+        "technology_stack",
+        "technology_stack_time",
+    )
+
+
+@admin.register(Candidate)
+class CandidateAdmin(admin.ModelAdmin):
+    """Добавление модели Candidate в админку."""
+
+    list_display = (
+        "first_name",
+        "last_name",
+        "patronymic",
+        "vacancy",
+        "email",
+        "telegram",
+        "cur_position",
+        "city",
+        "bday",
+        "salary",
+        "employment_type",
+        "technology_stack",
+    )
