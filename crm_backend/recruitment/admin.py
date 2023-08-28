@@ -83,6 +83,7 @@ class CompanyAdmin(admin.ModelAdmin):
         "company_title",
         "company_address",
         "email",
+        "website",
         "phone_number",
         "link_hr",
     )
@@ -102,14 +103,13 @@ class EventAdmin(admin.ModelAdmin):
         "end_time",
         "description",
         "conference_link",
-        "user",
+        "hr",
         "candidate",
     )
     list_filter = ("start_date", "end_date", "title", "start_time", "end_time")
     search_fields = (
         "start_date",
         "title",
-        "end_date",
         "candidate",
         "start_time",
         "end_time",

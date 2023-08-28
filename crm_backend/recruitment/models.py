@@ -64,12 +64,10 @@ class ApplicantResume(models.Model):
         related_name="applicant_resumes",
         verbose_name="Соискатель",
     )
-
     job_title = models.CharField(
         max_length=100,
         verbose_name="Должность",
     )
-
     employment_type = MultiSelectField(  # в модели кандидата
         choices=EMPLOYMENT_TYPE,
         verbose_name="Тип занятости",
@@ -77,7 +75,6 @@ class ApplicantResume(models.Model):
         default=["PO"],
         max_length=get_max_length(EMPLOYMENT_TYPE, None),
     )
-
     schedule_work = MultiSelectField(
         choices=SCHEDULE_WORK,
         verbose_name="Расписание работы",
@@ -85,75 +82,62 @@ class ApplicantResume(models.Model):
         default=["P"],
         max_length=get_max_length(SCHEDULE_WORK, None),
     )
-
     salary = models.CharField(  # в модели кандидата
         max_length=50,
         verbose_name="Желаемая зарплата",
     )
-
     working_trip = models.BooleanField(
         null=True,
         blank=True,
         verbose_name="Командировка",
     )
-
     phone_number = models.CharField(
         validators=[PHONE_NUMBER_REGEX],
         max_length=16,
     )
-
     relocation = models.CharField(
         max_length=2,
         choices=RELOCATION,
         verbose_name="Переезд",
     )
-
     education = models.CharField(
         max_length=2,
         choices=EDUCATION,
         verbose_name="Образование",
     )
-
     town = models.CharField(  # в модели кандидата
         max_length=50,
         verbose_name="Город проживания",
     )
-
     citizenship = models.CharField(
         max_length=50,
         verbose_name="Гражданство",
     )
-
     bday = models.DateField(  # в модели кандидата
         auto_now=False,
         auto_now_add=False,
         verbose_name="Дата рождения",
     )
-
     work_experiences = models.ManyToManyField(
         WorkExperience,
         verbose_name="Информация об опыте работы",
     )
-
     about_me = models.TextField(
         max_length=700,
         verbose_name="Коротко о себе",
     )
-
     current_company = models.CharField(
         max_length=50,
         blank=True,
         null=True,
         verbose_name="Текущее место работы",
     )
-
     current_job = models.CharField(
         max_length=50,
         blank=True,
         null=True,
         verbose_name="Текущяя должность",
     )
-
     pub_date = models.DateTimeField(
         "Дата публикации вакансии",
         auto_now_add=True,
@@ -175,23 +159,19 @@ class Education(models.Model):
         max_length=250,
         verbose_name="Учебное заведение",
     )
-
     faculty = models.CharField(
         max_length=100,
         verbose_name="Факультет",
     )
-
     specialization = models.CharField(
         max_length=100,
         verbose_name="Специальность",
     )
-
     graduation = models.DateField(
         verbose_name="Год окончания",
         null=True,
         blank=True,
     )
-
     resume = models.ForeignKey(
         ApplicantResume,
         on_delete=models.CASCADE,
@@ -215,27 +195,29 @@ class Company(models.Model):
         max_length=100,
         verbose_name="Название компании",
     )
-
     about_company = models.TextField(
         verbose_name="О компании",
         help_text="Введите информацию о компани",
+        null=True,
     )
-
     company_address = models.CharField(
         max_length=100,
         verbose_name="Адрес компании",
+        null=True,
     )
-
+    website = models.URLField(
+        max_length=120,
+        verbose_name="Сайт компании",
+    )
     email = models.EmailField(
         verbose_name="Эл.почта",
+        null=True,
     )
-
     phone_number = models.CharField(
         validators=[PHONE_NUMBER_REGEX],
         max_length=16,
         null=True,
     )
-
     link_hr = models.URLField(
         max_length=100,
         verbose_name="Ссылка на HR",
@@ -261,7 +243,6 @@ class Vacancy(models.Model):
         verbose_name="Компания",
         related_name="vacancies",
     )
-
     # Надо будет переписать на промежуточную таблицу ManyToMany с ссылками на HR'ов
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -270,19 +251,16 @@ class Vacancy(models.Model):
         verbose_name="Автор",
         related_name="vacancies",
     )
-
     vacancy_title = models.CharField(
         max_length=100,
         verbose_name="Название вакансии",
     )
-
     required_experience = models.CharField(
         max_length=1,
         choices=EXPERIENCE,
         verbose_name="Требуемый опыт работы",
         blank=False,
     )
-
     employment_type = MultiSelectField(
         choices=EMPLOYMENT_TYPE,
         verbose_name="Тип занятости",
@@ -290,7 +268,6 @@ class Vacancy(models.Model):
         default=["PO"],
         max_length=get_max_length(EMPLOYMENT_TYPE, None),
     )
-
     schedule_work = MultiSelectField(
         choices=SCHEDULE_WORK,
         verbose_name="Расписание работы",
@@ -298,57 +275,48 @@ class Vacancy(models.Model):
         default=["P"],
         max_length=get_max_length(SCHEDULE_WORK, None),
     )
-
     salary = models.CharField(
         max_length=50,
         blank=True,
         null=True,
         verbose_name="Оплата труда",
     )
-
     about_company = models.TextField(
         blank=True,
         null=True,
         verbose_name="О компании",
         help_text="Введите информацию о компани",
     )
-
     city = models.CharField(
         max_length=30,
         blank=True,
         null=True,
         verbose_name="Город офиса",
     )
-
     address = models.CharField(
         max_length=100,
         blank=True,
         null=True,
         verbose_name="Адрес офиса",
     )
-
     pub_date = models.DateTimeField(
         "Дата публикации вакансии",
         auto_now_add=True,
     )
-
     job_conditions = models.TextField(
         verbose_name="Условия работы",
         help_text="Введите условия работы",
     )
-
     job_responsibilities = models.TextField(
         verbose_name="Обязанности кандидата",
         help_text="Введите обязанности кандидата",
     )
-
     technology_stack = (
         # позже нужно будет сделать бд со всеми навыками
         models.TextField(
             verbose_name="Ключевые навыки",
         )
     )
-
     status = models.CharField(
         max_length=1,
         choices=VACANCY_STATUS,
@@ -356,7 +324,6 @@ class Vacancy(models.Model):
         verbose_name="Статус вакансии",
         blank=False,
     )
-
     deadline = models.DateField(default=DEADLINE, verbose_name="Срок закрытия вакансии")
 
     class Meta:
@@ -380,7 +347,7 @@ class Event(models.Model):
         blank=True,
         null=True,
     )
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    hr = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     conference_link = models.URLField(
         max_length=255,
         blank=True,
