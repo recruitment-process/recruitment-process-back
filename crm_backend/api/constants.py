@@ -1,0 +1,2 @@
+MAX_AGE = 100
+MIN_AGE = 13

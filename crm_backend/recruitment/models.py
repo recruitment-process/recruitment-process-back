@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import models
@@ -10,7 +11,7 @@ from recruitment.constants import (
     EXPERIENCE,
     FUNNEL_STATUS,
     GENDER,
-    MARITAL_STATUS,
+    INTERVIEW_STATUS,
     PHONE_NUMBER_REGEX,
     RELOCATION,
     SCHEDULE_WORK,
@@ -87,8 +88,11 @@ class ApplicantResume(models.Model):
         max_length=get_max_length(SCHEDULE_WORK, None),
     )
 
-    salary = models.CharField(  # в модели кандидата
-        max_length=50,
+    salary_expectations = ArrayField(
+        models.IntegerField(),
+        size=2,
+        blank=True,
+        null=True,
         verbose_name="Желаемая зарплата",
     )
 
@@ -106,19 +110,19 @@ class ApplicantResume(models.Model):
     relocation = models.CharField(
         max_length=2,
         choices=RELOCATION,
+        default=RELOCATION[3][0],
         verbose_name="Переезд",
     )
 
     gender = models.CharField(
-        max_length=1,
+        max_length=5,
         choices=GENDER,
         verbose_name="Пол",
     )
 
-    marital_status = models.CharField(
-        max_length=1,
-        choices=MARITAL_STATUS,
-        verbose_name="Семейное положение",
+    pub_date = models.DateTimeField(
+        "Дата публикации резюме",
+        auto_now_add=True,
     )
 
     education = models.CharField(
@@ -165,6 +169,14 @@ class ApplicantResume(models.Model):
         blank=True,
         null=True,
         verbose_name="Текущяя должность",
+    )
+
+    interview_status = models.CharField(
+        max_length=5,
+        choices=INTERVIEW_STATUS,
+        default=INTERVIEW_STATUS[0][0],
+        null=True,
+        verbose_name="Статус",
     )
 
     class Meta:
@@ -289,6 +301,7 @@ class Vacancy(models.Model):
         choices=EXPERIENCE,
         verbose_name="Требуемый опыт работы",
         blank=False,
+        null=True,
     )
 
     employment_type = MultiSelectField(
@@ -297,6 +310,7 @@ class Vacancy(models.Model):
         blank=False,
         default=["PO"],
         max_length=get_max_length(EMPLOYMENT_TYPE, None),
+        null=True,
     )
 
     schedule_work = MultiSelectField(
@@ -305,10 +319,12 @@ class Vacancy(models.Model):
         blank=False,
         default=["P"],
         max_length=get_max_length(SCHEDULE_WORK, None),
+        null=True,
     )
 
-    salary = models.CharField(
-        max_length=50,
+    salary = ArrayField(
+        models.IntegerField(),
+        size=2,
         blank=True,
         null=True,
         verbose_name="Оплата труда",
@@ -342,11 +358,13 @@ class Vacancy(models.Model):
 
     job_conditions = models.TextField(
         verbose_name="Условия работы",
+        null=True,
         help_text="Введите условия работы",
     )
 
     job_responsibilities = models.TextField(
         verbose_name="Обязанности кандидата",
+        null=True,
         help_text="Введите обязанности кандидата",
     )
 
@@ -357,7 +375,7 @@ class Vacancy(models.Model):
         )
     )
 
-    status = models.CharField(
+    vacancy_status = models.CharField(
         max_length=1,
         choices=VACANCY_STATUS,
         default=VACANCY_STATUS[2][0],
@@ -365,7 +383,10 @@ class Vacancy(models.Model):
         blank=False,
     )
 
-    deadline = models.DateField(verbose_name="Срок закрытия вакансии")
+    deadline = models.DateField(
+        verbose_name="Срок закрытия вакансии",
+        null=True,
+    )
 
     class Meta:
         ordering = ["pub_date"]
@@ -375,20 +396,25 @@ class Vacancy(models.Model):
     def __str__(self):
         return self.vacancy_title
 
-      
+
 class Event(models.Model):
     """Модель создания событий в календаре."""
 
     title = models.CharField(max_length=255)
     start_date = models.DateField()
-    end_date = models.DateField()
+    end_date = models.DateField(
+        blank=True,
+        null=True,
+    )
     start_time = models.TimeField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)
     description = models.TextField(
         blank=True,
         null=True,
     )
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    hr = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="events"
+    )
     conference_link = models.URLField(
         max_length=255,
         blank=True,
@@ -397,7 +423,7 @@ class Event(models.Model):
     candidate = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="candidate_user",
+        related_name="candidate_events",
         blank=True,
         null=True,
     )
@@ -410,7 +436,7 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
-      
+
 class FunnelStage(models.Model):
     """Этапы воронки."""
 
@@ -467,9 +493,9 @@ class SubStage(models.Model):
     def __str__(self):
         return self.name
 
-      
+
 class Candidate(models.Model):
-    """ Модель кандидата. """
+    """Модель кандидата."""
 
     first_name = models.CharField(max_length=40, verbose_name="Имя")
     last_name = models.CharField(max_length=50, verbose_name="Фамилия")
@@ -530,13 +556,15 @@ class Candidate(models.Model):
 
 
 class Note(models.Model):
-    """ Модель Заметок. """
+    """Модель Заметок."""
 
     candidate = models.ForeignKey(
         Candidate, on_delete=models.CASCADE, verbose_name="Кандидат"
     )
     text = models.TextField("Текст", help_text="Заметка")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="user_notes"
+    )
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 
     class Meta:
@@ -544,14 +572,12 @@ class Note(models.Model):
 
     def __str__(self):
         return self.text
-    
+
 
 class Comment(models.Model):
-    """ Модель комментария к заметкам. """
+    """Модель комментария к заметкам."""
 
-    note = models.ForeignKey(
-        Note, on_delete=models.CASCADE, related_name="Заметка"
-    )
+    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name="notes")
     text = models.TextField("Текст", help_text="Комментарий")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
@@ -560,4 +586,4 @@ class Comment(models.Model):
         ordering = ("-pub_date",)
 
     def __str__(self):
-        return self.text      
+        return self.text
