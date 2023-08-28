@@ -139,7 +139,7 @@ class ApplicantResume(models.Model):
         verbose_name="Текущяя должность",
     )
     pub_date = models.DateTimeField(
-        "Дата публикации вакансии",
+        "Дата публикации резюме",
         auto_now_add=True,
     )
 
