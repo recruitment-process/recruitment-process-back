@@ -20,15 +20,15 @@ class ApplicantResumeAdmin(admin.ModelAdmin):
         "job_title",
         "education",
         "bday",
-        "salary",
+        "salary_expectations",
         "town",
         "citizenship",
     )
-    list_filter = ("job_title", "education", "salary", "town")
+    list_filter = ("job_title", "education", "salary_expectations", "town")
     search_fields = (
         "job_title",
         "education",
-        "salary",
+        "salary_expectations",
         "town",
         "citizenship",
     )

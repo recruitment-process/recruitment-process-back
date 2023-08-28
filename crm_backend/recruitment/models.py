@@ -11,12 +11,13 @@ from recruitment.constants import (
     EXPERIENCE,
     FUNNEL_STATUS,
     PHONE_NUMBER_REGEX,
-    RELOCATION,
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
 from users.models import User
 from users.validators import custom_validate_email
+
+from .utils import generate_logo_path
 
 
 class WorkExperience(models.Model):
@@ -82,8 +83,9 @@ class ApplicantResume(models.Model):
         default=["P"],
         max_length=get_max_length(SCHEDULE_WORK, None),
     )
-    salary = models.CharField(  # в модели кандидата
+    salary_expectations = models.CharField(
         max_length=50,
+        default="з/п не указана",
         verbose_name="Желаемая зарплата",
     )
     working_trip = models.BooleanField(
@@ -95,11 +97,6 @@ class ApplicantResume(models.Model):
         validators=[PHONE_NUMBER_REGEX],
         max_length=16,
     )
-    relocation = models.CharField(
-        max_length=2,
-        choices=RELOCATION,
-        verbose_name="Переезд",
-    )
     education = models.CharField(
         max_length=2,
         choices=EDUCATION,
@@ -108,10 +105,12 @@ class ApplicantResume(models.Model):
     town = models.CharField(  # в модели кандидата
         max_length=50,
         verbose_name="Город проживания",
+        null=True,
     )
     citizenship = models.CharField(
         max_length=50,
         verbose_name="Гражданство",
+        null=True,
     )
     bday = models.DateField(  # в модели кандидата
         auto_now=False,
@@ -223,6 +222,9 @@ class Company(models.Model):
         verbose_name="Ссылка на HR",
         null=True,
     )
+    logo = models.ImageField(
+        upload_to=generate_logo_path, verbose_name="Логотип компании", null=True
+    )
 
     class Meta:
         ordering = ["company_title"]
@@ -238,15 +240,14 @@ class Vacancy(models.Model):
 
     company = models.ForeignKey(
         Company,
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.CASCADE,
         verbose_name="Компания",
         related_name="vacancies",
     )
     # Надо будет переписать на промежуточную таблицу ManyToMany с ссылками на HR'ов
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         verbose_name="Автор",
         related_name="vacancies",
@@ -259,27 +260,30 @@ class Vacancy(models.Model):
         max_length=1,
         choices=EXPERIENCE,
         verbose_name="Требуемый опыт работы",
-        blank=False,
+        null=True,
     )
     employment_type = MultiSelectField(
         choices=EMPLOYMENT_TYPE,
         verbose_name="Тип занятости",
-        blank=False,
-        default=["PO"],
+        null=True,
         max_length=get_max_length(EMPLOYMENT_TYPE, None),
     )
     schedule_work = MultiSelectField(
         choices=SCHEDULE_WORK,
         verbose_name="Расписание работы",
-        blank=False,
-        default=["P"],
+        null=True,
         max_length=get_max_length(SCHEDULE_WORK, None),
+    )
+    education = MultiSelectField(
+        choices=EDUCATION,
+        verbose_name="Образование",
+        null=True,
+        max_length=get_max_length(EMPLOYMENT_TYPE, None),
     )
     salary = models.CharField(
         max_length=50,
-        blank=True,
-        null=True,
-        verbose_name="Оплата труда",
+        default="з/п не указана",
+        verbose_name="Заработная плата",
     )
     about_company = models.TextField(
         blank=True,
@@ -289,15 +293,7 @@ class Vacancy(models.Model):
     )
     city = models.CharField(
         max_length=30,
-        blank=True,
-        null=True,
-        verbose_name="Город офиса",
-    )
-    address = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        verbose_name="Адрес офиса",
+        verbose_name="Город",
     )
     pub_date = models.DateTimeField(
         "Дата публикации вакансии",
@@ -435,35 +431,8 @@ class Candidate(models.Model):
     first_name = models.CharField(max_length=40, verbose_name="Имя")
     last_name = models.CharField(max_length=50, verbose_name="Фамилия")
     patronymic = models.CharField(
-        max_length=60,
-        verbose_name="Отчество",
-        null=True,
-        blank=True,
-    )
-    vacancy = models.ForeignKey(
-        Vacancy,
-        on_delete=models.CASCADE,
-        verbose_name="Вакансия",
-        related_name="candidates",
-    )
-    email = models.EmailField(
-        verbose_name="Почта",
-        max_length=254,
-        unique=True,
-        validators=[validate_email, custom_validate_email],
-        null=True,
-        blank=True,
-    )
-    telegram = models.CharField(
-        max_length=150,
-        verbose_name="Телеграмм",
-        null=True,
-        blank=True,
-    )
-    cur_position = models.CharField(max_length=50, verbose_name="Текущая должность")
-    city = models.CharField(
         max_length=50,
-        verbose_name="Город проживания",
+        verbose_name="Отчество",
         null=True,
         blank=True,
     )
@@ -471,19 +440,55 @@ class Candidate(models.Model):
         auto_now=False,
         auto_now_add=False,
         verbose_name="Дата рождения",
+    )
+    city = models.CharField(
+        max_length=50,
+        verbose_name="Город проживания",
+    )
+    last_job = models.CharField(
+        max_length=90,
+        verbose_name="Последнее место работы",
+    )
+    cur_position = models.CharField(
+        max_length=50,
+        verbose_name="Текущая должность",
+        null=True,
+    )
+    salary_expectations = models.CharField(
+        max_length=50,
+        default="з/п не указана",
+        verbose_name="Желаемая зарплата",
+    )
+    vacancy = models.ForeignKey(
+        Vacancy,
+        on_delete=models.CASCADE,
+        verbose_name="Вакансия",
+        related_name="candidates",
+    )
+    phone_number = models.CharField(
+        validators=[PHONE_NUMBER_REGEX],
+        max_length=16,
+        verbose_name="Телефон",
+    )
+    email = models.EmailField(
+        verbose_name="Почта",
+        max_length=254,
+        unique=True,
+        validators=[validate_email, custom_validate_email],
+    )
+    telegram = models.CharField(
+        max_length=150,
+        verbose_name="Телеграмм",
         null=True,
         blank=True,
     )
-    salary = models.CharField(
-        max_length=50,
-        verbose_name="Желаемая зарплата",
+    portfolio = models.URLField(
+        verbose_name="Ссылка на портфолио",
+        null=True,
     )
-    employment_type = MultiSelectField(
-        choices=EMPLOYMENT_TYPE,
-        verbose_name="Тип занятости",
-        blank=False,
-        default=["PO"],
-        max_length=get_max_length(EMPLOYMENT_TYPE, None),
+    resume = models.FileField(
+        verbose_name="Резюме",
+        upload_to="candidates/resumes",
     )
 
     def __str__(self):
