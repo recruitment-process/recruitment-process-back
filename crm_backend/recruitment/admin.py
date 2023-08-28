@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import (
     ApplicantResume,
+    Candidate,
     Company,
     Education,
     Event,
@@ -42,6 +43,31 @@ class ApplicantResumeAdmin(admin.ModelAdmin):
         "citizenship",
     )
     readonly_fields = ("pub_date",)
+    empty_value_display = "-пусто-"
+
+
+@admin.register(Candidate)
+class CandidateAdmin(admin.ModelAdmin):
+    """Добавление модели Candidate в админку."""
+
+    list_display = (
+        "first_name",
+        "last_name",
+        "patronymic",
+        "email",
+        "telegram",
+    )
+    list_filter = (
+        "last_name",
+        "first_name",
+    )
+    search_fields = (
+        "first_name",
+        "last_name",
+        "patronymic",
+        "email",
+        "telegram",
+    )
     empty_value_display = "-пусто-"
 
 
