@@ -347,7 +347,9 @@ class Event(models.Model):
         blank=True,
         null=True,
     )
-    hr = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    hr = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="events"
+    )
     conference_link = models.URLField(
         max_length=255,
         blank=True,
@@ -356,7 +358,7 @@ class Event(models.Model):
     candidate = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="candidate_user",
+        related_name="candidate_events",
         blank=True,
         null=True,
     )
