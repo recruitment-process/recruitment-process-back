@@ -6,7 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 def enforce_csrf(request):
     """Добавление CSRF."""
-    check = CSRFCheck()
+    check = CSRFCheck(request)
     check.process_request(request)
     reason = check.process_view(request, None, (), {})
     if reason:
