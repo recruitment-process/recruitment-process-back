@@ -118,7 +118,7 @@ class VacancySerializer(ModelSerializer):
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
     vacancy_status = SerializerMethodField()
-    pub_date = DateOnlyField()
+    pub_date = DateOnlyField(read_only=True)
     salary_range = SerializerMethodField()
 
     class Meta:
