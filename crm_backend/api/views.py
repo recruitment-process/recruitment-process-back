@@ -2,14 +2,25 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from recruitment.models import ApplicantResume, Vacancy
 from rest_framework import status
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
 
-from .serializers import UserSignupSerializer
+from .filters import ResumeFilterSet, VacancyFilterSet
+from .serializers import (
+    ResumeSerializer,
+    ResumesSerializer,
+    UserSignupSerializer,
+    VacanciesSerializer,
+    VacancySerializer,
+)
 from .utils import send_mail_to_user
 
 
@@ -89,3 +100,72 @@ class EmailConfirmationView(APIView):
             user.save()
             return Response({"Email подтвержден!"}, status=status.HTTP_200_OK)
         return Response({"Неверная ссылка!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VacancyViewSet(ModelViewSet):
+    """Вьюсет для модели вакансий."""
+
+    queryset = Vacancy.objects.all()
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    filterset_class = VacancyFilterSet
+    search_fields = (
+        "vacancy_title",
+        "company__company_title",
+        "city",
+        "technology_stack",
+    )
+    ordering_fields = (
+        "vacancy_status",
+        "deadline",
+        "pub_date",
+    )
+    ordering = ("pub_date",)
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от действия."""
+        if self.action == "list":
+            return VacanciesSerializer
+        return VacancySerializer
+
+    def perform_create(self, serializer):
+        """Переопределение метода create для записи информация о пользователе."""
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        """Переопределение метода update для записи информация о пользователе."""
+        serializer.save(author=self.request.user)
+
+
+class ResumeViewSet(ModelViewSet):
+    """Вьюсет для модели резюме."""
+
+    queryset = ApplicantResume.objects.all()
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    filterset_class = ResumeFilterSet
+    search_fields = (
+        "job_title",
+        "town",
+        "current_job",
+    )
+    ordering_fields = (
+        "applicant",
+        "work_experiences",
+        "interview_status",
+        "current_company",
+        "pub_date",
+    )
+    ordering = ("pub_date",)
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от действия."""
+        if self.action == "list":
+            return ResumesSerializer
+        return ResumeSerializer
