@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "users",
     "api",
     "multiselectfield",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
