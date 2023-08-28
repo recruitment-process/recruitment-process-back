@@ -4,12 +4,12 @@ from datetime import date
 from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
+    EXPERIENCE,
     INTERVIEW_STATUS,
-    RELOCATION,
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
-from recruitment.models import ApplicantResume, Company, Vacancy, WorkExperience
+from recruitment.models import ApplicantResume, Company, Vacancy, WorkExperience, Candidate
 from rest_framework.serializers import (
     CharField,
     ChoiceField,
@@ -220,12 +220,11 @@ class ResumeSerializer(ModelSerializer):
 
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
-    relocation = ChoiceField(choices=RELOCATION)
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
     salary_expectations = SerializerMethodField()
-    work_experiences = WorkExperienceSerializer(many=True)
+    required_experience = ChoiceField(choices=EXPERIENCE)
 
     class Meta:
         model = ApplicantResume
@@ -237,7 +236,6 @@ class ResumeSerializer(ModelSerializer):
             "salary_expectations",
             "working_trip",
             "phone_number",
-            "relocation",
             "pub_date",
             "gender",
             "education",
@@ -245,7 +243,7 @@ class ResumeSerializer(ModelSerializer):
             "citizenship",
             "bday",
             "age",
-            "work_experiences",
+            "required_experience",
             "about_me",
             "current_company",
             "current_job",
@@ -279,8 +277,7 @@ class ResumeSerializer(ModelSerializer):
     def validate_bday(self, obj):
         """Функция валидации даты рождения соискателя."""
         today = date.today()
-        born = obj.bday
-        if not (MAX_AGE > (today.year - born.year) > MIN_AGE):
+        if not (MAX_AGE > (today.year - obj.year) > MIN_AGE):
             raise ValidationError("Проверьте дату рождения!")
         return obj
 
@@ -299,5 +296,93 @@ class ResumesSerializer(ModelSerializer):
             "job_title",
             "work_experiences",
             "current_company",
+            "interview_status",
+        )
+
+
+class CandidateSerializer(ModelSerializer):
+    """Сериализатор для карточек кандидатов."""
+
+    schedule_work = SerializerMethodField()
+    employment_type = SerializerMethodField()
+    education = ChoiceField(choices=EDUCATION)
+    age = SerializerMethodField()
+    interview_status = ChoiceField(choices=INTERVIEW_STATUS)
+    salary_expectations = SerializerMethodField()
+    work_experiences = ChoiceField(choices=EXPERIENCE)
+
+    class Meta:
+        model = Candidate
+        fields = (
+            "first_name",
+            "last_name",
+            "patronymic",
+            "age",
+            "bday",
+            "city",
+            "last_job",            
+            "cur_position",
+            "salary_expectations",            
+            "phone_number",
+            "email",            
+            "portfolio",
+            "resume",
+            "photo",
+            "employment_type",
+            "schedule_work",            
+            "work_experiences",
+            "education",                       
+            "interview_status",
+            "pub_date", 
+        )
+
+    def get_schedule_work(self, obj):
+        """
+        Функция преобразования вывода информации.
+
+        Возвращает значение поля schedule_work.
+        """
+        return get_display_values(obj.schedule_work, SCHEDULE_WORK)
+
+    def get_employment_type(self, obj):
+        """
+        Функция преобразования вывода информации.
+
+        Возвращает значение поля employment_type.
+        """
+        return get_display_values(obj.employment_type, EMPLOYMENT_TYPE)
+
+    def get_age(self, obj):
+        """Функция для подсчета возраста соискателя."""
+        today = date.today()
+        born = obj.bday
+        return (
+            today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+        )
+
+    def validate_bday(self, obj):
+        """Функция валидации даты рождения соискателя."""
+        today = date.today()
+        if not (MAX_AGE > (today.year - obj.year) > MIN_AGE):
+            raise ValidationError("Проверьте дату рождения!")
+        return obj
+
+    def get_salary_expectations(self, obj):
+        """Функция преобразования вывода информации для поля salary_expectations."""
+        return get_salary_expectations(obj)
+
+
+class CandidatesSerializer(ModelSerializer):
+    """Сериализатор для карточек кандидатов."""
+
+    class Meta:
+        model = Candidate
+        fields = (
+            "first_name",
+            "last_name",
+            "patronymic",
+            "job_title",
+            "work_experiences",
+            "last_job",
             "interview_status",
         )
