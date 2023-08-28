@@ -1,17 +1,15 @@
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import models
 from multiselectfield import MultiSelectField
 from multiselectfield.utils import get_max_length
 from recruitment.constants import (
+    DEADLINE,
     EDUCATION,
     EMPLOYMENT_TYPE,
     EXPERIENCE,
     FUNNEL_STATUS,
-    GENDER,
-    INTERVIEW_STATUS,
     PHONE_NUMBER_REGEX,
     RELOCATION,
     SCHEDULE_WORK,
@@ -88,11 +86,8 @@ class ApplicantResume(models.Model):
         max_length=get_max_length(SCHEDULE_WORK, None),
     )
 
-    salary_expectations = ArrayField(
-        models.IntegerField(),
-        size=2,
-        blank=True,
-        null=True,
+    salary = models.CharField(  # в модели кандидата
+        max_length=50,
         verbose_name="Желаемая зарплата",
     )
 
@@ -110,19 +105,7 @@ class ApplicantResume(models.Model):
     relocation = models.CharField(
         max_length=2,
         choices=RELOCATION,
-        default=RELOCATION[3][0],
         verbose_name="Переезд",
-    )
-
-    gender = models.CharField(
-        max_length=5,
-        choices=GENDER,
-        verbose_name="Пол",
-    )
-
-    pub_date = models.DateTimeField(
-        "Дата публикации резюме",
-        auto_now_add=True,
     )
 
     education = models.CharField(
@@ -171,12 +154,9 @@ class ApplicantResume(models.Model):
         verbose_name="Текущяя должность",
     )
 
-    interview_status = models.CharField(
-        max_length=5,
-        choices=INTERVIEW_STATUS,
-        default=INTERVIEW_STATUS[0][0],
-        null=True,
-        verbose_name="Статус",
+    pub_date = models.DateTimeField(
+        "Дата публикации вакансии",
+        auto_now_add=True,
     )
 
     class Meta:
@@ -301,7 +281,6 @@ class Vacancy(models.Model):
         choices=EXPERIENCE,
         verbose_name="Требуемый опыт работы",
         blank=False,
-        null=True,
     )
 
     employment_type = MultiSelectField(
@@ -310,7 +289,6 @@ class Vacancy(models.Model):
         blank=False,
         default=["PO"],
         max_length=get_max_length(EMPLOYMENT_TYPE, None),
-        null=True,
     )
 
     schedule_work = MultiSelectField(
@@ -319,12 +297,10 @@ class Vacancy(models.Model):
         blank=False,
         default=["P"],
         max_length=get_max_length(SCHEDULE_WORK, None),
-        null=True,
     )
 
-    salary = ArrayField(
-        models.IntegerField(),
-        size=2,
+    salary = models.CharField(
+        max_length=50,
         blank=True,
         null=True,
         verbose_name="Оплата труда",
@@ -358,13 +334,11 @@ class Vacancy(models.Model):
 
     job_conditions = models.TextField(
         verbose_name="Условия работы",
-        null=True,
         help_text="Введите условия работы",
     )
 
     job_responsibilities = models.TextField(
         verbose_name="Обязанности кандидата",
-        null=True,
         help_text="Введите обязанности кандидата",
     )
 
@@ -375,7 +349,7 @@ class Vacancy(models.Model):
         )
     )
 
-    vacancy_status = models.CharField(
+    status = models.CharField(
         max_length=1,
         choices=VACANCY_STATUS,
         default=VACANCY_STATUS[2][0],
@@ -383,10 +357,7 @@ class Vacancy(models.Model):
         blank=False,
     )
 
-    deadline = models.DateField(
-        verbose_name="Срок закрытия вакансии",
-        null=True,
-    )
+    deadline = models.DateField(default=DEADLINE, verbose_name="Срок закрытия вакансии")
 
     class Meta:
         ordering = ["pub_date"]
@@ -402,19 +373,14 @@ class Event(models.Model):
 
     title = models.CharField(max_length=255)
     start_date = models.DateField()
-    end_date = models.DateField(
-        blank=True,
-        null=True,
-    )
+    end_date = models.DateField()
     start_time = models.TimeField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)
     description = models.TextField(
         blank=True,
         null=True,
     )
-    hr = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="events"
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     conference_link = models.URLField(
         max_length=255,
         blank=True,
@@ -423,7 +389,7 @@ class Event(models.Model):
     candidate = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="candidate_events",
+        related_name="candidate_user",
         blank=True,
         null=True,
     )

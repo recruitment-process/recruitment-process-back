@@ -239,7 +239,6 @@ class ResumeSerializer(ModelSerializer):
             "phone_number",
             "relocation",
             "pub_date",
-            "gender",
             "education",
             "town",
             "citizenship",

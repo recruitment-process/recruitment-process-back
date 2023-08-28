@@ -19,29 +19,19 @@ class ApplicantResumeAdmin(admin.ModelAdmin):
     list_display = (
         "job_title",
         "education",
-        "gender",
         "bday",
-        "salary_expectations",
+        "salary",
         "town",
         "citizenship",
     )
-    list_filter = (
-        "job_title",
-        "education",
-        "gender",
-        "salary_expectations",
-        "town",
-        "pub_date",
-    )
+    list_filter = ("job_title", "education", "salary", "town")
     search_fields = (
         "job_title",
         "education",
-        "gender",
-        "salary_expectations",
+        "salary",
         "town",
         "citizenship",
     )
-    readonly_fields = ("pub_date",)
     empty_value_display = "-пусто-"
 
 
@@ -75,25 +65,14 @@ class VacancyAdmin(admin.ModelAdmin):
         "required_experience",
         "employment_type",
         "schedule_work",
-        "vacancy_status",
     )
-    list_filter = (
-        "vacancy_title",
-        "company",
-        "employment_type",
-        "schedule_work",
-        "vacancy_status",
-        "pub_date",
-    )
+    list_filter = ("vacancy_title", "company", "employment_type", "schedule_work")
     search_fields = (
         "vacancy_title",
         "company",
         "employment_type",
         "schedule_work",
-        "salary",
-        "vacancy_status",
     )
-    readonly_fields = ("pub_date",)
 
 
 @admin.register(Company)
@@ -123,13 +102,14 @@ class EventAdmin(admin.ModelAdmin):
         "end_time",
         "description",
         "conference_link",
-        "hr",
+        "user",
         "candidate",
     )
     list_filter = ("start_date", "end_date", "title", "start_time", "end_time")
     search_fields = (
         "start_date",
         "title",
+        "end_date",
         "candidate",
         "start_time",
         "end_time",
