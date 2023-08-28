@@ -5,7 +5,6 @@ from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
     INTERVIEW_STATUS,
-    RELOCATION,
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
@@ -228,7 +227,6 @@ class ResumeSerializer(ModelSerializer):
 
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
-    relocation = ChoiceField(choices=RELOCATION)
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
@@ -245,7 +243,6 @@ class ResumeSerializer(ModelSerializer):
             "salary_expectations",
             "working_trip",
             "phone_number",
-            "relocation",
             "pub_date",
             "education",
             "town",
