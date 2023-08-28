@@ -195,23 +195,19 @@ class Education(models.Model):
         max_length=250,
         verbose_name="Учебное заведение",
     )
-
     faculty = models.CharField(
         max_length=100,
         verbose_name="Факультет",
     )
-
     specialization = models.CharField(
         max_length=100,
         verbose_name="Специальность",
     )
-
     graduation = models.DateField(
         verbose_name="Год окончания",
         null=True,
         blank=True,
     )
-
     resume = models.ForeignKey(
         ApplicantResume,
         on_delete=models.CASCADE,
@@ -235,27 +231,22 @@ class Company(models.Model):
         max_length=100,
         verbose_name="Название компании",
     )
-
     about_company = models.TextField(
         verbose_name="О компании",
         help_text="Введите информацию о компани",
     )
-
     company_address = models.CharField(
         max_length=100,
         verbose_name="Адрес компании",
     )
-
     email = models.EmailField(
         verbose_name="Эл.почта",
     )
-
     phone_number = models.CharField(
         validators=[PHONE_NUMBER_REGEX],
         max_length=16,
         null=True,
     )
-
     link_hr = models.URLField(
         max_length=100,
         verbose_name="Ссылка на HR",
@@ -281,7 +272,6 @@ class Vacancy(models.Model):
         verbose_name="Компания",
         related_name="vacancies",
     )
-
     # Надо будет переписать на промежуточную таблицу ManyToMany с ссылками на HR'ов
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -290,12 +280,10 @@ class Vacancy(models.Model):
         verbose_name="Автор",
         related_name="vacancies",
     )
-
     vacancy_title = models.CharField(
         max_length=100,
         verbose_name="Название вакансии",
     )
-
     required_experience = models.CharField(
         max_length=1,
         choices=EXPERIENCE,
@@ -303,7 +291,6 @@ class Vacancy(models.Model):
         blank=False,
         null=True,
     )
-
     employment_type = MultiSelectField(
         choices=EMPLOYMENT_TYPE,
         verbose_name="Тип занятости",
@@ -312,7 +299,6 @@ class Vacancy(models.Model):
         max_length=get_max_length(EMPLOYMENT_TYPE, None),
         null=True,
     )
-
     schedule_work = MultiSelectField(
         choices=SCHEDULE_WORK,
         verbose_name="Расписание работы",
@@ -321,7 +307,6 @@ class Vacancy(models.Model):
         max_length=get_max_length(SCHEDULE_WORK, None),
         null=True,
     )
-
     salary = ArrayField(
         models.IntegerField(),
         size=2,
@@ -329,52 +314,44 @@ class Vacancy(models.Model):
         null=True,
         verbose_name="Оплата труда",
     )
-
     about_company = models.TextField(
         blank=True,
         null=True,
         verbose_name="О компании",
         help_text="Введите информацию о компани",
     )
-
     city = models.CharField(
         max_length=30,
         blank=True,
         null=True,
         verbose_name="Город офиса",
     )
-
     address = models.CharField(
         max_length=100,
         blank=True,
         null=True,
         verbose_name="Адрес офиса",
     )
-
     pub_date = models.DateTimeField(
         "Дата публикации вакансии",
         auto_now_add=True,
     )
-
     job_conditions = models.TextField(
         verbose_name="Условия работы",
         null=True,
         help_text="Введите условия работы",
     )
-
     job_responsibilities = models.TextField(
         verbose_name="Обязанности кандидата",
         null=True,
         help_text="Введите обязанности кандидата",
     )
-
     technology_stack = (
         # позже нужно будет сделать бд со всеми навыками
         models.TextField(
             verbose_name="Ключевые навыки",
         )
     )
-
     vacancy_status = models.CharField(
         max_length=1,
         choices=VACANCY_STATUS,
@@ -461,6 +438,36 @@ class Candidate(models.Model):
     resume = models.FileField(
         verbose_name="Резюме",
         upload_to="candidates/resumes",
+    )
+    photo = models.ImageField(upload_to="candidates/photos",
+                              verbose_name="Фотография",)
+    employment_type = MultiSelectField(
+        choices=EMPLOYMENT_TYPE,
+        verbose_name="Тип занятости",
+        null=True,
+        max_length=get_max_length(EMPLOYMENT_TYPE, None),
+    )
+    schedule_work = MultiSelectField(
+        choices=SCHEDULE_WORK,
+        verbose_name="Расписание работы",
+        null=True,
+        max_length=get_max_length(SCHEDULE_WORK, None),
+    )
+    work_experiences = models.ManyToManyField(
+        WorkExperience,
+        verbose_name="Информация об опыте работы",
+    )
+    education = models.CharField(
+        max_length=2,
+        choices=EDUCATION,
+        verbose_name="Образование",
+    )
+    interview_status = models.CharField(
+        max_length=5,
+        choices=INTERVIEW_STATUS,
+        default=INTERVIEW_STATUS[0][0],
+        null=True,
+        verbose_name="Статус",
     )
 
     def __str__(self):
