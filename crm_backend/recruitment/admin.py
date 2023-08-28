@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import (
     ApplicantResume,
+    Candidate,
     Company,
     Education,
     Event,
@@ -157,3 +158,52 @@ class FunnelStageAdmin(admin.ModelAdmin):
     )
     list_filter = ("candidate", "name", "date", "status")
     search_fields = ("candidate",)
+
+
+@admin.register(Candidate)
+class CandidateAdmin(admin.ModelAdmin):
+    """Добавление модели Candidate в админку."""
+
+    list_display = (
+        "first_name",
+            "last_name",
+            "patronymic",
+            "bday",
+            "city",
+            "last_job",            
+            "cur_position",
+            "salary_expectations",            
+            "phone_number",
+            "email",            
+            "portfolio",
+            "resume",
+            "photo",
+            "employment_type",
+            "schedule_work",            
+            "work_experiences",
+            "education",                       
+            "interview_status",
+            "pub_date", 
+    )
+    list_filter = (
+        "cur_position",
+        "education",
+        "employment_type",
+        "schedule_work",
+        "salary_expectations",
+        "work_experiences",
+        "city",
+        "pub_date",
+    )
+    search_fields = ( 
+        "cur_position",       
+        "education",
+        "salary_expectations",
+        "city",
+        "employment_type",
+        "schedule_work",
+        "work_experiences",                       
+        "interview_status",
+    )
+    readonly_fields = ("pub_date",)
+    empty_value_display = "-пусто-"

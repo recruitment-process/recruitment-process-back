@@ -469,6 +469,10 @@ class Candidate(models.Model):
         null=True,
         verbose_name="Статус",
     )
+    pub_date = models.DateTimeField(
+        "Дата добавления кандидата резюме",
+        auto_now_add=True,
+    )
 
     def __str__(self):
         return self.last_name
