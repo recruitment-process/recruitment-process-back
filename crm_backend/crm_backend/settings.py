@@ -10,9 +10,9 @@ load_dotenv(os.path.join(BASE_DIR.parent, "infra/.env"))
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", default=True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", "80.87.107.75"]
 
 
 INSTALLED_APPS = [
@@ -99,8 +99,8 @@ USE_I18N = True
 USE_TZ = True
 
 
-STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = "/static_backend/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static_backend")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -122,6 +122,13 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://backend",
+    "http://localhost",
+    "http://127.0.0.1",
+    "http://80.87.107.75",
+]
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),

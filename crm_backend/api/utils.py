@@ -53,12 +53,14 @@ def get_salary_range(obj):
 
 def send_mail_to_user(email, confirmation_code):
     """Отправка кода подтверждения на почту."""
+    # message = (
+    #     "Подтвердить почту перейдя по ссылке: "
+    #     f"http://localhost:8000/api/confirm/{email}/{confirmation_code}"
+    # )
     message = (
         "Подтвердить почту перейдя по ссылке: "
-        f"http://localhost:8000/confirm/{email}/{confirmation_code}"
+        f"http://80.87.107.75/api/confirm/{email}/{confirmation_code}"
     )
-    #    message = ("Подтвердить почту перейдя по ссылке: "
-    #               f"http://80.87.107.166/confirm/{email}/{confirmation_code}")
     send_mail(
         "Подтверждение регистрации в Meeting Room",
         message,
