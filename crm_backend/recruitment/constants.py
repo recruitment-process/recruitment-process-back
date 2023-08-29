@@ -1,3 +1,5 @@
+import datetime as dt
+
 from django.core.validators import RegexValidator
 
 EMPLOYMENT_TYPE = (
@@ -5,35 +7,20 @@ EMPLOYMENT_TYPE = (
     ("CH", "Частичная"),
     ("PR", "Проектная"),
     ("ST", "Стажировка"),
-    ("VO", "Волонтерство"),
 )
 
 SCHEDULE_WORK = (
-    ("P", "Полный день"),
-    ("S", "Сменный график"),
-    ("G", "Гибкий график"),
-    ("U", "Удаленная работа"),
-    ("W", "Вахтовый метод"),
-)
-
-RELOCATION = (
-    ("VZ", "Возможен"),
-    ("NV", "Невозможен"),
-    ("GL", "Желателен"),
-    ("NG", "Нежелателен"),
-)
-
-GENDER = (
-    ("MAN", "Мужской"),
-    ("WOMAN", "Женский"),
+    ("P", "Офис"),
+    ("G", "Гибрид"),
+    ("U", "Удаленный"),
+    ("W", "Вахтовый"),
 )
 
 EDUCATION = (
-    ("SN", "Среднее неполное"),
     ("SR", "Среднее"),
-    ("SP", "Среднее профессиональное"),
     ("VN", "Высшее неполное"),
     ("VS", "Высшее"),
+    ("RC", "Переподготовка"),
 )
 
 EXPERIENCE = (
@@ -57,6 +44,7 @@ INTERVIEW_STATUS = (
     ("CTT", "Выполнил тестовое задание"),
     ("IT", "Интервью с командой"),
     ("OFFER", "Оффер"),
+    ("OC", "Оффер принят"),
 )
 
 FUNNEL_STATUS = (
@@ -66,3 +54,12 @@ FUNNEL_STATUS = (
 )
 
 PHONE_NUMBER_REGEX = RegexValidator(regex=r"^\+?1?\d{8,15}$")
+
+FUNNEL_STATUS = (
+    ("1", "Создан"),
+    ("2", "Пройден"),
+    ("3", "Провален"),
+)
+
+PHONE_NUMBER_REGEX = RegexValidator(regex=r"^\+?1?\d{8,15}$")
+DEADLINE = dt.date.today() + dt.timedelta(days=30)

@@ -11,16 +11,6 @@ def generate_logo_path(instance, filename):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     return f"images/company_logos/{company_name}/{timestamp}__{filename}"
 
-def generate_logo_path(instance, filename):
-    """
-    Генерирует путь сохранения загружаемой картинки.
-
-    Возвращает путь сохранения картинки.
-    """
-    company_name = instance.name
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return f"images/company_logos/{company_name}/{timestamp}__{filename}"
-
 def upload_to_candidates(instance, filename):
     """
     Генерирует путь сохранения загружаемых резюме и фотографий.
@@ -31,4 +21,3 @@ def upload_to_candidates(instance, filename):
         return f"candidates/{instance.last_name}{instance.first_name}/resumes/{filename}"
     else:
         return f"candidates/{instance.last_name}{instance.first_name}/photos/{filename}"
-    
