@@ -84,7 +84,6 @@ class CompanyAdmin(admin.ModelAdmin):
         "company_title",
         "company_address",
         "email",
-        "website",
         "phone_number",
         "link_hr",
         "website"

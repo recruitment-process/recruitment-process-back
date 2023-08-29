@@ -7,7 +7,7 @@ def generate_logo_path(instance, filename):
 
     Возвращает путь сохранения картинки.
     """
-    company_name = instance.name
+    company_name = instance.company_name
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     return f"images/company_logos/{company_name}/{timestamp}__{filename}"
 

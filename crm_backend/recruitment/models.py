@@ -20,6 +20,7 @@ from users.models import User
 from users.validators import custom_validate_email
 from .utils import generate_logo_path, upload_to_candidates
 
+
 class WorkExperience(models.Model):
     """Модель опыта работы."""
 
