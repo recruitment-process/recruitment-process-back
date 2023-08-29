@@ -107,9 +107,10 @@ class CompanyAdmin(admin.ModelAdmin):
         "email",
         "phone_number",
         "link_hr",
+        "website"
     )
     list_filter = ("company_title",)
-    search_fields = ("company_title", "email", "phone_number", "link_hr")
+    search_fields = ("company_title", "email", "phone_number", "link_hr", "website")
 
 
 @admin.register(Event)
@@ -124,7 +125,7 @@ class EventAdmin(admin.ModelAdmin):
         "end_time",
         "description",
         "conference_link",
-        "hr",
+        #"hr",
         "candidate",
     )
     list_filter = ("start_date", "end_date", "title", "start_time", "end_time")
@@ -165,7 +166,7 @@ class CandidateAdmin(admin.ModelAdmin):
     """Добавление модели Candidate в админку."""
 
     list_display = (
-        "first_name",
+            "first_name",
             "last_name",
             "patronymic",
             "bday",
