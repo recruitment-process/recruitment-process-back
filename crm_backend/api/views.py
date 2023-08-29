@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recruitment.models import ApplicantResume, Vacancy
+from recruitment.models import ApplicantResume, Vacancy, Company, Candidate
 from rest_framework import status
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny
@@ -15,6 +15,10 @@ from users.models import User
 
 from .filters import ResumeFilterSet, VacancyFilterSet
 from .serializers import (
+    CandidateSerializer,
+    CandidatesSerializer,
+    CompanySerializer,
+    CompanyShortSerializer,
     ResumeSerializer,
     ResumesSerializer,
     UserSignupSerializer,
@@ -169,3 +173,57 @@ class ResumeViewSet(ModelViewSet):
         if self.action == "list":
             return ResumesSerializer
         return ResumeSerializer
+
+
+class CandidateViewSet(ModelViewSet):
+    """Вьюсет для модели Candidate."""
+
+    queryset = Candidate.objects.all()
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    
+    search_fields = (
+        "pub_date",
+    )
+    ordering_fields = (
+        
+        "pub_date",
+    )
+    ordering = ("pub_date",)
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от действия."""
+        if self.action == "list":
+            return CandidatesSerializer
+        return CandidateSerializer
+    
+
+class CompanyViewSet(ModelViewSet):
+    """Вьюсет для модели Company."""
+
+    queryset = Company.objects.all()
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    filterset_fields = ("company_address",)
+    search_fields = (
+        "company_title",
+        "company_address",
+    )
+    ordering_fields = (
+        "company_title",
+        "company_address",
+    )
+    ordering = ("company_title",)
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от действия."""
+        if self.action == "list":
+            return CompanyShortSerializer
+        return CompanySerializer
+    

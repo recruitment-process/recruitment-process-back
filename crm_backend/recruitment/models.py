@@ -1,11 +1,12 @@
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
+from django.core.validators import MinLengthValidator, validate_email
 from django.db import models
 from multiselectfield import MultiSelectField
 from multiselectfield.utils import get_max_length
 from recruitment.constants import (
+    VALID_TELEGRAM_REGEX,
     DEADLINE,
     EDUCATION,
     EMPLOYMENT_TYPE,
@@ -36,6 +37,8 @@ class WorkExperience(models.Model):
     organization = models.CharField(
         max_length=50,
         verbose_name="Организация",
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -101,15 +104,17 @@ class ApplicantResume(models.Model):
         max_length=2,
         choices=EDUCATION,
         verbose_name="Образование",
+        null=True,
+        blank=True,
     )
-    town = models.CharField(  # в модели кандидата
-        max_length=50,
+    town = models.CharField(
+        max_length=40,
         verbose_name="Город проживания",
         null=True,
         blank=True,
     )
     citizenship = models.CharField(
-        max_length=50,
+        max_length=40,
         verbose_name="Гражданство",
         null=True,
         blank=True,
@@ -122,6 +127,8 @@ class ApplicantResume(models.Model):
     work_experiences = models.ManyToManyField(
         WorkExperience,
         verbose_name="Информация об опыте работы",
+        null=True,
+        blank=True,
     )
     about_me = models.TextField(
         max_length=700,
@@ -213,7 +220,7 @@ class Company(models.Model):
         blank=True,
     )
     website = models.URLField(
-        max_length=120,
+        max_length=255,
         verbose_name="Сайт компании",
     )
     email = models.EmailField(
@@ -228,7 +235,7 @@ class Company(models.Model):
         blank=True,
     )
     link_hr = models.URLField(
-        max_length=100,
+        max_length=250,
         verbose_name="Ссылка на HR",
         null=True,
         blank=True,
@@ -242,8 +249,8 @@ class Company(models.Model):
 
     class Meta:
         ordering = ["company_title"]
-        verbose_name = "Основная информация о компании"
-        verbose_name_plural = "Основная информация о компании"
+        verbose_name = "Компания"
+        verbose_name_plural = "Компании"
 
     def __str__(self):
         return self.company_title
@@ -300,7 +307,7 @@ class Vacancy(models.Model):
         verbose_name="Оплата труда",
     )    
     city = models.CharField(
-        max_length=30,
+        max_length=40,
         verbose_name="Город",
     )
     education = MultiSelectField(
@@ -308,8 +315,8 @@ class Vacancy(models.Model):
         verbose_name="Образование",
         null=True,
         blank=True,
-        max_length=get_max_length(EMPLOYMENT_TYPE, None),
-    )
+        max_length=get_max_length(EDUCATION, None),
+        )
     pub_date = models.DateTimeField(
         "Дата публикации вакансии",
         auto_now_add=True,
@@ -339,8 +346,8 @@ class Vacancy(models.Model):
 
     class Meta:
         ordering = ["pub_date"]
-        verbose_name = "Основная информация о вакансии"
-        verbose_name_plural = "Основная информация о вакансии"
+        verbose_name = "Вакансия"
+        verbose_name_plural = "Вакансии"
 
     def __str__(self):
         return self.vacancy_title
@@ -348,35 +355,55 @@ class Vacancy(models.Model):
 
 class Candidate(models.Model):
     """Модель кандидата."""
-
-    first_name = models.CharField(max_length=40, verbose_name="Имя")
-    last_name = models.CharField(max_length=50, verbose_name="Фамилия")
+    
+    first_name = models.CharField(max_length=40,
+                                  verbose_name="Имя",
+                                  validators=[
+            MinLengthValidator(2)
+        ],)
+    last_name = models.CharField(max_length=50,
+                                 verbose_name="Фамилия",
+                                 validators=[
+            MinLengthValidator(2)
+        ],)
     patronymic = models.CharField(
         max_length=50,
         verbose_name="Отчество",
         null=True,
         blank=True,
+        validators=[
+            MinLengthValidator(2)
+        ],
     )
     bday = models.DateField(
         auto_now=False,
         auto_now_add=False,
         verbose_name="Дата рождения",
     )
-    city = models.CharField(
-        max_length=50,
+    city = models.CharField(        
+        max_length=40,
         verbose_name="Город проживания",
+        validators=[
+            MinLengthValidator(2)
+        ],
     )
     last_job = models.CharField(
         max_length=90,
         verbose_name="Последнее место работы",
         null=True,
         blank=True,
+        validators=[
+            MinLengthValidator(2)
+        ],
     )
     cur_position = models.CharField(
         max_length=50,
         verbose_name="Текущая должность",
         null=True,
         blank=True,
+        validators=[
+            MinLengthValidator(2)
+        ],
     )
     salary_expectations = ArrayField(
         models.IntegerField(),
@@ -395,24 +422,26 @@ class Candidate(models.Model):
         validators=[PHONE_NUMBER_REGEX],
         max_length=16,
         verbose_name="Телефон",
+        default='89501002030'
 
-
-        null=True,
-        blank=True,
     )
     email = models.EmailField(
         verbose_name="Почта",
-        max_length=254,
-        unique=True,
-        validators=[validate_email, custom_validate_email],
+        max_length=256,
+        unique=True,        
+        validators=[MinLengthValidator(2),
+                    validate_email,
+                    custom_validate_email],
     )
     telegram = models.CharField(
         max_length=150,
+        validators=[VALID_TELEGRAM_REGEX],
         verbose_name="Телеграмм",
         null=True,
         blank=True,
     )
     portfolio = models.URLField(
+        max_length=255,
         verbose_name="Ссылка на портфолио",
         null=True,
         blank=True,
@@ -420,10 +449,13 @@ class Candidate(models.Model):
     resume = models.FileField(
         verbose_name="Резюме",
         upload_to=upload_to_candidates,
+        null=True,
+        blank=True,
     )
     photo = models.ImageField(upload_to=upload_to_candidates,
                               verbose_name="Фотография",
-                              null=True,)
+                              null=True,
+                              blank=True,)
     employment_type = MultiSelectField(
         choices=EMPLOYMENT_TYPE,
         verbose_name="Тип занятости",
@@ -456,8 +488,6 @@ class Candidate(models.Model):
         max_length=5,
         choices=INTERVIEW_STATUS,
         default=INTERVIEW_STATUS[0][0],
-        null=True,
-        blank=True,
         verbose_name="Статус",
     )
     pub_date = models.DateTimeField(
@@ -465,6 +495,11 @@ class Candidate(models.Model):
         auto_now_add=True,
     )
 
+    class Meta:
+        ordering = ["pub_date"]
+        verbose_name = "Кандидат"
+        verbose_name_plural = "Кандидаты"
+    
     def __str__(self):
         return self.last_name
 

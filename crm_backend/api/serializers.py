@@ -1,6 +1,7 @@
 import re
 from datetime import date
 
+from drf_extra_fields.fields import Base64ImageField, Base64FileField
 from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
@@ -14,6 +15,7 @@ from rest_framework.serializers import (
     CharField,
     ChoiceField,
     EmailField,
+    ImageField,
     ModelSerializer,
     SerializerMethodField,
     StringRelatedField,
@@ -30,6 +32,16 @@ from .utils import (
     get_salary_range,
 )
 
+
+class CustomBase64FileField(Base64FileField):
+    ALLOWED_TYPES = ["pdf"]
+
+    def get_file_extension(self, filename, decoded_file):
+        file_extension = filename.split("/")[0]
+        if file_extension not in self.ALLOWED_TYPES:
+            raise ValidationError("Файлы такого типа не поддерживаются.")
+        return file_extension
+    
 
 class UserSignupSerializer(ModelSerializer):
     """Сериализатор пользователя при регистрации."""
@@ -76,9 +88,20 @@ class UserSignupSerializer(ModelSerializer):
 class CompanySerializer(ModelSerializer):
     """Сериализатор для модели Company."""
 
+    logo = Base64ImageField()
+
     class Meta:
         model = Company
-        fields = "__all__"
+        fields = (
+                "company_title",
+                "about_company",
+                "company_address",
+                "website",
+                "email",
+                "phone_number",
+                "link_hr",
+                "logo",
+                )
 
 
 class CompanyShortSerializer(ModelSerializer):
@@ -232,7 +255,7 @@ class ResumeSerializer(ModelSerializer):
     age = SerializerMethodField()
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
     salary_expectations = SerializerMethodField()
-    required_experience = ChoiceField(choices=EXPERIENCE)
+    work_experiences = WorkExperienceSerializer()
 
     class Meta:
         model = ApplicantResume
@@ -250,7 +273,7 @@ class ResumeSerializer(ModelSerializer):
             "citizenship",
             "bday",
             "age",
-            "required_experience",
+            "work_experiences",
             "about_me",
             "current_company",
             "current_job",
@@ -308,7 +331,7 @@ class ResumesSerializer(ModelSerializer):
 
 
 class CandidateSerializer(ModelSerializer):
-    """Сериализатор для карточек кандидатов."""
+    """Сериализатор для кандидата."""
 
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
@@ -317,32 +340,37 @@ class CandidateSerializer(ModelSerializer):
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
     salary_expectations = SerializerMethodField()
     work_experiences = ChoiceField(choices=EXPERIENCE)
+    resume = Base64FileField()
+    photo = Base64ImageField()
 
     class Meta:
         model = Candidate
         fields = (
-            "first_name",
-            "last_name",
-            "patronymic",
+            'id',
+            'first_name',
+            'last_name',
+            'patronymic',
+            'bday',
             "age",
-            "bday",
-            "city",
-            "last_job",            
-            "cur_position",
-            "salary_expectations",            
-            "phone_number",
-            "email",            
-            "portfolio",
-            "resume",
-            "photo",
-            "employment_type",
-            "schedule_work",            
-            "work_experiences",
-            "education",                       
-            "interview_status",
-            "pub_date", 
+            'city',
+            'last_job',
+            'cur_position',
+            'salary_expectations',
+            'vacancy',
+            'phone_number',
+            'email',
+            'telegram',
+            'portfolio',
+            'resume',
+            'photo',
+            'employment_type',
+            'schedule_work',
+            'work_experiences',
+            'education',
+            'interview_status',
+            'pub_date'
         )
-
+    
     def get_schedule_work(self, obj):
         """
         Функция преобразования вывода информации.
@@ -382,13 +410,16 @@ class CandidateSerializer(ModelSerializer):
 class CandidatesSerializer(ModelSerializer):
     """Сериализатор для карточек кандидатов."""
 
+    interview_status = ChoiceField(choices=INTERVIEW_STATUS)
+    work_experiences = ChoiceField(choices=EXPERIENCE)
+
     class Meta:
         model = Candidate
         fields = (
             "first_name",
             "last_name",
             "patronymic",
-            "job_title",
+            "cur_position",
             "work_experiences",
             "last_job",
             "interview_status",
