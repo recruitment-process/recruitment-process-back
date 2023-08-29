@@ -5,7 +5,6 @@ from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
     INTERVIEW_STATUS,
-    RELOCATION,
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
@@ -81,6 +80,14 @@ class CompanySerializer(ModelSerializer):
         fields = "__all__"
 
 
+class CompanyShortSerializer(ModelSerializer):
+    """Сериализатор для краткой версии модели Company."""
+
+    class Meta:
+        model = Company
+        fields = ("company_title", "website")
+
+
 class WorkExperienceSerializer(ModelSerializer):
     """Сериализатор карточки опыта работы."""
 
@@ -113,7 +120,7 @@ class WorkExperienceSerializer(ModelSerializer):
 class VacancySerializer(ModelSerializer):
     """Сериализатор карточки вакансии."""
 
-    company = CompanySerializer(read_only=True)
+    company = CompanyShortSerializer(read_only=True)
     author = StringRelatedField(read_only=True)
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
@@ -220,7 +227,6 @@ class ResumeSerializer(ModelSerializer):
 
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
-    relocation = ChoiceField(choices=RELOCATION)
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
@@ -237,9 +243,7 @@ class ResumeSerializer(ModelSerializer):
             "salary_expectations",
             "working_trip",
             "phone_number",
-            "relocation",
             "pub_date",
-            "gender",
             "education",
             "town",
             "citizenship",
