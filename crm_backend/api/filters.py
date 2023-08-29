@@ -3,9 +3,7 @@ from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
     EXPERIENCE,
-    GENDER,
     INTERVIEW_STATUS,
-    RELOCATION,
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
@@ -54,8 +52,6 @@ class ResumeFilterSet(FilterSet):
     )
     schedule_work = ChoiceFilter(field_name="schedule_work", choices=SCHEDULE_WORK)
     education = ChoiceFilter(field_name="education", choices=EDUCATION)
-    relocation = ChoiceFilter(field_name="relocation", choices=RELOCATION)
-    gender = ChoiceFilter(field_name="gender", choices=GENDER)
     work_experiences = ChoiceFilter(field_name="work_experiences", choices=EXPERIENCE)
     interview_status = ChoiceFilter(
         field_name="interview_status", choices=INTERVIEW_STATUS
@@ -70,8 +66,6 @@ class ResumeFilterSet(FilterSet):
             "employment_type",
             "schedule_work",
             "working_trip",
-            "relocation",
-            "gender",
             "pub_date",
             "education",
             "town",
