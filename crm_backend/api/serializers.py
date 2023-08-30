@@ -1,7 +1,10 @@
 import re
 from datetime import date
+import base64  
 
-from drf_extra_fields.fields import Base64ImageField, Base64FileField
+from django.core.files.base import ContentFile
+
+from drf_extra_fields.fields import Base64ImageField
 from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
@@ -15,7 +18,7 @@ from rest_framework.serializers import (
     CharField,
     ChoiceField,
     EmailField,
-    ImageField,
+    FileField,
     ModelSerializer,
     SerializerMethodField,
     StringRelatedField,
@@ -33,14 +36,21 @@ from .utils import (
 )
 
 
-class CustomBase64FileField(Base64FileField):
-    ALLOWED_TYPES = ["pdf"]
+class Base64PDFField(FileField):
+    """Кастомное поле для загрузки pdf файлов."""
 
-    def get_file_extension(self, filename, decoded_file):
-        file_extension = filename.split("/")[0]
-        if file_extension not in self.ALLOWED_TYPES:
-            raise ValidationError("Файлы такого типа не поддерживаются.")
-        return file_extension
+    def to_internal_value(self, data):
+        """
+        Функция декодирования файла из base64.
+
+        Возвращает адрес с нужным файлом из каталога media/candidates/.
+        """
+        if isinstance(data, str) and data.startswith('data:application/pdf'):
+            format, pdfstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(pdfstr), name='temp.' + ext)
+
+        return super().to_internal_value(data)
     
 
 class UserSignupSerializer(ModelSerializer):
@@ -144,11 +154,12 @@ class WorkExperienceSerializer(ModelSerializer):
 class VacancySerializer(ModelSerializer):
     """Сериализатор карточки вакансии."""
 
-    company = CompanyShortSerializer(read_only=True)
+    company = CompanyShortSerializer()
     author = StringRelatedField(read_only=True)
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
     vacancy_status = SerializerMethodField()
+    education = ChoiceField(choices=EDUCATION)
     pub_date = DateOnlyField(read_only=True)
     salary_range = SerializerMethodField()
 
@@ -157,23 +168,22 @@ class VacancySerializer(ModelSerializer):
         fields = (
             "vacancy_title",
             "company",
+            "author",
             "required_experience",
             "employment_type",
             "schedule_work",
             "salary_range",
-            "about_company",
             "city",
-            "address",
+            "education",
             "pub_date",
             "job_conditions",
             "job_responsibilities",
             "technology_stack",
-            "vacancy_status",
-            "author",
+            "vacancy_status",            
             "deadline",
         )
         read_only_fields = ("author",)
-
+    
     def get_schedule_work(self, obj):
         """
         Функция преобразования вывода информации.
@@ -340,7 +350,7 @@ class CandidateSerializer(ModelSerializer):
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
     salary_expectations = SerializerMethodField()
     work_experiences = ChoiceField(choices=EXPERIENCE)
-    resume = Base64FileField()
+    resume = Base64PDFField()
     photo = Base64ImageField()
 
     class Meta:
