@@ -319,12 +319,12 @@ class ResumesSerializer(ModelSerializer):
 class CandidateSerializer(ModelSerializer):
     """Сериализатор для кандидата."""
 
-    schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
-    employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
     salary_expectations = SerializerMethodField()
+    schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
+    employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
     work_experiences = ChoiceField(choices=EXPERIENCE)
     resume = Base64PDFField()
     photo = Base64ImageField()
