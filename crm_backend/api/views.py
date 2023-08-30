@@ -183,14 +183,34 @@ class CandidateViewSet(ModelViewSet):
         DjangoFilterBackend,
         SearchFilter,
         OrderingFilter,
+    )    
+    search_fields = (        
+            'first_name',
+            'last_name',
+            'city',
+            'last_job',
+            'cur_position',
+            'phone_number',
+            'email',
+            'telegram',
+            'employment_type',
+            'schedule_work',
+            'education',
+            'interview_status',            
     )
-    
-    search_fields = (
-        "pub_date",
-    )
-    ordering_fields = (
-        
-        "pub_date",
+    ordering_fields = (        
+            'last_name',
+            'city',
+            'last_job',
+            'cur_position',
+            'salary_expectations',
+            'vacancy',
+            'employment_type',
+            'schedule_work',
+            'work_experiences',
+            'education',
+            'interview_status',
+            "pub_date",
     )
     ordering = ("pub_date",)
 
