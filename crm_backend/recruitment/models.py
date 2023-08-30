@@ -312,12 +312,12 @@ class Vacancy(models.Model):
         max_length=40,
         verbose_name="Город",
     )
-    education = MultiSelectField(
+    education = models.CharField(
+        max_length=5,
         choices=EDUCATION,
         verbose_name="Образование",
         null=True,
         blank=True,
-        max_length=get_max_length(EDUCATION, None),
         )
     pub_date = models.DateTimeField(
         "Дата публикации вакансии",
