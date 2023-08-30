@@ -1,3 +1,4 @@
+from datetime import date
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
@@ -24,11 +25,13 @@ from .utils import generate_logo_path, upload_to_candidates
 
 class WorkExperience(models.Model):
     """Модель опыта работы."""
-
+    
     start_date = models.DateField(verbose_name="Дата начала работы")
     end_date = models.DateField(
         verbose_name="Дата увольнения",
+        default=date.today(),
         null=True,
+        blank=True,
     )
     position = models.CharField(
         max_length=50,
@@ -88,7 +91,6 @@ class ApplicantResume(models.Model):
         size=2,
         null=True,
         blank=True,
-        default="з/п не указана",
         verbose_name="Желаемая зарплата",
     )
     working_trip = models.BooleanField(
@@ -119,7 +121,7 @@ class ApplicantResume(models.Model):
         null=True,
         blank=True,
     )
-    bday = models.DateField(  # в модели кандидата
+    bday = models.DateField(
         auto_now=False,
         auto_now_add=False,
         verbose_name="Дата рождения",
@@ -324,10 +326,14 @@ class Vacancy(models.Model):
     job_conditions = models.TextField(
         verbose_name="Условия работы",
         help_text="Введите условия работы",
+        null=True,
+        blank=True,
     )
     job_responsibilities = models.TextField(
         verbose_name="Обязанности кандидата",
         help_text="Введите обязанности кандидата",
+        null=True,
+        blank=True,
     )
     technology_stack = (
         # позже нужно будет сделать бд со всеми навыками
@@ -338,7 +344,6 @@ class Vacancy(models.Model):
     vacancy_status = models.CharField(
         max_length=1,
         choices=VACANCY_STATUS,
-        default=VACANCY_STATUS[2][0],
         verbose_name="Статус вакансии",
         blank=False,
     )

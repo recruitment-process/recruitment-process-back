@@ -24,6 +24,7 @@ class ApplicantResumeAdmin(admin.ModelAdmin):
         "salary_expectations",
         "town",
         "citizenship",
+        
     )
     list_filter = ("job_title", "education", "salary_expectations", "town")
     search_fields = (

@@ -20,6 +20,7 @@ from rest_framework.serializers import (
     EmailField,
     FileField,
     ModelSerializer,
+    MultipleChoiceField,
     SerializerMethodField,
     StringRelatedField,
     ValidationError,
@@ -156,12 +157,10 @@ class VacancySerializer(ModelSerializer):
 
     company = CompanyShortSerializer()
     author = StringRelatedField(read_only=True)
-    schedule_work = SerializerMethodField()
-    employment_type = SerializerMethodField()
-    vacancy_status = SerializerMethodField()
+    schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
+    employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
     education = ChoiceField(choices=EDUCATION)
     pub_date = DateOnlyField(read_only=True)
-    salary_range = SerializerMethodField()
 
     class Meta:
         model = Vacancy
@@ -172,7 +171,7 @@ class VacancySerializer(ModelSerializer):
             "required_experience",
             "employment_type",
             "schedule_work",
-            "salary_range",
+            "salary",
             "city",
             "education",
             "pub_date",
@@ -184,33 +183,28 @@ class VacancySerializer(ModelSerializer):
         )
         read_only_fields = ("author",)
     
-    def get_schedule_work(self, obj):
+   
+    def create(self, validated_data):
         """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля schedule_work.
+        Функция для создания или обновления экземпляра Company.
+        
+        Возвращает новый созданный экземпляр Vacancy.
         """
-        return get_display_values(obj.schedule_work, SCHEDULE_WORK)
-
-    def get_employment_type(self, obj):
+        company_data = validated_data.pop('company')
+        company, created = Company.objects.update_or_create(**company_data)
+        vacancy = Vacancy.objects.create(company=company, **validated_data)
+        return vacancy
+    
+    def update(self, instance, validated_data):
         """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля employment_type.
+        Функция для обновления экземпляра Company.
+        
+        Возвращает обновленный экземпляр Vacancy.
         """
-        return get_display_values(obj.employment_type, EMPLOYMENT_TYPE)
+        company_data = validated_data.pop('company')
+        Company.objects.filter(id=instance.company.id).update(**company_data)
+        return super().update(instance, validated_data)      
 
-    def get_vacancy_status(self, obj):
-        """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля vacancy_status.
-        """
-        return get_display_values(obj.vacancy_status, VACANCY_STATUS)
-
-    def get_salary_range(self, obj):
-        """Функция преобразования вывода информации для поля salary."""
-        return get_salary_range(obj)
 
 
 class VacanciesSerializer(ModelSerializer):
@@ -259,13 +253,13 @@ class VacanciesSerializer(ModelSerializer):
 class ResumeSerializer(ModelSerializer):
     """Сериализатор карточки резюме."""
 
-    schedule_work = SerializerMethodField()
-    employment_type = SerializerMethodField()
+    schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
+    employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
-    interview_status = ChoiceField(choices=INTERVIEW_STATUS)
     salary_expectations = SerializerMethodField()
-    work_experiences = WorkExperienceSerializer()
+    work_experiences = WorkExperienceSerializer(many=True)
+    pub_date = DateOnlyField(read_only=True)
 
     class Meta:
         model = ApplicantResume
@@ -287,24 +281,7 @@ class ResumeSerializer(ModelSerializer):
             "about_me",
             "current_company",
             "current_job",
-            "interview_status",
         )
-
-    def get_schedule_work(self, obj):
-        """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля schedule_work.
-        """
-        return get_display_values(obj.schedule_work, SCHEDULE_WORK)
-
-    def get_employment_type(self, obj):
-        """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля employment_type.
-        """
-        return get_display_values(obj.employment_type, EMPLOYMENT_TYPE)
 
     def get_age(self, obj):
         """Функция для подсчета возраста соискателя."""
@@ -336,15 +313,14 @@ class ResumesSerializer(ModelSerializer):
             "job_title",
             "work_experiences",
             "current_company",
-            "interview_status",
         )
 
 
 class CandidateSerializer(ModelSerializer):
     """Сериализатор для кандидата."""
 
-    schedule_work = SerializerMethodField()
-    employment_type = SerializerMethodField()
+    schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
+    employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
@@ -352,6 +328,7 @@ class CandidateSerializer(ModelSerializer):
     work_experiences = ChoiceField(choices=EXPERIENCE)
     resume = Base64PDFField()
     photo = Base64ImageField()
+    pub_date = DateOnlyField(read_only=True)
 
     class Meta:
         model = Candidate
@@ -379,23 +356,7 @@ class CandidateSerializer(ModelSerializer):
             'education',
             'interview_status',
             'pub_date'
-        )
-    
-    def get_schedule_work(self, obj):
-        """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля schedule_work.
-        """
-        return get_display_values(obj.schedule_work, SCHEDULE_WORK)
-
-    def get_employment_type(self, obj):
-        """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля employment_type.
-        """
-        return get_display_values(obj.employment_type, EMPLOYMENT_TYPE)
+        )    
 
     def get_age(self, obj):
         """Функция для подсчета возраста соискателя."""
