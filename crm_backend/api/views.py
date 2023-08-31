@@ -184,7 +184,7 @@ class NoteViewSet(ModelViewSet):
 
     def get_queryset(self):
         candidate = get_object_or_404(Candidate, id=self.kwargs.get('candidate_id'))
-        return candidate.comments.all()
+        return candidate.user_notes.all()
 
     def perform_create(self, serializer):
         candidate = get_object_or_404(Candidate, id=self.kwargs.get('candidate_id'))
