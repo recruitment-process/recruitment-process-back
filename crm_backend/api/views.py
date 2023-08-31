@@ -183,11 +183,11 @@ class NoteViewSet(ModelViewSet):
     ordering = ("pub_date",)
 
     def get_queryset(self):
-        candidate = get_object_or_404(Candidate, id=self.kwargs.get('review_id'))
+        candidate = get_object_or_404(Candidate, id=self.kwargs.get('candidate_id'))
         return candidate.comments.all()
 
     def perform_create(self, serializer):
-        candidate = get_object_or_404(Candidate, id=self.kwargs.get('review_id'))
+        candidate = get_object_or_404(Candidate, id=self.kwargs.get('candidate_id'))
         serializer.save(author=self.request.user, candidate=candidate)
     
 
@@ -196,9 +196,9 @@ class CommentViewSet(ModelViewSet):
     ordering = ("pub_date",)
 
     def get_queryset(self):
-        note = get_object_or_404(Note, id=self.kwargs.get('review_id'))
+        note = get_object_or_404(Note, id=self.kwargs.get('note_id'))
         return note.comments.all()
 
     def perform_create(self, serializer):
-        note = get_object_or_404(Note, id=self.kwargs.get('review_id'))
+        note = get_object_or_404(Note, id=self.kwargs.get('note_id'))
         serializer.save(author=self.request.user, note=note)
