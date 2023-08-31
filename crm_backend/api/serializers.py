@@ -43,6 +43,12 @@ class UserSignupSerializer(ModelSerializer):
             "password",
         )
 
+    def to_representation(self, instance):
+        """Изменение возвращаемого ответа сериализатора."""
+        return {
+            "id": instance.id,
+        }
+
     def create(self, validated_data):
         """Создание пользователя в БД."""
         user = User.objects.create_user(

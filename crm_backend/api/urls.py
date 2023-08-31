@@ -9,10 +9,7 @@ from .views import (
     VacancyViewSet,
 )
 
-CONFIRM_URL = (
-    r"^confirm/(?P<email>[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]{1,}\.[a-zA-Z]{2,})"
-    "/(?P<confirmation_code>[0-9a-f-]+)/"
-)
+CONFIRM_URL = r"^confirm/(?P<user_id>[0-9]+)/(?P<confirmation_code>[0-9a-f-]+)/"
 
 router = DefaultRouter()
 router.register("vacancies", VacancyViewSet, basename="vacancies")

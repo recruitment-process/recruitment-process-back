@@ -82,7 +82,7 @@ class UserSignupView(APIView):
         serializer = UserSignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        send_mail_to_user(user.email, user.confirmation_code)
+        send_mail_to_user(user.id, user.confirmation_code, user.email)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -92,14 +92,16 @@ class EmailConfirmationView(APIView):
     pagination_class = None
     permission_classes = [AllowAny]
 
-    def get(self, request, email, confirmation_code):
+    def get(self, request, user_id, confirmation_code):
         """GET запрос подтверждения email."""
-        user = get_object_or_404(User, email=email)
+        user = get_object_or_404(User, pk=user_id)
         if user.confirmation_code == confirmation_code:
             user.email_status = True
             user.save()
-            return Response({"Email подтвержден!"}, status=status.HTTP_200_OK)
-        return Response({"Неверная ссылка!"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "Email подтвержден!"}, status=status.HTTP_200_OK)
+        return Response(
+            {"status": "Неверная ссылка!"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class VacancyViewSet(ModelViewSet):

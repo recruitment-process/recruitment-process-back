@@ -12,7 +12,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG", default=True)
 
-ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", "80.87.107.75"]
+ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", "80.87.107.166"]
 
 
 INSTALLED_APPS = [
@@ -127,7 +127,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://backend",
     "http://localhost",
     "http://127.0.0.1",
-    "http://80.87.107.75",
+    "http://80.87.107.166",
 ]
 
 SIMPLE_JWT = {
