@@ -192,7 +192,7 @@ class NoteViewSet(ModelViewSet):
     
 
 class CommentViewSet(ModelViewSet):
-    serializer_class = NoteSerializer
+    serializer_class = CommentSerializer
     ordering = ("pub_date",)
 
     def get_queryset(self):
