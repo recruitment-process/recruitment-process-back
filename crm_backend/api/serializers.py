@@ -8,7 +8,14 @@ from recruitment.constants import (
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
-from recruitment.models import ApplicantResume, Company, Vacancy, WorkExperience
+from recruitment.models import (
+    ApplicantResume,
+    Company,
+    Vacancy,
+    WorkExperience,
+    Note,
+    Comment,
+    )
 from rest_framework.serializers import (
     CharField,
     ChoiceField,
@@ -17,6 +24,7 @@ from rest_framework.serializers import (
     SerializerMethodField,
     StringRelatedField,
     ValidationError,
+    SlugRelatedField,
 )
 from users.models import User
 from users.validators import custom_validate_email
@@ -305,3 +313,38 @@ class ResumesSerializer(ModelSerializer):
             "current_company",
             "interview_status",
         )
+
+
+class NoteSerializer(ModelSerializer):
+    author = SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
+
+    class Meta:
+        fields = (
+            "candidate",
+            "text",
+            "author",
+            "pub_date",
+
+        )
+        model = Note
+        read_only_fields = ('candidate',)
+
+
+class CommentSerializer(ModelSerializer):
+    author = SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
+
+    class Meta:
+        fields = (
+            "note",
+            "text",
+            "author",
+            "pub_date",
+
+        )
+        model = Comment
+        read_only_fields = ('note',)
+

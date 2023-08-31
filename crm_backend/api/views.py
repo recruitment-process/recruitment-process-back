@@ -3,7 +3,12 @@ from django.contrib.auth import authenticate
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recruitment.models import ApplicantResume, Vacancy
+from recruitment.models import (
+    ApplicantResume,
+    Vacancy,
+    Candidate,
+    Note,
+    )
 from rest_framework import status
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny
@@ -20,6 +25,8 @@ from .serializers import (
     UserSignupSerializer,
     VacanciesSerializer,
     VacancySerializer,
+    NoteSerializer,
+    CommentSerializer,
 )
 from .utils import send_mail_to_user
 
@@ -169,3 +176,29 @@ class ResumeViewSet(ModelViewSet):
         if self.action == "list":
             return ResumesSerializer
         return ResumeSerializer
+
+
+class NoteViewSet(ModelViewSet):
+    serializer_class = NoteSerializer
+    ordering = ("pub_date",)
+
+    def get_queryset(self):
+        candidate = get_object_or_404(Candidate, id=self.kwargs.get('review_id'))
+        return candidate.comments.all()
+
+    def perform_create(self, serializer):
+        candidate = get_object_or_404(Candidate, id=self.kwargs.get('review_id'))
+        serializer.save(author=self.request.user, candidate=candidate)
+    
+
+class CommentViewSet(ModelViewSet):
+    serializer_class = NoteSerializer
+    ordering = ("pub_date",)
+
+    def get_queryset(self):
+        note = get_object_or_404(Note, id=self.kwargs.get('review_id'))
+        return note.comments.all()
+
+    def perform_create(self, serializer):
+        note = get_object_or_404(Note, id=self.kwargs.get('review_id'))
+        serializer.save(author=self.request.user, note=note)
