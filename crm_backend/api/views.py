@@ -1,12 +1,13 @@
 from django.conf import settings
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, logout
+from django.http import HttpResponseRedirect
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from recruitment.models import ApplicantResume, Vacancy
 from rest_framework import status
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -86,6 +87,19 @@ class UserSignupView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+class LogoutView(APIView):
+    """Выход пользователя."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """POST запрос выхода пользователя."""
+        logout(request)
+        response = HttpResponseRedirect(f"http://{settings.DOMAIN_NAME}/login/")
+        response.delete_cookie(settings.SIMPLE_JWT["AUTH_COOKIE"])
+        return response
+
+
 class EmailConfirmationView(APIView):
     """Подтверждение email пользователя."""
 
@@ -98,7 +112,7 @@ class EmailConfirmationView(APIView):
         if user.confirmation_code == confirmation_code:
             user.email_status = True
             user.save()
-            return Response({"status": "Email подтвержден!"}, status=status.HTTP_200_OK)
+            return HttpResponseRedirect(f"{settings.DOMAIN_NAME}/login/")
         return Response(
             {"status": "Неверная ссылка!"}, status=status.HTTP_400_BAD_REQUEST
         )

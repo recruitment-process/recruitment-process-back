@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     EmailConfirmationView,
     LoginView,
+    LogoutView,
     ResumeViewSet,
     UserSignupView,
     VacancyViewSet,
@@ -17,6 +18,7 @@ router.register("resumes", ResumeViewSet, basename="resumes")
 
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
+    path("logout/", LogoutView.as_view(), name="logout"),
     path("signup/", UserSignupView.as_view(), name="signup"),
     re_path(CONFIRM_URL, EmailConfirmationView.as_view(), name="email_confirm"),
     path("", include(router.urls)),
