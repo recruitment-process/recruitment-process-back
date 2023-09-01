@@ -112,7 +112,7 @@ class EmailConfirmationView(APIView):
         if user.confirmation_code == confirmation_code:
             user.email_status = True
             user.save()
-            return HttpResponseRedirect(f"{settings.DOMAIN_NAME}/login/")
+            return HttpResponseRedirect(f"http://{settings.DOMAIN_NAME}/login/")
         return Response(
             {"status": "Неверная ссылка!"}, status=status.HTTP_400_BAD_REQUEST
         )
