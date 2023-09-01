@@ -3,10 +3,12 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     EmailConfirmationView,
+    CompanyViewSet,
     LoginView,
     ResumeViewSet,
     UserSignupView,
     VacancyViewSet,
+    CandidateViewSet,
 )
 
 CONFIRM_URL = (
@@ -17,6 +19,8 @@ CONFIRM_URL = (
 router = DefaultRouter()
 router.register("vacancies", VacancyViewSet, basename="vacancies")
 router.register("resumes", ResumeViewSet, basename="resumes")
+router.register("candidates", CandidateViewSet, basename="candidates")
+router.register("companies", CompanyViewSet, basename="companies")
 
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),

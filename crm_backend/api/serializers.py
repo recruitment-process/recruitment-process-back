@@ -1,19 +1,26 @@
 import re
 from datetime import date
+import base64  
 
+from django.core.files.base import ContentFile
+
+from drf_extra_fields.fields import Base64ImageField
 from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
+    EXPERIENCE,
     INTERVIEW_STATUS,
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
-from recruitment.models import ApplicantResume, Company, Vacancy, WorkExperience
+from recruitment.models import ApplicantResume, Company, Vacancy, WorkExperience, Candidate
 from rest_framework.serializers import (
     CharField,
     ChoiceField,
     EmailField,
+    FileField,
     ModelSerializer,
+    MultipleChoiceField,
     SerializerMethodField,
     StringRelatedField,
     ValidationError,
@@ -29,6 +36,23 @@ from .utils import (
     get_salary_range,
 )
 
+
+class Base64PDFField(FileField):
+    """Кастомное поле для загрузки pdf файлов."""
+
+    def to_internal_value(self, data):
+        """
+        Функция декодирования файла из base64.
+
+        Возвращает адрес с нужным файлом из каталога media/candidates/.
+        """
+        if isinstance(data, str) and data.startswith('data:application/pdf'):
+            format, pdfstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(pdfstr), name='temp.' + ext)
+
+        return super().to_internal_value(data)
+    
 
 class UserSignupSerializer(ModelSerializer):
     """Сериализатор пользователя при регистрации."""
@@ -75,9 +99,20 @@ class UserSignupSerializer(ModelSerializer):
 class CompanySerializer(ModelSerializer):
     """Сериализатор для модели Company."""
 
+    logo = Base64ImageField()
+
     class Meta:
         model = Company
-        fields = "__all__"
+        fields = (
+                "company_title",
+                "about_company",
+                "company_address",
+                "website",
+                "email",
+                "phone_number",
+                "link_hr",
+                "logo",
+                )
 
 
 class CompanyShortSerializer(ModelSerializer):
@@ -120,63 +155,56 @@ class WorkExperienceSerializer(ModelSerializer):
 class VacancySerializer(ModelSerializer):
     """Сериализатор карточки вакансии."""
 
-    company = CompanyShortSerializer(read_only=True)
+    company = CompanyShortSerializer()
     author = StringRelatedField(read_only=True)
-    schedule_work = SerializerMethodField()
-    employment_type = SerializerMethodField()
-    vacancy_status = SerializerMethodField()
+    schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
+    employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
+    education = ChoiceField(choices=EDUCATION)
     pub_date = DateOnlyField(read_only=True)
-    salary_range = SerializerMethodField()
 
     class Meta:
         model = Vacancy
         fields = (
             "vacancy_title",
             "company",
+            "author",
             "required_experience",
             "employment_type",
             "schedule_work",
-            "salary_range",
-            "about_company",
+            "salary",
             "city",
-            "address",
+            "education",
             "pub_date",
             "job_conditions",
             "job_responsibilities",
             "technology_stack",
-            "vacancy_status",
-            "author",
+            "vacancy_status",            
             "deadline",
         )
         read_only_fields = ("author",)
-
-    def get_schedule_work(self, obj):
+    
+   
+    def create(self, validated_data):
         """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля schedule_work.
+        Функция для создания или обновления экземпляра Company.
+        
+        Возвращает новый созданный экземпляр Vacancy.
         """
-        return get_display_values(obj.schedule_work, SCHEDULE_WORK)
-
-    def get_employment_type(self, obj):
+        company_data = validated_data.pop('company')
+        company, created = Company.objects.update_or_create(**company_data)
+        vacancy = Vacancy.objects.create(company=company, **validated_data)
+        return vacancy
+    
+    def update(self, instance, validated_data):
         """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля employment_type.
+        Функция для обновления экземпляра Company.
+        
+        Возвращает обновленный экземпляр Vacancy.
         """
-        return get_display_values(obj.employment_type, EMPLOYMENT_TYPE)
+        company_data = validated_data.pop('company')
+        Company.objects.filter(id=instance.company.id).update(**company_data)
+        return super().update(instance, validated_data)      
 
-    def get_vacancy_status(self, obj):
-        """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля vacancy_status.
-        """
-        return get_display_values(obj.vacancy_status, VACANCY_STATUS)
-
-    def get_salary_range(self, obj):
-        """Функция преобразования вывода информации для поля salary."""
-        return get_salary_range(obj)
 
 
 class VacanciesSerializer(ModelSerializer):
@@ -225,13 +253,13 @@ class VacanciesSerializer(ModelSerializer):
 class ResumeSerializer(ModelSerializer):
     """Сериализатор карточки резюме."""
 
-    schedule_work = SerializerMethodField()
-    employment_type = SerializerMethodField()
+    schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
+    employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
-    interview_status = ChoiceField(choices=INTERVIEW_STATUS)
     salary_expectations = SerializerMethodField()
     work_experiences = WorkExperienceSerializer(many=True)
+    pub_date = DateOnlyField(read_only=True)
 
     class Meta:
         model = ApplicantResume
@@ -253,24 +281,7 @@ class ResumeSerializer(ModelSerializer):
             "about_me",
             "current_company",
             "current_job",
-            "interview_status",
         )
-
-    def get_schedule_work(self, obj):
-        """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля schedule_work.
-        """
-        return get_display_values(obj.schedule_work, SCHEDULE_WORK)
-
-    def get_employment_type(self, obj):
-        """
-        Функция преобразования вывода информации.
-
-        Возвращает значение поля employment_type.
-        """
-        return get_display_values(obj.employment_type, EMPLOYMENT_TYPE)
 
     def get_age(self, obj):
         """Функция для подсчета возраста соискателя."""
@@ -283,8 +294,7 @@ class ResumeSerializer(ModelSerializer):
     def validate_bday(self, obj):
         """Функция валидации даты рождения соискателя."""
         today = date.today()
-        born = obj.bday
-        if not (MAX_AGE > (today.year - born.year) > MIN_AGE):
+        if not (MAX_AGE > (today.year - obj.year) > MIN_AGE):
             raise ValidationError("Проверьте дату рождения!")
         return obj
 
@@ -303,5 +313,85 @@ class ResumesSerializer(ModelSerializer):
             "job_title",
             "work_experiences",
             "current_company",
+        )
+
+
+class CandidateSerializer(ModelSerializer):
+    """Сериализатор для кандидата."""
+
+    education = ChoiceField(choices=EDUCATION)
+    age = SerializerMethodField()
+    interview_status = ChoiceField(choices=INTERVIEW_STATUS)
+    salary_expectations = SerializerMethodField()
+    schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
+    employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
+    work_experiences = ChoiceField(choices=EXPERIENCE)
+    resume = Base64PDFField()
+    photo = Base64ImageField()
+    pub_date = DateOnlyField(read_only=True)
+
+    class Meta:
+        model = Candidate
+        fields = (
+            'id',
+            'first_name',
+            'last_name',
+            'patronymic',
+            'bday',
+            "age",
+            'city',
+            'last_job',
+            'cur_position',
+            'salary_expectations',
+            'vacancy',
+            'phone_number',
+            'email',
+            'telegram',
+            'portfolio',
+            'resume',
+            'photo',
+            'employment_type',
+            'schedule_work',
+            'work_experiences',
+            'education',
+            'interview_status',
+            'pub_date'
+        )    
+
+    def get_age(self, obj):
+        """Функция для подсчета возраста соискателя."""
+        today = date.today()
+        born = obj.bday
+        return (
+            today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+        )
+
+    def validate_bday(self, obj):
+        """Функция валидации даты рождения соискателя."""
+        today = date.today()
+        if not (MAX_AGE > (today.year - obj.year) > MIN_AGE):
+            raise ValidationError("Проверьте дату рождения!")
+        return obj
+
+    def get_salary_expectations(self, obj):
+        """Функция преобразования вывода информации для поля salary_expectations."""
+        return get_salary_expectations(obj)
+
+
+class CandidatesSerializer(ModelSerializer):
+    """Сериализатор для карточек кандидатов."""
+
+    interview_status = ChoiceField(choices=INTERVIEW_STATUS)
+    work_experiences = ChoiceField(choices=EXPERIENCE)
+
+    class Meta:
+        model = Candidate
+        fields = (
+            "first_name",
+            "last_name",
+            "patronymic",
+            "cur_position",
+            "work_experiences",
+            "last_job",
             "interview_status",
         )
