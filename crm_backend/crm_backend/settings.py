@@ -131,8 +131,11 @@ CSRF_COOKIE_SAMESITE = "None"
 CSRF_TRUSTED_ORIGINS = [
     "http://backend",
     "http://localhost",
+    "https://localhost",
     "http://127.0.0.1",
+    "https://127.0.0.1",
     "http://80.87.107.166",
+    "https://80.87.107.166",
 ]
 
 SIMPLE_JWT = {
@@ -163,7 +166,7 @@ SIMPLE_JWT = {
     "AUTH_COOKIE_SECURE": False,  # Whether the auth cookies should be secure (https:// only).
     "AUTH_COOKIE_HTTP_ONLY": True,  # Http only cookie flag.It"s not fetch by javascript.
     "AUTH_COOKIE_PATH": "/",  # The path of the auth cookie.
-    "AUTH_COOKIE_SAMESITE": "Lax",  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be "Lax", "Strict", or None to disable the flag.
+    "AUTH_COOKIE_SAMESITE": None,  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be "Lax", "Strict", or None to disable the flag.
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"

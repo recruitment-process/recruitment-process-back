@@ -1,9 +1,8 @@
+import base64
 import re
 from datetime import date
-import base64  
 
 from django.core.files.base import ContentFile
-
 from drf_extra_fields.fields import Base64ImageField
 from recruitment.constants import (
     EDUCATION,
@@ -11,9 +10,14 @@ from recruitment.constants import (
     EXPERIENCE,
     INTERVIEW_STATUS,
     SCHEDULE_WORK,
-    VACANCY_STATUS,
 )
-from recruitment.models import ApplicantResume, Company, Vacancy, WorkExperience, Candidate
+from recruitment.models import (
+    ApplicantResume,
+    Candidate,
+    Company,
+    Vacancy,
+    WorkExperience,
+)
 from rest_framework.serializers import (
     CharField,
     ChoiceField,
@@ -46,13 +50,13 @@ class Base64PDFField(FileField):
 
         Возвращает адрес с нужным файлом из каталога media/candidates/.
         """
-        if isinstance(data, str) and data.startswith('data:application/pdf'):
-            format, pdfstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(pdfstr), name='temp.' + ext)
+        if isinstance(data, str) and data.startswith("data:application/pdf"):
+            format, pdfstr = data.split(";base64,")
+            ext = format.split("/")[-1]
+            data = ContentFile(base64.b64decode(pdfstr), name="temp." + ext)
 
         return super().to_internal_value(data)
-    
+
 
 class UserSignupSerializer(ModelSerializer):
     """Сериализатор пользователя при регистрации."""
@@ -104,6 +108,20 @@ class UserSignupSerializer(ModelSerializer):
         return data
 
 
+class UserSerializer(ModelSerializer):
+    """Сериализатор для модели User."""
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "first_name",
+            "last_name",
+            "role",
+            "is_hr",
+        )
+
+
 class CompanySerializer(ModelSerializer):
     """Сериализатор для модели Company."""
 
@@ -112,15 +130,15 @@ class CompanySerializer(ModelSerializer):
     class Meta:
         model = Company
         fields = (
-                "company_title",
-                "about_company",
-                "company_address",
-                "website",
-                "email",
-                "phone_number",
-                "link_hr",
-                "logo",
-                )
+            "company_title",
+            "about_company",
+            "company_address",
+            "website",
+            "email",
+            "phone_number",
+            "link_hr",
+            "logo",
+        )
 
 
 class CompanyShortSerializer(ModelSerializer):
@@ -186,33 +204,31 @@ class VacancySerializer(ModelSerializer):
             "job_conditions",
             "job_responsibilities",
             "technology_stack",
-            "vacancy_status",            
+            "vacancy_status",
             "deadline",
         )
         read_only_fields = ("author",)
-    
-   
+
     def create(self, validated_data):
         """
         Функция для создания или обновления экземпляра Company.
-        
+
         Возвращает новый созданный экземпляр Vacancy.
         """
-        company_data = validated_data.pop('company')
+        company_data = validated_data.pop("company")
         company, created = Company.objects.update_or_create(**company_data)
         vacancy = Vacancy.objects.create(company=company, **validated_data)
         return vacancy
-    
+
     def update(self, instance, validated_data):
         """
         Функция для обновления экземпляра Company.
-        
+
         Возвращает обновленный экземпляр Vacancy.
         """
-        company_data = validated_data.pop('company')
+        company_data = validated_data.pop("company")
         Company.objects.filter(id=instance.company.id).update(**company_data)
-        return super().update(instance, validated_data)      
-
+        return super().update(instance, validated_data)
 
 
 class VacanciesSerializer(ModelSerializer):
@@ -341,30 +357,30 @@ class CandidateSerializer(ModelSerializer):
     class Meta:
         model = Candidate
         fields = (
-            'id',
-            'first_name',
-            'last_name',
-            'patronymic',
-            'bday',
+            "id",
+            "first_name",
+            "last_name",
+            "patronymic",
+            "bday",
             "age",
-            'city',
-            'last_job',
-            'cur_position',
-            'salary_expectations',
-            'vacancy',
-            'phone_number',
-            'email',
-            'telegram',
-            'portfolio',
-            'resume',
-            'photo',
-            'employment_type',
-            'schedule_work',
-            'work_experiences',
-            'education',
-            'interview_status',
-            'pub_date'
-        )    
+            "city",
+            "last_job",
+            "cur_position",
+            "salary_expectations",
+            "vacancy",
+            "phone_number",
+            "email",
+            "telegram",
+            "portfolio",
+            "resume",
+            "photo",
+            "employment_type",
+            "schedule_work",
+            "work_experiences",
+            "education",
+            "interview_status",
+            "pub_date",
+        )
 
     def get_age(self, obj):
         """Функция для подсчета возраста соискателя."""

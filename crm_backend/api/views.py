@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recruitment.models import ApplicantResume, Vacancy, Company, Candidate
+from recruitment.models import ApplicantResume, Candidate, Company, Vacancy
 from rest_framework import status
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -22,6 +22,7 @@ from .serializers import (
     CompanyShortSerializer,
     ResumeSerializer,
     ResumesSerializer,
+    UserSerializer,
     UserSignupSerializer,
     VacanciesSerializer,
     VacancySerializer,
@@ -122,6 +123,19 @@ class EmailConfirmationView(APIView):
         )
 
 
+class UserViewSet(ModelViewSet):
+    """Вьюсет для модели пользователей."""
+
+    queryset = User.objects.filter(is_staff=False)
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated,)
+    lookup_field = "id"
+    lookup_value_regex = r"[0-9]+"
+    http_method_names = [
+        "get",
+    ]
+
+
 class VacancyViewSet(ModelViewSet):
     """Вьюсет для модели вакансий."""
 
@@ -199,34 +213,34 @@ class CandidateViewSet(ModelViewSet):
         DjangoFilterBackend,
         SearchFilter,
         OrderingFilter,
-    )    
-    search_fields = (        
-            'first_name',
-            'last_name',
-            'city',
-            'last_job',
-            'cur_position',
-            'phone_number',
-            'email',
-            'telegram',
-            'employment_type',
-            'schedule_work',
-            'education',
-            'interview_status',            
     )
-    ordering_fields = (        
-            'last_name',
-            'city',
-            'last_job',
-            'cur_position',
-            'salary_expectations',
-            'vacancy',
-            'employment_type',
-            'schedule_work',
-            'work_experiences',
-            'education',
-            'interview_status',
-            "pub_date",
+    search_fields = (
+        "first_name",
+        "last_name",
+        "city",
+        "last_job",
+        "cur_position",
+        "phone_number",
+        "email",
+        "telegram",
+        "employment_type",
+        "schedule_work",
+        "education",
+        "interview_status",
+    )
+    ordering_fields = (
+        "last_name",
+        "city",
+        "last_job",
+        "cur_position",
+        "salary_expectations",
+        "vacancy",
+        "employment_type",
+        "schedule_work",
+        "work_experiences",
+        "education",
+        "interview_status",
+        "pub_date",
     )
     ordering = ("pub_date",)
 
@@ -235,7 +249,7 @@ class CandidateViewSet(ModelViewSet):
         if self.action == "list":
             return CandidatesSerializer
         return CandidateSerializer
-    
+
 
 class CompanyViewSet(ModelViewSet):
     """Вьюсет для модели Company."""
@@ -262,4 +276,3 @@ class CompanyViewSet(ModelViewSet):
         if self.action == "list":
             return CompanyShortSerializer
         return CompanySerializer
-    
