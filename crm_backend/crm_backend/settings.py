@@ -12,7 +12,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG", default=True)
 
-ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", "80.87.107.75"]
+ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", "80.87.107.166"]
 
 
 INSTALLED_APPS = [
@@ -117,17 +117,22 @@ REST_FRAMEWORK = {
     ],
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
+CORS_ORIGIN_ALLOW_ALL = True
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",
+# ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+SESSION_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SAMESITE = "None"
 
 CSRF_TRUSTED_ORIGINS = [
     "http://backend",
     "http://localhost",
     "http://127.0.0.1",
-    "http://80.87.107.75",
+    "http://80.87.107.166",
 ]
 
 SIMPLE_JWT = {

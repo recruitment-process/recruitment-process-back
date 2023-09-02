@@ -5,16 +5,14 @@ from .views import (
     EmailConfirmationView,
     CompanyViewSet,
     LoginView,
+    LogoutView,
     ResumeViewSet,
     UserSignupView,
     VacancyViewSet,
     CandidateViewSet,
 )
 
-CONFIRM_URL = (
-    r"^confirm/(?P<email>[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]{1,}\.[a-zA-Z]{2,})"
-    "/(?P<confirmation_code>[0-9a-f-]+)/"
-)
+CONFIRM_URL = r"^confirm/(?P<user_id>[0-9]+)/(?P<confirmation_code>[0-9a-f-]+)/"
 
 router = DefaultRouter()
 router.register("vacancies", VacancyViewSet, basename="vacancies")
@@ -24,6 +22,7 @@ router.register("companies", CompanyViewSet, basename="companies")
 
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
+    path("logout/", LogoutView.as_view(), name="logout"),
     path("signup/", UserSignupView.as_view(), name="signup"),
     re_path(CONFIRM_URL, EmailConfirmationView.as_view(), name="email_confirm"),
     path("", include(router.urls)),

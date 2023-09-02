@@ -57,8 +57,8 @@ class Base64PDFField(FileField):
 class UserSignupSerializer(ModelSerializer):
     """Сериализатор пользователя при регистрации."""
 
-    password = CharField(max_length=255)
-    email = EmailField(max_length=255)
+    password = CharField(max_length=128)
+    email = EmailField(max_length=256)
 
     class Meta:
         model = User
@@ -66,6 +66,12 @@ class UserSignupSerializer(ModelSerializer):
             "email",
             "password",
         )
+
+    def to_representation(self, instance):
+        """Изменение возвращаемого ответа сериализатора."""
+        return {
+            "id": instance.id,
+        }
 
     def create(self, validated_data):
         """Создание пользователя в БД."""
@@ -80,8 +86,10 @@ class UserSignupSerializer(ModelSerializer):
 
     def validate_password(self, value):
         """Валидация пароля."""
-        if len(value) < 8:
-            raise ValidationError("Минимальная длина пароля 8 символов!")
+        if len(value) < 8 or len(value) > 128:
+            raise ValidationError(
+                "Минимальная длина пароля 8 символов, максимальная 128!"
+            )
         if not re.match(r"^[^\sа-яА-Я]+$", value):
             raise ValidationError(
                 "Пароль не должен содержать невидимые символы и кириллицу!"

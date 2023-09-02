@@ -60,7 +60,7 @@ class User(AbstractUser):
     username = None
     USERNAME_FIELD = "email"
     email = models.EmailField(
-        max_length=254, unique=True, validators=[validate_email, custom_validate_email]
+        max_length=256, unique=True, validators=[validate_email, custom_validate_email]
     )
     first_name = models.CharField(max_length=150, verbose_name="Имя")
     last_name = models.CharField(max_length=150, verbose_name="Фамилия")
