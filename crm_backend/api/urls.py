@@ -2,14 +2,15 @@ from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    EmailConfirmationView,
+    CandidateViewSet,
     CompanyViewSet,
+    EmailConfirmationView,
     LoginView,
     LogoutView,
     ResumeViewSet,
     UserSignupView,
+    UserViewSet,
     VacancyViewSet,
-    CandidateViewSet,
 )
 
 CONFIRM_URL = r"^confirm/(?P<user_id>[0-9]+)/(?P<confirmation_code>[0-9a-f-]+)/"
@@ -19,6 +20,7 @@ router.register("vacancies", VacancyViewSet, basename="vacancies")
 router.register("resumes", ResumeViewSet, basename="resumes")
 router.register("candidates", CandidateViewSet, basename="candidates")
 router.register("companies", CompanyViewSet, basename="companies")
+router.register("users", UserViewSet, basename="users")
 
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
