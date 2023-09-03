@@ -8,6 +8,7 @@ from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
     EXPERIENCE,
+    FUNNEL_STATUS,
     INTERVIEW_STATUS,
     SCHEDULE_WORK,
 )
@@ -15,6 +16,8 @@ from recruitment.models import (
     ApplicantResume,
     Candidate,
     Company,
+    FunnelStage,
+    SubStage,
     Vacancy,
     WorkExperience,
 )
@@ -418,4 +421,68 @@ class CandidatesSerializer(ModelSerializer):
             "work_experiences",
             "last_job",
             "interview_status",
+        )
+
+
+class SubStageSerializer(ModelSerializer):
+    """Сериализатор для подэтапов воронок."""
+
+    stage = StringRelatedField(read_only=True)
+    status = ChoiceField(choices=FUNNEL_STATUS)
+
+    class Meta:
+        model = SubStage
+        fields = (
+            "id",
+            "stage",
+            "name",
+            "date",
+            "status",
+        )
+
+
+class FunnelSerializer(ModelSerializer):
+    """Сериализатор для воронок кандидатов."""
+
+    candidate = StringRelatedField(read_only=True)
+    status = ChoiceField(choices=FUNNEL_STATUS)
+
+    class Meta:
+        model = FunnelStage
+        fields = (
+            "id",
+            "candidate",
+            "name",
+            "date",
+            "status",
+        )
+
+
+class FunnelDetailSerializer(ModelSerializer):
+    """Сериализатор для воронок c подэтапами кандидатов."""
+
+    candidate = StringRelatedField(read_only=True)
+    substages = SubStageSerializer(many=True, required=False)
+    status = ChoiceField(choices=FUNNEL_STATUS)
+
+    def create(self, validated_data):
+        """Функция создания воронки Funnel."""
+        if "substages" not in self.initial_data:
+            funnel = FunnelStage.objects.create(**validated_data)
+            return funnel
+        substages = validated_data.pop("substages")
+        funnel = FunnelStage.objects.create(**validated_data)
+        for substage in substages:
+            SubStage.objects.create(stage=funnel, **substage)
+        return funnel
+
+    class Meta:
+        model = FunnelStage
+        fields = (
+            "id",
+            "candidate",
+            "name",
+            "date",
+            "status",
+            "substages",
         )

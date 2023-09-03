@@ -5,9 +5,11 @@ from .views import (
     CandidateViewSet,
     CompanyViewSet,
     EmailConfirmationView,
+    FunnelViewSet,
     LoginView,
     LogoutView,
     ResumeViewSet,
+    SubStageViewSet,
     UserSignupView,
     UserViewSet,
     VacancyViewSet,
@@ -21,6 +23,12 @@ router.register("resumes", ResumeViewSet, basename="resumes")
 router.register("candidates", CandidateViewSet, basename="candidates")
 router.register("companies", CompanyViewSet, basename="companies")
 router.register("users", UserViewSet, basename="users")
+router.register(r"candidates/(?P<candidate_id>\d+)/funnel", FunnelViewSet, "funnel")
+router.register(
+    r"candidates/(?P<candidate_id>\d+)/funnel/(?P<funnel_id>\d+)/substage",
+    SubStageViewSet,
+    "substage",
+)
 
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),

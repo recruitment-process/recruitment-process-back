@@ -19,12 +19,14 @@ services:
     env_file:
       - ./.env
 
-#  frontend:
-#    image: dosuzer/crm_frontend:latest
-#    volumes:
-#      - ../frontend/:/app/result_build/
-#    depends_on:
-#      - backend
+  frontend:
+    image: bjorn1986/crm_frontend:latest
+    volumes:
+      - ../frontend/:/app/result_build/
+    depends_on:
+      - backend
+    env_file:
+      - ./.env
 
   nginx:
     image: nginx:1.19.3
@@ -34,14 +36,14 @@ services:
       - static_backend_value:/var/html/static_backend/
       - media_value:/var/html/media/
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-#      - ../frontend/build:/usr/share/nginx/html/
+      - ../frontend/build:/usr/share/nginx/html/
 #      - ./docs/:/usr/share/nginx/html/api/docs/
     depends_on:
       - backend
-#      - frontend
+      - frontend
 
 volumes:
   postgres_data:
-#  result_build:
+  result_build:
   static_backend_value:
   media_value:

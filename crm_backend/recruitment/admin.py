@@ -24,7 +24,6 @@ class ApplicantResumeAdmin(admin.ModelAdmin):
         "salary_expectations",
         "town",
         "citizenship",
-        
     )
     list_filter = ("job_title", "education", "salary_expectations", "town")
     search_fields = (
@@ -87,7 +86,7 @@ class CompanyAdmin(admin.ModelAdmin):
         "email",
         "phone_number",
         "link_hr",
-        "website"
+        "website",
     )
     list_filter = ("company_title",)
     search_fields = ("company_title", "email", "phone_number", "link_hr", "website")
@@ -105,7 +104,7 @@ class EventAdmin(admin.ModelAdmin):
         "end_time",
         "description",
         "conference_link",
-        #"hr",
+        # "hr",
         "candidate",
     )
     list_filter = ("start_date", "end_date", "title", "start_time", "end_time")
@@ -146,25 +145,25 @@ class CandidateAdmin(admin.ModelAdmin):
     """Добавление модели Candidate в админку."""
 
     list_display = (
-            "first_name",
-            "last_name",
-            "patronymic",
-            "bday",
-            "city",
-            "last_job",            
-            "cur_position",
-            "salary_expectations",            
-            "phone_number",
-            "email",            
-            "portfolio",
-            "resume",
-            "photo",
-            "employment_type",
-            "schedule_work",            
-            "work_experiences",
-            "education",                       
-            "interview_status",
-            "pub_date", 
+        "first_name",
+        "last_name",
+        "patronymic",
+        "bday",
+        "city",
+        "last_job",
+        "cur_position",
+        "salary_expectations",
+        "phone_number",
+        "email",
+        "portfolio",
+        "resume",
+        "photo",
+        "employment_type",
+        "schedule_work",
+        "work_experiences",
+        "education",
+        "interview_status",
+        "pub_date",
     )
     list_filter = (
         "cur_position",
@@ -176,14 +175,14 @@ class CandidateAdmin(admin.ModelAdmin):
         "city",
         "pub_date",
     )
-    search_fields = ( 
-        "cur_position",       
+    search_fields = (
+        "cur_position",
         "education",
         "salary_expectations",
         "city",
         "employment_type",
         "schedule_work",
-        "work_experiences",                       
+        "work_experiences",
         "interview_status",
     )
     readonly_fields = ("pub_date",)

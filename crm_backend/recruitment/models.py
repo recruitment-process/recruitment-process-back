@@ -329,12 +329,14 @@ class Vacancy(models.Model):
         help_text="Введите условия работы",
         null=True,
         blank=True,
+        max_length=1400,
     )
     job_responsibilities = models.TextField(
         verbose_name="Обязанности кандидата",
         help_text="Введите обязанности кандидата",
         null=True,
         blank=True,
+        max_length=1400,
     )
     technology_stack = (
         # позже нужно будет сделать бд со всеми навыками
@@ -581,8 +583,6 @@ class SubStage(models.Model):
     )
     stage = models.ForeignKey(
         FunnelStage,
-        null=True,
-        blank=True,
         on_delete=models.CASCADE,
         verbose_name="Этап воронки",
         related_name="substage",

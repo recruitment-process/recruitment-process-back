@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recruitment.models import ApplicantResume, Candidate, Company, Vacancy
+from recruitment.models import ApplicantResume, Candidate, Company, FunnelStage, Vacancy
 from rest_framework import status
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -20,8 +20,11 @@ from .serializers import (
     CandidatesSerializer,
     CompanySerializer,
     CompanyShortSerializer,
+    FunnelDetailSerializer,
+    FunnelSerializer,
     ResumeSerializer,
     ResumesSerializer,
+    SubStageSerializer,
     UserSerializer,
     UserSignupSerializer,
     VacanciesSerializer,
@@ -139,6 +142,7 @@ class UserViewSet(ModelViewSet):
 class VacancyViewSet(ModelViewSet):
     """Вьюсет для модели вакансий."""
 
+    permission_classes = (IsAuthenticated,)
     queryset = Vacancy.objects.all()
     filter_backends = (
         DjangoFilterBackend,
@@ -177,6 +181,7 @@ class VacancyViewSet(ModelViewSet):
 class ResumeViewSet(ModelViewSet):
     """Вьюсет для модели резюме."""
 
+    permission_classes = (IsAuthenticated,)
     queryset = ApplicantResume.objects.all()
     filter_backends = (
         DjangoFilterBackend,
@@ -208,6 +213,7 @@ class ResumeViewSet(ModelViewSet):
 class CandidateViewSet(ModelViewSet):
     """Вьюсет для модели Candidate."""
 
+    permission_classes = (IsAuthenticated,)
     queryset = Candidate.objects.all()
     filter_backends = (
         DjangoFilterBackend,
@@ -254,6 +260,7 @@ class CandidateViewSet(ModelViewSet):
 class CompanyViewSet(ModelViewSet):
     """Вьюсет для модели Company."""
 
+    permission_classes = (IsAuthenticated,)
     queryset = Company.objects.all()
     filter_backends = (
         DjangoFilterBackend,
@@ -276,3 +283,53 @@ class CompanyViewSet(ModelViewSet):
         if self.action == "list":
             return CompanyShortSerializer
         return CompanySerializer
+
+
+class FunnelViewSet(ModelViewSet):
+    """Вьюсет для воронки кандидата Funnel."""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = FunnelSerializer
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от действия."""
+        if self.action == "list" or self.action == "create":
+            return FunnelDetailSerializer
+        return FunnelSerializer
+
+    def get_queryset(self):
+        """Получаем воронку кандидата."""
+        candidate = get_object_or_404(Candidate, pk=self.kwargs.get("candidate_id"))
+        return candidate.funnel.all()
+
+    def perform_create(self, serializer):
+        """Переопределение метода create для записи информация о кандидате."""
+        candidate = get_object_or_404(Candidate, pk=self.kwargs.get("candidate_id"))
+        serializer.save(candidate=candidate)
+
+    def perform_update(self, serializer):
+        """Переопределение метода update для записи информация о кандидате."""
+        candidate = get_object_or_404(Candidate, pk=self.kwargs.get("candidate_id"))
+        serializer.save(candidate=candidate)
+
+
+class SubStageViewSet(ModelViewSet):
+    """Вьюсет для подэтапов воронки кандидата SubStage."""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SubStageSerializer
+
+    def get_queryset(self):
+        """Получаем подэтапы кандидата."""
+        funnel = get_object_or_404(FunnelStage, pk=self.kwargs.get("funnel_id"))
+        return funnel.substage.all()
+
+    def perform_create(self, serializer):
+        """Переопределение метода create для записи информация о воронке."""
+        funnel = get_object_or_404(FunnelStage, pk=self.kwargs.get("funnel_id"))
+        serializer.save(stage=funnel)
+
+    def perform_update(self, serializer):
+        """Переопределение метода update для записи информация о воронке."""
+        funnel = get_object_or_404(FunnelStage, pk=self.kwargs.get("funnel_id"))
+        serializer.save(stage=funnel)
