@@ -7,6 +7,8 @@ from .views import (
     ResumeViewSet,
     UserSignupView,
     VacancyViewSet,
+    NoteViewSet,
+    CommentViewSet,
 )
 
 CONFIRM_URL = (
@@ -17,6 +19,8 @@ CONFIRM_URL = (
 router = DefaultRouter()
 router.register("vacancies", VacancyViewSet, basename="vacancies")
 router.register("resumes", ResumeViewSet, basename="resumes")
+router.register("notes", NoteViewSet, basename="notes")
+router.register("comments", CommentViewSet, basename="comments")
 
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
