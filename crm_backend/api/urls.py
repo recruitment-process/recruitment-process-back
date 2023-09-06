@@ -19,8 +19,8 @@ CONFIRM_URL = (
 router = DefaultRouter()
 router.register("vacancies", VacancyViewSet, basename="vacancies")
 router.register("resumes", ResumeViewSet, basename="resumes")
-router.register("notes", NoteViewSet, basename="notes")
-router.register("comments", CommentViewSet, basename="comments")
+router.register(r"candidates/(?P<candidate_id>\d+)/notes", NoteViewSet, basename="notes")
+router.register(r"candidates/(?P<candidate_id>\d+)/notes/(?P<note_id>\d+)/comments", CommentViewSet, basename="comments")
 
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
