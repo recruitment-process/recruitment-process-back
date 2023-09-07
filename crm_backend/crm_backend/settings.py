@@ -12,7 +12,13 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG", default=True)
 
-ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", "80.87.107.166"]
+ALLOWED_HOSTS = [
+    "backend",
+    "localhost",
+    "127.0.0.1",
+    "80.87.107.166",
+    "meetingroom.acceleratorpracticum.ru",
+]
 
 
 INSTALLED_APPS = [
@@ -117,25 +123,37 @@ REST_FRAMEWORK = {
     ],
 }
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-# ]
-
-CORS_ALLOW_CREDENTIALS = True
-
-# SESSION_COOKIE_SAMESITE = "None"
-# CSRF_COOKIE_SAMESITE = "None"
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://backend",
+CORS_ALLOWED_ORIGINS = [
     "http://localhost",
     "https://localhost",
     "http://127.0.0.1",
     "https://127.0.0.1",
     "http://80.87.107.166",
     "https://80.87.107.166",
+    "http://meetingroom.acceleratorpracticum.ru",
+    "https://meetingroom.acceleratorpracticum.ru",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 1 week
+SESSION_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SECURE = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://backend",
+    "http://localhost:3000",
+    "https://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://127.0.0.1:3000",
+    "http://80.87.107.166",
+    "https://80.87.107.166",
+    "http://meetingroom.acceleratorpracticum.ru",
+    "https://meetingroom.acceleratorpracticum.ru",
 ]
 
 SIMPLE_JWT = {
@@ -163,15 +181,15 @@ SIMPLE_JWT = {
     # custom
     "AUTH_COOKIE": "access_token",  # Cookie name. Enables cookies if value is set.
     "AUTH_COOKIE_DOMAIN": None,  # A string like "example.com", or None for standard domain cookie.
-    "AUTH_COOKIE_SECURE": False,  # Whether the auth cookies should be secure (https:// only).
+    "AUTH_COOKIE_SECURE": True,  # Whether the auth cookies should be secure (https:// only).
     "AUTH_COOKIE_HTTP_ONLY": True,  # Http only cookie flag.It"s not fetch by javascript.
     "AUTH_COOKIE_PATH": "/",  # The path of the auth cookie.
-    "AUTH_COOKIE_SAMESITE": "Lax",  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be "Lax", "Strict", or None to disable the flag.
+    "AUTH_COOKIE_SAMESITE": "None",  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be "Lax", "Strict", or None to disable the flag.
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
-DOMAIN_NAME = "meeting-room.ru"
+DOMAIN_NAME = "meetingroom.acceleratorpracticum.ru"
 EMAIL_HOST_USER = "noreply@" + DOMAIN_NAME
 
 TELEGRAM_CHAT_ID = os.getenv("TG_CHAT_ID")
