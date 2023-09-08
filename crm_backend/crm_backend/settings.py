@@ -91,6 +91,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
+    {
+        "NAME": "users.validators.CustomPasswordValidator",
+    },
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -126,14 +129,12 @@ REST_FRAMEWORK = {
 # CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost",
-    "https://localhost",
-    "http://127.0.0.1",
-    "https://127.0.0.1",
-    "http://80.87.107.166",
-    "https://80.87.107.166",
-    "http://meetingroom.acceleratorpracticum.ru",
-    "https://meetingroom.acceleratorpracticum.ru",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://localhost:3000",
+    "https://127.0.0.1:3000",
+    "https://80.87.107.166:3000",
+    "https://meetingroom.acceleratorpracticum.ru:3000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -141,18 +142,18 @@ CORS_ALLOW_CREDENTIALS = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 1 week
 SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SECURE = True
+
 CSRF_COOKIE_SAMESITE = "None"
 CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://backend",
-    "http://localhost:3000",
-    "https://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://127.0.0.1:3000",
-    "http://80.87.107.166",
+    "https://backend",
+    "http://localhost",
+    "http://127.0.0.1",
+    "https://localhost",
+    "https://127.0.0.1",
     "https://80.87.107.166",
-    "http://meetingroom.acceleratorpracticum.ru",
     "https://meetingroom.acceleratorpracticum.ru",
 ]
 

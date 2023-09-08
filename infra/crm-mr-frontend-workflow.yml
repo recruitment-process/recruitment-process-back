@@ -23,6 +23,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: bjorn1986/crm_frontend:latest
+          build-args: |
+            REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}
 
   deploy:
     runs-on: ubuntu-latest
