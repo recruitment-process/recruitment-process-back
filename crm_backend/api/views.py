@@ -1,15 +1,35 @@
 from django.conf import settings
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, logout
+from django.http import HttpResponseRedirect
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from recruitment.models import ApplicantResume, Candidate, Company, FunnelStage, Vacancy
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
 
-from .serializers import UserSignupSerializer
+from .filters import ResumeFilterSet, VacancyFilterSet
+from .serializers import (
+    CandidateSerializer,
+    CandidatesSerializer,
+    CompanySerializer,
+    CompanyShortSerializer,
+    FunnelDetailSerializer,
+    FunnelSerializer,
+    ResumeSerializer,
+    ResumesSerializer,
+    SubStageSerializer,
+    UserSerializer,
+    UserSignupSerializer,
+    VacanciesSerializer,
+    VacancySerializer,
+)
 from .utils import send_mail_to_user
 
 
@@ -71,8 +91,21 @@ class UserSignupView(APIView):
         serializer = UserSignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        send_mail_to_user(user.email, user.confirmation_code)
+        send_mail_to_user(user.id, user.confirmation_code, user.email)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class LogoutView(APIView):
+    """Выход пользователя."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """POST запрос выхода пользователя."""
+        logout(request)
+        response = HttpResponseRedirect(f"http://{settings.DOMAIN_NAME}/login/")
+        response.delete_cookie(settings.SIMPLE_JWT["AUTH_COOKIE"])
+        return response
 
 
 class EmailConfirmationView(APIView):
@@ -81,11 +114,222 @@ class EmailConfirmationView(APIView):
     pagination_class = None
     permission_classes = [AllowAny]
 
-    def get(self, request, email, confirmation_code):
+    def get(self, request, user_id, confirmation_code):
         """GET запрос подтверждения email."""
-        user = get_object_or_404(User, email=email)
+        user = get_object_or_404(User, pk=user_id)
         if user.confirmation_code == confirmation_code:
             user.email_status = True
             user.save()
-            return Response({"Email подтвержден!"}, status=status.HTTP_200_OK)
-        return Response({"Неверная ссылка!"}, status=status.HTTP_400_BAD_REQUEST)
+            return HttpResponseRedirect(f"http://{settings.DOMAIN_NAME}/login/")
+        return Response(
+            {"status": "Неверная ссылка!"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class UserViewSet(ModelViewSet):
+    """Вьюсет для модели пользователей."""
+
+    queryset = User.objects.filter(is_staff=False)
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated,)
+    lookup_field = "id"
+    lookup_value_regex = r"[0-9]+"
+    http_method_names = [
+        "get",
+    ]
+
+
+class VacancyViewSet(ModelViewSet):
+    """Вьюсет для модели вакансий."""
+
+    permission_classes = (IsAuthenticated,)
+    queryset = Vacancy.objects.all()
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    filterset_class = VacancyFilterSet
+    search_fields = (
+        "vacancy_title",
+        "company__company_title",
+        "city",
+        "technology_stack",
+    )
+    ordering_fields = (
+        "vacancy_status",
+        "deadline",
+        "pub_date",
+    )
+    ordering = ("pub_date",)
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от действия."""
+        if self.action == "list":
+            return VacanciesSerializer
+        return VacancySerializer
+
+    def perform_create(self, serializer):
+        """Переопределение метода create для записи информация о пользователе."""
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        """Переопределение метода update для записи информация о пользователе."""
+        serializer.save(author=self.request.user)
+
+
+class ResumeViewSet(ModelViewSet):
+    """Вьюсет для модели резюме."""
+
+    permission_classes = (IsAuthenticated,)
+    queryset = ApplicantResume.objects.all()
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    filterset_class = ResumeFilterSet
+    search_fields = (
+        "job_title",
+        "town",
+        "current_job",
+    )
+    ordering_fields = (
+        "applicant",
+        "work_experiences",
+        "interview_status",
+        "current_company",
+        "pub_date",
+    )
+    ordering = ("pub_date",)
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от действия."""
+        if self.action == "list":
+            return ResumesSerializer
+        return ResumeSerializer
+
+
+class CandidateViewSet(ModelViewSet):
+    """Вьюсет для модели Candidate."""
+
+    permission_classes = (IsAuthenticated,)
+    queryset = Candidate.objects.all()
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    search_fields = (
+        "first_name",
+        "last_name",
+        "city",
+        "last_job",
+        "cur_position",
+        "phone_number",
+        "email",
+        "telegram",
+        "employment_type",
+        "schedule_work",
+        "education",
+        "interview_status",
+    )
+    ordering_fields = (
+        "last_name",
+        "city",
+        "last_job",
+        "cur_position",
+        "salary_expectations",
+        "vacancy",
+        "employment_type",
+        "schedule_work",
+        "work_experiences",
+        "education",
+        "interview_status",
+        "pub_date",
+    )
+    ordering = ("pub_date",)
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от действия."""
+        if self.action == "list":
+            return CandidatesSerializer
+        return CandidateSerializer
+
+
+class CompanyViewSet(ModelViewSet):
+    """Вьюсет для модели Company."""
+
+    permission_classes = (IsAuthenticated,)
+    queryset = Company.objects.all()
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    filterset_fields = ("company_address",)
+    search_fields = (
+        "company_title",
+        "company_address",
+    )
+    ordering_fields = (
+        "company_title",
+        "company_address",
+    )
+    ordering = ("company_title",)
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от действия."""
+        if self.action == "list":
+            return CompanyShortSerializer
+        return CompanySerializer
+
+
+class FunnelViewSet(ModelViewSet):
+    """Вьюсет для воронки кандидата Funnel."""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = FunnelSerializer
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от действия."""
+        if self.action == "list" or self.action == "create":
+            return FunnelDetailSerializer
+        return FunnelSerializer
+
+    def get_queryset(self):
+        """Получаем воронку кандидата."""
+        candidate = get_object_or_404(Candidate, pk=self.kwargs.get("candidate_id"))
+        return candidate.funnel.all()
+
+    def perform_create(self, serializer):
+        """Переопределение метода create для записи информация о кандидате."""
+        candidate = get_object_or_404(Candidate, pk=self.kwargs.get("candidate_id"))
+        serializer.save(candidate=candidate)
+
+    def perform_update(self, serializer):
+        """Переопределение метода update для записи информация о кандидате."""
+        candidate = get_object_or_404(Candidate, pk=self.kwargs.get("candidate_id"))
+        serializer.save(candidate=candidate)
+
+
+class SubStageViewSet(ModelViewSet):
+    """Вьюсет для подэтапов воронки кандидата SubStage."""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SubStageSerializer
+
+    def get_queryset(self):
+        """Получаем подэтапы кандидата."""
+        funnel = get_object_or_404(FunnelStage, pk=self.kwargs.get("funnel_id"))
+        return funnel.substage.all()
+
+    def perform_create(self, serializer):
+        """Переопределение метода create для записи информация о воронке."""
+        funnel = get_object_or_404(FunnelStage, pk=self.kwargs.get("funnel_id"))
+        serializer.save(stage=funnel)
+
+    def perform_update(self, serializer):
+        """Переопределение метода update для записи информация о воронке."""
+        funnel = get_object_or_404(FunnelStage, pk=self.kwargs.get("funnel_id"))
+        serializer.save(stage=funnel)

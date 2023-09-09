@@ -7,9 +7,9 @@ from .models import (
     Education,
     Event,
     FunnelStage,
+    Skills,
+    SkillStack,
     SubStage,
-    Technology,
-    TechnologyStack,
     Vacancy,
     WorkExperience,
 )
@@ -22,18 +22,16 @@ class ApplicantResumeAdmin(admin.ModelAdmin):
     list_display = (
         "job_title",
         "education",
-        "gender",
         "bday",
-        "salary",
+        "salary_expectations",
         "town",
         "citizenship",
     )
-    list_filter = ("job_title", "education", "gender", "salary", "town")
+    list_filter = ("job_title", "education", "salary_expectations", "town")
     search_fields = (
         "job_title",
         "education",
-        "gender",
-        "salary",
+        "salary_expectations",
         "town",
         "citizenship",
     )
@@ -91,9 +89,10 @@ class CompanyAdmin(admin.ModelAdmin):
         "email",
         "phone_number",
         "link_hr",
+        "website",
     )
     list_filter = ("company_title",)
-    search_fields = ("company_title", "email", "phone_number", "link_hr")
+    search_fields = ("company_title", "email", "phone_number", "link_hr", "website")
 
 
 @admin.register(Event)
@@ -108,14 +107,13 @@ class EventAdmin(admin.ModelAdmin):
         "end_time",
         "description",
         "conference_link",
-        "user",
+        # "hr",
         "candidate",
     )
     list_filter = ("start_date", "end_date", "title", "start_time", "end_time")
     search_fields = (
         "start_date",
         "title",
-        "end_date",
         "candidate",
         "start_time",
         "end_time",
@@ -145,14 +143,14 @@ class FunnelStageAdmin(admin.ModelAdmin):
     search_fields = ("candidate",)
 
 
-@admin.register(Technology)
+@admin.register(Skills)
 class TechnologyAdmin(admin.ModelAdmin):
     """Добавление модели Technology в админку."""
 
     list_display = ("name",)
 
 
-@admin.register(TechnologyStack)
+@admin.register(SkillStack)
 class TechnologyStackAdmin(admin.ModelAdmin):
     """Добавление модели TechnologyStack в админку."""
 
@@ -170,13 +168,42 @@ class CandidateAdmin(admin.ModelAdmin):
         "first_name",
         "last_name",
         "patronymic",
-        "vacancy",
-        "email",
-        "telegram",
-        "cur_position",
-        "city",
         "bday",
-        "salary",
+        "city",
+        "last_job",
+        "cur_position",
+        "salary_expectations",
+        "phone_number",
+        "email",
+        "portfolio",
+        "resume",
+        "photo",
         "employment_type",
-        "technology_stack",
+        "schedule_work",
+        "work_experiences",
+        "education",
+        "interview_status",
+        "pub_date",
     )
+    list_filter = (
+        "cur_position",
+        "education",
+        "employment_type",
+        "schedule_work",
+        "salary_expectations",
+        "work_experiences",
+        "city",
+        "pub_date",
+    )
+    search_fields = (
+        "cur_position",
+        "education",
+        "salary_expectations",
+        "city",
+        "employment_type",
+        "schedule_work",
+        "work_experiences",
+        "interview_status",
+    )
+    readonly_fields = ("pub_date",)
+    empty_value_display = "-пусто-"

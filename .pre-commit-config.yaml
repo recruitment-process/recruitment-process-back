@@ -16,7 +16,7 @@ repos:
     -   id: check-json
 
 -   repo: https://github.com/commitizen-tools/commitizen
-    rev: master
+    rev: 3.6.0
     hooks:
     -   id: commitizen
         stages: [commit-msg]
@@ -29,16 +29,15 @@ repos:
         args: [--profile, black, --line-length=88]
 
 -   repo: https://github.com/pycqa/flake8
-    rev: 4.0.1
+    rev: 6.1.0
     hooks:
     -   id: flake8
-        exclude: (migrations|crm_backend/crm_backend/settings/|__init__.py)
+        exclude: (apps|__init__|migrations|crm_backend/crm_backend/settings/)
         additional_dependencies:
         - flake8-docstrings
         args:
         -  --max-line-length=88
         -  --ignore=D100, D105, D106
-
 
 -   repo: https://github.com/ambv/black
     rev: 23.7.0

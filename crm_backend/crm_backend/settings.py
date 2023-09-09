@@ -10,9 +10,9 @@ load_dotenv(os.path.join(BASE_DIR.parent, "infra/.env"))
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", default=True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["backend", "localhost", "127.0.0.1", "80.87.107.166"]
 
 
 INSTALLED_APPS = [
@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "users",
     "api",
     "multiselectfield",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -98,8 +99,8 @@ USE_I18N = True
 USE_TZ = True
 
 
-STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = "/static_backend/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static_backend")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -116,11 +117,26 @@ REST_FRAMEWORK = {
     ],
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
+CORS_ORIGIN_ALLOW_ALL = True
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",
+# ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+# SESSION_COOKIE_SAMESITE = "None"
+# CSRF_COOKIE_SAMESITE = "None"
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://backend",
+    "http://localhost",
+    "https://localhost",
+    "http://127.0.0.1",
+    "https://127.0.0.1",
+    "http://80.87.107.166",
+    "https://80.87.107.166",
+]
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
