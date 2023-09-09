@@ -1,7 +1,7 @@
 import base64
-import re
 from datetime import date
 
+from django.contrib.auth.password_validation import validate_password
 from django.core.files.base import ContentFile
 from drf_extra_fields.fields import Base64ImageField
 from recruitment.constants import (
@@ -28,6 +28,7 @@ from rest_framework.serializers import (
     FileField,
     ModelSerializer,
     MultipleChoiceField,
+    Serializer,
     SerializerMethodField,
     StringRelatedField,
     ValidationError,
@@ -93,14 +94,7 @@ class UserSignupSerializer(ModelSerializer):
 
     def validate_password(self, value):
         """Валидация пароля."""
-        if len(value) < 8 or len(value) > 128:
-            raise ValidationError(
-                "Минимальная длина пароля 8 символов, максимальная 128!"
-            )
-        if not re.match(r"^[^\sа-яА-Я]+$", value):
-            raise ValidationError(
-                "Пароль не должен содержать невидимые символы и кириллицу!"
-            )
+        validate_password(value)
         return value
 
     def validate(self, data):
@@ -125,6 +119,27 @@ class UserSerializer(ModelSerializer):
         )
 
 
+class ChangePasswordSerializer(Serializer):
+    """Сериализатор смены пароля."""
+
+    old_password = CharField(required=True)
+    new_password_1 = CharField(required=True)
+    new_password_2 = CharField(required=True)
+
+    def validate_new_password_1(self, value):
+        """Валидация пароля."""
+        validate_password(value)
+        return value
+
+    def validate(self, data):
+        """Проверка на равенство паролей."""
+        new_password_1 = data.get("new_password_1")
+        new_password_2 = data.get("new_password_2")
+        if not new_password_1 == new_password_2:
+            raise ValidationError("Новые пароли не совпадают!")
+        return data
+
+
 class CompanySerializer(ModelSerializer):
     """Сериализатор для модели Company."""
 
@@ -133,6 +148,7 @@ class CompanySerializer(ModelSerializer):
     class Meta:
         model = Company
         fields = (
+            "id",
             "company_title",
             "about_company",
             "company_address",
@@ -348,13 +364,14 @@ class CandidateSerializer(ModelSerializer):
 
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
-    interview_status = ChoiceField(choices=INTERVIEW_STATUS)
+    interview_status = ChoiceField(choices=INTERVIEW_STATUS, required=False)
     salary_expectations = SerializerMethodField()
     schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
     employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
     work_experiences = ChoiceField(choices=EXPERIENCE)
     resume = Base64PDFField()
     photo = Base64ImageField()
+    custom_status = CharField(required=False)
     pub_date = DateOnlyField(read_only=True)
 
     class Meta:
@@ -382,9 +399,14 @@ class CandidateSerializer(ModelSerializer):
             "work_experiences",
             "education",
             "interview_status",
+            "custom_status",
             "pub_date",
         )
-
+    def validate(self, data):
+        # Check if both fields are not empty
+        if data.get("custom_status") and data.get("interview_status"):
+            raise ValidationError("Нельзя заполнить оба поля одновременно.")
+        return data
     def get_age(self, obj):
         """Функция для подсчета возраста соискателя."""
         today = date.today()
@@ -409,6 +431,7 @@ class CandidatesSerializer(ModelSerializer):
     """Сериализатор для карточек кандидатов."""
 
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
+    custom_status = CharField(required=False)
     work_experiences = ChoiceField(choices=EXPERIENCE)
 
     class Meta:
@@ -421,6 +444,7 @@ class CandidatesSerializer(ModelSerializer):
             "work_experiences",
             "last_job",
             "interview_status",
+            "custom_status",
         )
 
 
