@@ -1,4 +1,4 @@
-from django_filters import BooleanFilter, ChoiceFilter, FilterSet, filters
+from django_filters import BooleanFilter, ChoiceFilter, FilterSet, filters, MultipleChoiceFilter
 from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
@@ -7,17 +7,17 @@ from recruitment.constants import (
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
-from recruitment.models import ApplicantResume, Vacancy
+from recruitment.models import ApplicantResume, Vacancy, Candidate
 
 
 class VacancyFilterSet(FilterSet):
-    """Кастомный фильтр для зарплат."""
+    """Кастомный фильтр для вакансий."""
 
     salary = filters.BaseCSVFilter(field_name="salary", lookup_expr="contains")
-    employment_type = ChoiceFilter(
-        field_name="employment_type", choices=EMPLOYMENT_TYPE
-    )
-    schedule_work = ChoiceFilter(field_name="schedule_work", choices=SCHEDULE_WORK)
+    employment_type = MultipleChoiceFilter(
+        field_name="employment_type", choices=EMPLOYMENT_TYPE, lookup_expr="contains"
+    )    
+    schedule_work = MultipleChoiceFilter(field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains")
     vacancy_status = ChoiceFilter(field_name="vacancy_status", choices=VACANCY_STATUS)
     required_experience = ChoiceFilter(
         field_name="required_experience", choices=EXPERIENCE
@@ -42,15 +42,15 @@ class VacancyFilterSet(FilterSet):
 
 
 class ResumeFilterSet(FilterSet):
-    """Кастомный фильтр для зарплат."""
+    """Кастомный фильтр для резюме."""
 
     salary_expectations = filters.BaseCSVFilter(
         field_name="salary_expectations", lookup_expr="contains"
     )
-    employment_type = ChoiceFilter(
-        field_name="employment_type", choices=EMPLOYMENT_TYPE
-    )
-    schedule_work = ChoiceFilter(field_name="schedule_work", choices=SCHEDULE_WORK)
+    employment_type = MultipleChoiceFilter(
+        field_name="employment_type", choices=EMPLOYMENT_TYPE, lookup_expr="contains"
+    )    
+    schedule_work = MultipleChoiceFilter(field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains")
     education = ChoiceFilter(field_name="education", choices=EDUCATION)
     work_experiences = ChoiceFilter(field_name="work_experiences", choices=EXPERIENCE)
     interview_status = ChoiceFilter(
@@ -73,4 +73,40 @@ class ResumeFilterSet(FilterSet):
             "bday",
             "work_experiences",
             "interview_status",
+        ]
+
+class CandidatesFilterSet(FilterSet):
+    """Кастомный фильтр для кандидатов."""
+
+    salary_expectations = filters.BaseCSVFilter(
+        field_name="salary_expectations", lookup_expr="contains"
+    )
+    employment_type = MultipleChoiceFilter(
+        field_name="employment_type", choices=EMPLOYMENT_TYPE, lookup_expr="contains"
+    )    
+    schedule_work = MultipleChoiceFilter(field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains")
+    education = ChoiceFilter(field_name="education", choices=EDUCATION)
+    work_experiences = ChoiceFilter(field_name="work_experiences", choices=EXPERIENCE)
+    interview_status = ChoiceFilter(
+        field_name="interview_status", choices=INTERVIEW_STATUS
+    )
+
+    class Meta:
+        model = Candidate
+        fields = [
+            "first_name",
+            "last_name",
+            "city",
+            "last_job",
+            "cur_position",
+            "vacancy",
+            "salary_expectations",
+            "employment_type",
+            "schedule_work",
+            "work_experiences",
+            "pub_date",
+            "education",
+            "bday",
+            "interview_status",
+            "custom_status",
         ]

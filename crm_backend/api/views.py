@@ -14,7 +14,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
 
-from .filters import ResumeFilterSet, VacancyFilterSet
+from .filters import CandidatesFilterSet, ResumeFilterSet, VacancyFilterSet
 from .serializers import (
     CandidateSerializer,
     CandidatesSerializer,
@@ -220,6 +220,7 @@ class CandidateViewSet(ModelViewSet):
         SearchFilter,
         OrderingFilter,
     )
+    filterset_class = CandidatesFilterSet
     search_fields = (
         "first_name",
         "last_name",
