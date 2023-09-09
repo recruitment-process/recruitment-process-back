@@ -23,29 +23,29 @@ from users.validators import custom_validate_email
 
 
 class Skill(models.Model):
-    """Модель для списка технологий."""
+    """Модель для списка навыков."""
 
     name = models.CharField(max_length=50, unique=True)
 
     class Meta:
         ordering = ["name"]
-        verbose_name = "Список технологий"
-        verbose_name_plural = "Список технологий"
+        verbose_name = "Список навыков"
+        verbose_name_plural = "Списоки навыков"
 
     def __str__(self):
         return self.name
 
 
 class SkillStack(models.Model):
-    """Модель стека и срока работы по стеку."""
+    """Модель навыков и опыта работы по ним."""
 
     technology_stack = models.ForeignKey(Skill, on_delete=models.CASCADE)
     technology_stack_time = models.IntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ["technology_stack"]
-        verbose_name = "Скилл и опыт работы"
-        verbose_name_plural = "Стек и срок работы"
+        verbose_name = "Скилл и опыт"
+        verbose_name_plural = "Навыки и опыт"
 
     def __str__(self):
         return f"{self.technology_stack} - {self.technology_stack_time} года"
