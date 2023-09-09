@@ -149,7 +149,7 @@ CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://backend",
-    "http://localhost",
+    "http://localhost:3000",
     "http://127.0.0.1",
     "https://localhost",
     "https://127.0.0.1",
