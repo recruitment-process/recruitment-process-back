@@ -1,7 +1,7 @@
 import base64
-import re
 from datetime import date
 
+from django.contrib.auth.password_validation import validate_password
 from django.core.files.base import ContentFile
 from drf_extra_fields.fields import Base64ImageField
 from recruitment.constants import (
@@ -28,6 +28,7 @@ from rest_framework.serializers import (
     FileField,
     ModelSerializer,
     MultipleChoiceField,
+    Serializer,
     SerializerMethodField,
     StringRelatedField,
     ValidationError,
@@ -93,14 +94,7 @@ class UserSignupSerializer(ModelSerializer):
 
     def validate_password(self, value):
         """Валидация пароля."""
-        if len(value) < 8 or len(value) > 128:
-            raise ValidationError(
-                "Минимальная длина пароля 8 символов, максимальная 128!"
-            )
-        if not re.match(r"^[^\sа-яА-Я]+$", value):
-            raise ValidationError(
-                "Пароль не должен содержать невидимые символы и кириллицу!"
-            )
+        validate_password(value)
         return value
 
     def validate(self, data):
@@ -123,6 +117,27 @@ class UserSerializer(ModelSerializer):
             "role",
             "is_hr",
         )
+
+
+class ChangePasswordSerializer(Serializer):
+    """Сериализатор смены пароля."""
+
+    old_password = CharField(required=True)
+    new_password_1 = CharField(required=True)
+    new_password_2 = CharField(required=True)
+
+    def validate_new_password_1(self, value):
+        """Валидация пароля."""
+        validate_password(value)
+        return value
+
+    def validate(self, data):
+        """Проверка на равенство паролей."""
+        new_password_1 = data.get("new_password_1")
+        new_password_2 = data.get("new_password_2")
+        if not new_password_1 == new_password_2:
+            raise ValidationError("Новые пароли не совпадают!")
+        return data
 
 
 class CompanySerializer(ModelSerializer):

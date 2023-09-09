@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.auth import authenticate, logout
+from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
@@ -18,6 +18,7 @@ from .filters import CandidatesFilterSet, ResumeFilterSet, VacancyFilterSet
 from .serializers import (
     CandidateSerializer,
     CandidatesSerializer,
+    ChangePasswordSerializer,
     CompanySerializer,
     CompanyShortSerializer,
     FunnelDetailSerializer,
@@ -53,6 +54,7 @@ class LoginView(APIView):
         response = Response()
         email = data.get("email", None)
         password = data.get("password", None)
+        remember_me = data.get("remember_me", None)
         user = authenticate(email=email, password=password)
         if user is not None:
             if user.is_active:
@@ -65,8 +67,11 @@ class LoginView(APIView):
                     httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
                     samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
                 )
+                login(request, user)
+                if not remember_me:
+                    request.session.set_expiry(0)
                 csrf.get_token(request)
-                response.data = {"Success": "Login successfully", "data": data}
+                response.data = {"id": user.id, "data": data}
                 return response
             else:
                 return Response(
@@ -137,6 +142,32 @@ class UserViewSet(ModelViewSet):
     http_method_names = [
         "get",
     ]
+
+
+class ChangePasswordView(APIView):
+    """Смена пароля пользователя."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, queryset=None):
+        """Получение объекта пользователя."""
+        return self.request.user
+
+    def put(self, request, *args, **kwargs):
+        """PUT запрос мены пароля пользователя."""
+        self.object = self.get_object()
+        serializer = ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            old_password = serializer.data.get("old_password")
+            if not self.object.check_password(old_password):
+                return Response(
+                    {"old_password": "неверный текущий пароль."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            self.object.set_password(serializer.data.get("new_password_1"))
+            self.object.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class VacancyViewSet(ModelViewSet):
@@ -214,7 +245,6 @@ class CandidateViewSet(ModelViewSet):
     """Вьюсет для модели Candidate."""
 
     permission_classes = (IsAuthenticated,)
-    queryset = Candidate.objects.all()
     filter_backends = (
         DjangoFilterBackend,
         SearchFilter,
@@ -250,6 +280,11 @@ class CandidateViewSet(ModelViewSet):
         "pub_date",
     )
     ordering = ("pub_date",)
+
+    def get_queryset(self):
+        """Получаем кандидатов на вакансию."""
+        vacancy = get_object_or_404(Vacancy, pk=self.kwargs.get("vacancy_id"))
+        return vacancy.candidates.all()
 
     def get_serializer_class(self):
         """Функция определяющая сериализатор в зависимости от действия."""
