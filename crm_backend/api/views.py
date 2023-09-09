@@ -73,16 +73,14 @@ class LoginView(APIView):
                 csrf.get_token(request)
                 response.data = {"id": user.id, "data": data}
                 return response
-            else:
-                return Response(
-                    {"No active": "This account is not active!!"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-        else:
             return Response(
-                {"Invalid": "Invalid email or password!!"},
+                {"No active": "This account is not active!!"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+        return Response(
+            {"Invalid": "Invalid email or password!!"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
 
 class UserSignupView(APIView):
@@ -291,6 +289,16 @@ class CandidateViewSet(ModelViewSet):
         if self.action == "list":
             return CandidatesSerializer
         return CandidateSerializer
+
+    def perform_create(self, serializer):
+        """Переопределение метода create для записи информация о кандидате."""
+        vacancy = get_object_or_404(Vacancy, pk=self.kwargs.get("vacancy_id"))
+        serializer.save(vacancy=vacancy)
+
+    def perform_update(self, serializer):
+        """Переопределение метода update для записи информация о кандидате."""
+        vacancy = get_object_or_404(Vacancy, pk=self.kwargs.get("vacancy_id"))
+        serializer.save(vacancy=vacancy)
 
 
 class CompanyViewSet(ModelViewSet):
