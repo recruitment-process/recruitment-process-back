@@ -144,15 +144,15 @@ class FunnelStageAdmin(admin.ModelAdmin):
 
 
 @admin.register(Skills)
-class TechnologyAdmin(admin.ModelAdmin):
-    """Добавление модели Technology в админку."""
+class SkillsAdmin(admin.ModelAdmin):
+    """Добавление модели Skills в админку."""
 
     list_display = ("name",)
 
 
 @admin.register(SkillStack)
-class TechnologyStackAdmin(admin.ModelAdmin):
-    """Добавление модели TechnologyStack в админку."""
+class SkillStackAdmin(admin.ModelAdmin):
+    """Добавление модели SkillStack в админку."""
 
     list_display = (
         "technology_stack",
