@@ -486,8 +486,15 @@ class Candidate(models.Model):
     interview_status = models.CharField(
         max_length=5,
         choices=INTERVIEW_STATUS,
-        default=INTERVIEW_STATUS[0][0],
+        null=True,
+        blank=True,
         verbose_name="Статус",
+    )
+    custom_status = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="Собственный статус",
     )
     pub_date = models.DateTimeField(
         "Дата добавления кандидата резюме",

@@ -133,6 +133,7 @@ class CompanySerializer(ModelSerializer):
     class Meta:
         model = Company
         fields = (
+            "id",
             "company_title",
             "about_company",
             "company_address",
@@ -348,13 +349,14 @@ class CandidateSerializer(ModelSerializer):
 
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
-    interview_status = ChoiceField(choices=INTERVIEW_STATUS)
+    interview_status = ChoiceField(choices=INTERVIEW_STATUS, required=False)
     salary_expectations = SerializerMethodField()
     schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
     employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
     work_experiences = ChoiceField(choices=EXPERIENCE)
     resume = Base64PDFField()
     photo = Base64ImageField()
+    custom_status = CharField(required=False)
     pub_date = DateOnlyField(read_only=True)
 
     class Meta:
@@ -382,9 +384,14 @@ class CandidateSerializer(ModelSerializer):
             "work_experiences",
             "education",
             "interview_status",
+            "custom_status",
             "pub_date",
         )
-
+    def validate(self, data):
+        # Check if both fields are not empty
+        if data.get("custom_status") and data.get("interview_status"):
+            raise ValidationError("Нельзя заполнить оба поля одновременно.")
+        return data
     def get_age(self, obj):
         """Функция для подсчета возраста соискателя."""
         today = date.today()
@@ -409,6 +416,7 @@ class CandidatesSerializer(ModelSerializer):
     """Сериализатор для карточек кандидатов."""
 
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
+    custom_status = CharField(required=False)
     work_experiences = ChoiceField(choices=EXPERIENCE)
 
     class Meta:
@@ -421,6 +429,7 @@ class CandidatesSerializer(ModelSerializer):
             "work_experiences",
             "last_job",
             "interview_status",
+            "custom_status",
         )
 
 
