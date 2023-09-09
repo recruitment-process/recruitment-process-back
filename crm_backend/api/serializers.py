@@ -83,10 +83,9 @@ class UserSignupSerializer(ModelSerializer):
 
     def create(self, validated_data):
         """Создание пользователя в БД."""
-        user = User.objects.create_user(
+        return User.objects.create_user(
             validated_data["email"], validated_data["password"]
         )
-        return user
 
     def validate_email(self, value):
         """Валидация email."""
@@ -211,6 +210,7 @@ class VacancySerializer(ModelSerializer):
     employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
     education = ChoiceField(choices=EDUCATION)
     pub_date = DateOnlyField(read_only=True)
+    candidates_count = SerializerMethodField()
 
     class Meta:
         model = Vacancy
@@ -231,6 +231,7 @@ class VacancySerializer(ModelSerializer):
             "technology_stack",
             "vacancy_status",
             "deadline",
+            "candidates_count",
         )
         read_only_fields = ("author",)
 
@@ -242,8 +243,7 @@ class VacancySerializer(ModelSerializer):
         """
         company_data = validated_data.pop("company")
         company, created = Company.objects.update_or_create(**company_data)
-        vacancy = Vacancy.objects.create(company=company, **validated_data)
-        return vacancy
+        return Vacancy.objects.create(company=company, **validated_data)
 
     def update(self, instance, validated_data):
         """
@@ -255,6 +255,10 @@ class VacancySerializer(ModelSerializer):
         Company.objects.filter(id=instance.company.id).update(**company_data)
         return super().update(instance, validated_data)
 
+    def get_candidates_count(self, obj):
+        """Подсчет количества кандидатов на вакансию."""
+        return obj.candidates.count()
+
 
 class VacanciesSerializer(ModelSerializer):
     """Сериализатор для просмотра карточек вакансий."""
@@ -263,6 +267,7 @@ class VacanciesSerializer(ModelSerializer):
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
     salary_range = SerializerMethodField()
+    candidates_count = SerializerMethodField()
 
     class Meta:
         model = Vacancy
@@ -277,6 +282,7 @@ class VacanciesSerializer(ModelSerializer):
             "city",
             "technology_stack",
             "deadline",
+            "candidates_count",
         )
 
     def get_schedule_work(self, obj):
@@ -298,6 +304,10 @@ class VacanciesSerializer(ModelSerializer):
     def get_salary_range(self, obj):
         """Функция преобразования вывода информации для поля salary."""
         return get_salary_range(obj)
+
+    def get_candidates_count(self, obj):
+        """Подсчет количества кандидатов на вакансию."""
+        return obj.candidates.count()
 
 
 class ResumeSerializer(ModelSerializer):

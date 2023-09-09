@@ -73,16 +73,14 @@ class LoginView(APIView):
                 csrf.get_token(request)
                 response.data = {"id": user.id, "data": data}
                 return response
-            else:
-                return Response(
-                    {"No active": "This account is not active!!"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-        else:
             return Response(
-                {"Invalid": "Invalid email or password!!"},
+                {"No active": "This account is not active!!"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+        return Response(
+            {"Invalid": "Invalid email or password!!"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
 
 class UserSignupView(APIView):
