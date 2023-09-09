@@ -2,7 +2,7 @@ from django.apps import AppConfig
 
 
 class RecruitmentConfig(AppConfig):
-    """Модель найма."""
+    """Настройка приложения Recruitment."""
 
     default_auto_field = "django.db.models.BigAutoField"
     name = "recruitment"

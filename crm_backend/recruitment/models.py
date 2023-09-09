@@ -22,7 +22,7 @@ from users.models import User
 from users.validators import custom_validate_email
 
 
-class Technology(models.Model):
+class Skill(models.Model):
     """Модель для списка технологий."""
 
     name = models.CharField(max_length=50, unique=True)
@@ -36,15 +36,15 @@ class Technology(models.Model):
         return self.name
 
 
-class TechnologyStack(models.Model):
+class SkillStack(models.Model):
     """Модель стека и срока работы по стеку."""
 
-    technology_stack = models.ForeignKey(Technology, on_delete=models.CASCADE)
-    technology_stack_time = models.IntegerField()
+    technology_stack = models.ForeignKey(Skill, on_delete=models.CASCADE)
+    technology_stack_time = models.IntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ["technology_stack"]
-        verbose_name = "Стек и срок работы"
+        verbose_name = "Скилл и опыт работы"
         verbose_name_plural = "Стек и срок работы"
 
     def __str__(self):
@@ -382,7 +382,7 @@ class Vacancy(models.Model):
     )
 
     technology_stack = models.ForeignKey(
-        TechnologyStack,
+        SkillStack,
         on_delete=models.CASCADE,
         null=True,
         verbose_name="Ключевые навыки",
@@ -557,7 +557,7 @@ class Candidate(models.Model):
         max_length=get_max_length(EMPLOYMENT_TYPE, None),
     )
     technology_stack = models.ForeignKey(
-        TechnologyStack,
+        SkillStack,
         on_delete=models.CASCADE,
         null=True,
         verbose_name="Ключевые навыки",
