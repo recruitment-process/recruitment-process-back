@@ -193,12 +193,14 @@ class WorkExperienceSerializer(ModelSerializer):
 
         Возвращает количество месяцев и лет работы.
         """
-        today = date.today()
         if obj.end_date:
+            experience_length = (obj.end_date - obj.start_date).days / 30
+        else:
+            today = date.today()
             experience_length = (today - obj.start_date).days / 30
-            years = experience_length // 12
-            months = experience_length % 12
-            return f"{int(years)} года/лет и {round(months)} месяца(ев)"
+        years = experience_length // 12
+        months = experience_length % 12
+        return f"{int(years)} года/лет и {round(months)} месяца(ев)"
 
 
 class VacancySerializer(ModelSerializer):
