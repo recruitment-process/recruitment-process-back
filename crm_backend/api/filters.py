@@ -1,4 +1,11 @@
-from django_filters import BooleanFilter, ChoiceFilter, FilterSet, CharFilter, filters, ModelChoiceFilter, MultipleChoiceFilter
+from django_filters import (
+    BooleanFilter,
+    CharFilter,
+    ChoiceFilter,
+    FilterSet,
+    MultipleChoiceFilter,
+    filters,
+)
 from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
@@ -7,7 +14,7 @@ from recruitment.constants import (
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
-from recruitment.models import ApplicantResume, Vacancy, Candidate, Company
+from recruitment.models import ApplicantResume, Candidate, Vacancy
 
 
 class VacancyFilterSet(FilterSet):
@@ -16,14 +23,18 @@ class VacancyFilterSet(FilterSet):
     salary = filters.BaseCSVFilter(field_name="salary", lookup_expr="contains")
     employment_type = MultipleChoiceFilter(
         field_name="employment_type", choices=EMPLOYMENT_TYPE, lookup_expr="contains"
-    )    
-    schedule_work = MultipleChoiceFilter(field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains")
+    )
+    schedule_work = MultipleChoiceFilter(
+        field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains"
+    )
     vacancy_status = ChoiceFilter(field_name="vacancy_status", choices=VACANCY_STATUS)
     required_experience = ChoiceFilter(
         field_name="required_experience", choices=EXPERIENCE
     )
     company = CharFilter(
-        field_name="company", lookup_expr="exact",)
+        field_name="company",
+        lookup_expr="exact",
+    )
 
     class Meta:
         model = Vacancy
@@ -51,8 +62,10 @@ class ResumeFilterSet(FilterSet):
     )
     employment_type = MultipleChoiceFilter(
         field_name="employment_type", choices=EMPLOYMENT_TYPE, lookup_expr="contains"
-    )    
-    schedule_work = MultipleChoiceFilter(field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains")
+    )
+    schedule_work = MultipleChoiceFilter(
+        field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains"
+    )
     education = ChoiceFilter(field_name="education", choices=EDUCATION)
     work_experiences = ChoiceFilter(field_name="work_experiences", choices=EXPERIENCE)
     interview_status = ChoiceFilter(
@@ -77,6 +90,7 @@ class ResumeFilterSet(FilterSet):
             "interview_status",
         ]
 
+
 class CandidatesFilterSet(FilterSet):
     """Кастомный фильтр для кандидатов."""
 
@@ -85,8 +99,10 @@ class CandidatesFilterSet(FilterSet):
     )
     employment_type = MultipleChoiceFilter(
         field_name="employment_type", choices=EMPLOYMENT_TYPE, lookup_expr="contains"
-    )    
-    schedule_work = MultipleChoiceFilter(field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains")
+    )
+    schedule_work = MultipleChoiceFilter(
+        field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains"
+    )
     education = ChoiceFilter(field_name="education", choices=EDUCATION)
     work_experiences = ChoiceFilter(field_name="work_experiences", choices=EXPERIENCE)
     interview_status = ChoiceFilter(
