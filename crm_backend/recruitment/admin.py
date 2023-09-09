@@ -163,6 +163,7 @@ class CandidateAdmin(admin.ModelAdmin):
         "work_experiences",
         "education",
         "interview_status",
+        "custom_status",
         "pub_date",
     )
     list_filter = (
@@ -173,6 +174,8 @@ class CandidateAdmin(admin.ModelAdmin):
         "salary_expectations",
         "work_experiences",
         "city",
+        "interview_status",
+        "custom_status",
         "pub_date",
     )
     search_fields = (
@@ -184,6 +187,7 @@ class CandidateAdmin(admin.ModelAdmin):
         "schedule_work",
         "work_experiences",
         "interview_status",
+        "custom_status",
     )
     readonly_fields = ("pub_date",)
     empty_value_display = "-пусто-"
