@@ -108,13 +108,18 @@ class UserSignupSerializer(ModelSerializer):
 class UserSerializer(ModelSerializer):
     """Сериализатор для модели User."""
 
+    photo = Base64ImageField()
+
     class Meta:
         model = User
         fields = (
             "id",
             "first_name",
             "last_name",
-            "role",
+            "position",
+            "photo",
+            "phone_number",
+            "email",
             "is_hr",
         )
 
@@ -210,6 +215,7 @@ class VacancySerializer(ModelSerializer):
     class Meta:
         model = Vacancy
         fields = (
+            "id",
             "vacancy_title",
             "company",
             "author",
@@ -261,6 +267,7 @@ class VacanciesSerializer(ModelSerializer):
     class Meta:
         model = Vacancy
         fields = (
+            "id",
             "vacancy_title",
             "company",
             "required_experience",
@@ -371,8 +378,9 @@ class CandidateSerializer(ModelSerializer):
     work_experiences = ChoiceField(choices=EXPERIENCE)
     resume = Base64PDFField()
     photo = Base64ImageField()
-    custom_status = CharField(required=False)
+    custom_status = CharField(required=False, allow_null=True)
     pub_date = DateOnlyField(read_only=True)
+    vacancy = StringRelatedField(read_only=True)
 
     class Meta:
         model = Candidate
@@ -402,11 +410,13 @@ class CandidateSerializer(ModelSerializer):
             "custom_status",
             "pub_date",
         )
+
     def validate(self, data):
-        # Check if both fields are not empty
+        """Валидация полей."""
         if data.get("custom_status") and data.get("interview_status"):
             raise ValidationError("Нельзя заполнить оба поля одновременно.")
         return data
+
     def get_age(self, obj):
         """Функция для подсчета возраста соискателя."""
         today = date.today()

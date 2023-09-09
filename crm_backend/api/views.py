@@ -292,6 +292,16 @@ class CandidateViewSet(ModelViewSet):
             return CandidatesSerializer
         return CandidateSerializer
 
+    def perform_create(self, serializer):
+        """Переопределение метода create для записи информация о кандидате."""
+        vacancy = get_object_or_404(Vacancy, pk=self.kwargs.get("vacancy_id"))
+        serializer.save(vacancy=vacancy)
+
+    def perform_update(self, serializer):
+        """Переопределение метода update для записи информация о кандидате."""
+        vacancy = get_object_or_404(Vacancy, pk=self.kwargs.get("vacancy_id"))
+        serializer.save(vacancy=vacancy)
+
 
 class CompanyViewSet(ModelViewSet):
     """Вьюсет для модели Company."""

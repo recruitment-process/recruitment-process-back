@@ -20,9 +20,11 @@ class CustomUserAdmin(UserAdmin):
                     "last_name",
                     "patronymic",
                     "role",
-                    "category",
+                    # "category",
                     "telegram",
                     "photo",
+                    "position",
+                    "phone_number",
                 )
             },
         ),
@@ -56,8 +58,8 @@ class CustomUserAdmin(UserAdmin):
         "date_joined",
         "confirmation_code",
     )
-    list_display = ("email", "first_name", "last_name", "role", "category", "is_staff")
-    list_filter = ("email", "first_name", "last_name", "role", "category")
+    list_display = ("email", "first_name", "last_name", "role", "is_staff")
+    list_filter = ("email", "first_name", "last_name", "role")
     search_fields = (
         "email",
         "first_name",
