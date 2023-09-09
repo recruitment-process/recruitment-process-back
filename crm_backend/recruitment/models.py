@@ -22,7 +22,7 @@ from users.models import User
 from users.validators import custom_validate_email
 
 
-class Skill(models.Model):
+class Skills(models.Model):
     """Модель для списка навыков."""
 
     name = models.CharField(max_length=50, unique=True)
@@ -39,7 +39,7 @@ class Skill(models.Model):
 class SkillStack(models.Model):
     """Модель навыков и опыта работы по ним."""
 
-    technology_stack = models.ForeignKey(Skill, on_delete=models.CASCADE)
+    technology_stack = models.ForeignKey(Skills, on_delete=models.CASCADE)
     technology_stack_time = models.IntegerField(null=True, blank=True)
 
     class Meta:
