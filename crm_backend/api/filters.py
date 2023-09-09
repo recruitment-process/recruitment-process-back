@@ -1,4 +1,4 @@
-from django_filters import BooleanFilter, ChoiceFilter, FilterSet, filters, MultipleChoiceFilter
+from django_filters import BooleanFilter, ChoiceFilter, FilterSet, CharFilter, filters, ModelChoiceFilter, MultipleChoiceFilter
 from recruitment.constants import (
     EDUCATION,
     EMPLOYMENT_TYPE,
@@ -7,7 +7,7 @@ from recruitment.constants import (
     SCHEDULE_WORK,
     VACANCY_STATUS,
 )
-from recruitment.models import ApplicantResume, Vacancy, Candidate
+from recruitment.models import ApplicantResume, Vacancy, Candidate, Company
 
 
 class VacancyFilterSet(FilterSet):
@@ -22,6 +22,8 @@ class VacancyFilterSet(FilterSet):
     required_experience = ChoiceFilter(
         field_name="required_experience", choices=EXPERIENCE
     )
+    company = CharFilter(
+        field_name="company", lookup_expr="exact",)
 
     class Meta:
         model = Vacancy

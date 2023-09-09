@@ -133,6 +133,7 @@ class CompanySerializer(ModelSerializer):
     class Meta:
         model = Company
         fields = (
+            "id",
             "company_title",
             "about_company",
             "company_address",

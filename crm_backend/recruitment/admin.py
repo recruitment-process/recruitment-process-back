@@ -24,6 +24,9 @@ class ApplicantResumeAdmin(admin.ModelAdmin):
         "salary_expectations",
         "town",
         "citizenship",
+        "employment_type",
+        "schedule_work",
+        "working_trip"
     )
     list_filter = ("job_title", "education", "salary_expectations", "town")
     search_fields = (
@@ -66,6 +69,8 @@ class VacancyAdmin(admin.ModelAdmin):
         "required_experience",
         "employment_type",
         "schedule_work",
+        "vacancy_status",
+        "deadline",
     )
     list_filter = ("vacancy_title", "company", "employment_type", "schedule_work")
     search_fields = (
