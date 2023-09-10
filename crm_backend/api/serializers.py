@@ -316,6 +316,7 @@ class ResumesSerializer(ModelSerializer):
 
 
 class NoteSerializer(ModelSerializer):
+    """Сериализатор для заметок."""
     author = SlugRelatedField(
         read_only=True, slug_field='username'
     )
@@ -333,6 +334,7 @@ class NoteSerializer(ModelSerializer):
 
 
 class CommentSerializer(ModelSerializer):
+    """Сериализатор для ответов."""
     author = SlugRelatedField(
         read_only=True, slug_field='username'
     )

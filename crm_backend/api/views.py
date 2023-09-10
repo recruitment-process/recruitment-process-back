@@ -179,6 +179,7 @@ class ResumeViewSet(ModelViewSet):
 
 
 class NoteViewSet(ModelViewSet):
+    """Вьюсет для модели заметок."""
     serializer_class = NoteSerializer
     ordering = ("pub_date",)
 
@@ -192,6 +193,7 @@ class NoteViewSet(ModelViewSet):
     
 
 class CommentViewSet(ModelViewSet):
+    """Вьюсет для модели ответов к заметкам."""
     serializer_class = CommentSerializer
     ordering = ("pub_date",)
 
