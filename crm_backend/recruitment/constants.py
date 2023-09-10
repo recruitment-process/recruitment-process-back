@@ -62,4 +62,5 @@ FUNNEL_STATUS = (
 )
 
 PHONE_NUMBER_REGEX = RegexValidator(regex=r"^\+?1?\d{8,15}$")
+VALID_TELEGRAM_REGEX = RegexValidator(regex=r"^@[a-zA-Z0-9_-]+$")
 DEADLINE = dt.date.today() + dt.timedelta(days=30)

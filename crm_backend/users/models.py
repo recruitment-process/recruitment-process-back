@@ -4,6 +4,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import validate_email
 from django.db import models
+from recruitment.constants import PHONE_NUMBER_REGEX
 
 from .validators import custom_validate_email
 
@@ -60,10 +61,12 @@ class User(AbstractUser):
     username = None
     USERNAME_FIELD = "email"
     email = models.EmailField(
-        max_length=254, unique=True, validators=[validate_email, custom_validate_email]
+        max_length=256, unique=True, validators=[validate_email, custom_validate_email]
     )
-    first_name = models.CharField(max_length=150, verbose_name="Имя")
-    last_name = models.CharField(max_length=150, verbose_name="Фамилия")
+    first_name = models.CharField(max_length=150, default="Имя", verbose_name="Имя")
+    last_name = models.CharField(
+        max_length=150, default="Фамилия", verbose_name="Фамилия"
+    )
     patronymic = models.CharField(
         max_length=150,
         verbose_name="Отчество",
@@ -77,13 +80,17 @@ class User(AbstractUser):
         blank=True,
     )
     role = models.CharField(
-        max_length=11, choices=Role.choices, default=Role.APPLICANT, verbose_name="Роль"
+        max_length=11, choices=Role.choices, default=Role.HR, verbose_name="Роль"
     )
-    category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, verbose_name="Категория", null=True
-    )
+    #    category = models.ForeignKey(
+    #        Category, on_delete=models.SET_NULL, verbose_name="Категория", null=True
+    #    )
     photo = models.ImageField(
         upload_to="users/photo/", null=True, blank=True, verbose_name="Фото"
+    )
+    position = models.CharField(max_length=40, blank=True, verbose_name="Должность")
+    phone_number = models.CharField(
+        validators=[PHONE_NUMBER_REGEX], max_length=16, blank=True
     )
     confirmation_code = models.CharField(
         max_length=40, editable=False, default=str(uuid4())

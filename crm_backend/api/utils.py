@@ -3,7 +3,6 @@ from django.conf import settings
 from django.core.mail import send_mail
 from rest_framework import serializers
 
-
 bot = telebot.TeleBot(settings.TELEGRAM_TOKEN)
 
 
@@ -18,8 +17,7 @@ class DateOnlyField(serializers.DateTimeField):
 def get_display_values(keys, choices):
     """Функция преобразования вывода информации для поля с ключа на значение."""
     if keys:
-        display_values = [dict(choices).get(key) for key in keys]
-        return display_values
+        return [dict(choices).get(key) for key in keys]
     return None
 
 
@@ -51,15 +49,11 @@ def get_salary_range(obj):
     return None
 
 
-def send_mail_to_user(email, confirmation_code):
+def send_mail_to_user(user_id, confirmation_code, email):
     """Отправка кода подтверждения на почту."""
-    # message = (
-    #     "Подтвердить почту перейдя по ссылке: "
-    #     f"http://localhost:8000/api/confirm/{email}/{confirmation_code}"
-    # )
     message = (
         "Подтвердить почту перейдя по ссылке: "
-        f"http://80.87.107.75/api/confirm/{email}/{confirmation_code}"
+        f"https://{settings.DOMAIN_NAME}/api/confirm/{user_id}/{confirmation_code}"
     )
     send_mail(
         "Подтверждение регистрации в Meeting Room",
