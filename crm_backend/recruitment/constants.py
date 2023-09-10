@@ -36,6 +36,14 @@ VACANCY_STATUS = (
     ("D", "draftVacancies"),
 )
 
+CANDIDATE_STATUS = (
+    ("A", "activeCandidates"),
+    ("F", "favoritesCandidates"),
+    ("R", "rejectedCandidates"),
+    ("T", "trialCandidates"),
+    ("S", "standbyCandidates"),
+)
+
 INTERVIEW_STATUS = (
     ("PS", "Первичный скрининг"),
     ("IHR", "Интервью с HR"),

@@ -5,6 +5,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.files.base import ContentFile
 from drf_extra_fields.fields import Base64ImageField
 from recruitment.constants import (
+    CANDIDATE_STATUS,
     EDUCATION,
     EMPLOYMENT_TYPE,
     EXPERIENCE,
@@ -14,13 +15,14 @@ from recruitment.constants import (
 )
 from recruitment.models import (
     ApplicantResume,
+    Candidate,
+    Comment,
     Company,
+    FunnelStage,
+    Note,
+    SubStage,
     Vacancy,
     WorkExperience,
-    Note,
-    Candidate,
-    FunnelStage,
-    SubStage,
 )
 from rest_framework.serializers import (
     CharField,
@@ -31,9 +33,9 @@ from rest_framework.serializers import (
     MultipleChoiceField,
     Serializer,
     SerializerMethodField,
+    SlugRelatedField,
     StringRelatedField,
     ValidationError,
-    SlugRelatedField,
 )
 from users.models import User
 from users.validators import custom_validate_email
@@ -386,6 +388,7 @@ class CandidateSerializer(ModelSerializer):
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
     interview_status = ChoiceField(choices=INTERVIEW_STATUS, required=False)
+    candidate_status = ChoiceField(choices=CANDIDATE_STATUS)
     salary_expectations = SerializerMethodField()
     schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
     employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
@@ -420,6 +423,7 @@ class CandidateSerializer(ModelSerializer):
             "schedule_work",
             "work_experiences",
             "education",
+            "candidate_status",
             "interview_status",
             "custom_status",
             "pub_date",
@@ -455,6 +459,7 @@ class CandidatesSerializer(ModelSerializer):
     """Сериализатор для карточек кандидатов."""
 
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
+    candidate_status = ChoiceField(choices=CANDIDATE_STATUS)
     custom_status = CharField(required=False)
     work_experiences = ChoiceField(choices=EXPERIENCE)
 
@@ -469,6 +474,7 @@ class CandidatesSerializer(ModelSerializer):
             "last_job",
             "interview_status",
             "custom_status",
+            "candidate_status",
         )
 
 
@@ -538,9 +544,8 @@ class FunnelDetailSerializer(ModelSerializer):
 
 class NoteSerializer(ModelSerializer):
     """Сериализатор для заметок."""
-    author = SlugRelatedField(
-        read_only=True, slug_field='username'
-    )
+
+    author = SlugRelatedField(read_only=True, slug_field="username")
 
     class Meta:
         fields = (
@@ -548,17 +553,15 @@ class NoteSerializer(ModelSerializer):
             "text",
             "author",
             "pub_date",
-
         )
         model = Note
-        read_only_fields = ('candidate',)
+        read_only_fields = ("candidate",)
 
 
 class CommentSerializer(ModelSerializer):
     """Сериализатор для ответов."""
-    author = SlugRelatedField(
-        read_only=True, slug_field='username'
-    )
+
+    author = SlugRelatedField(read_only=True, slug_field="username")
 
     class Meta:
         fields = (
@@ -566,8 +569,6 @@ class CommentSerializer(ModelSerializer):
             "text",
             "author",
             "pub_date",
-
         )
         model = Comment
-        read_only_fields = ('note',)
-
+        read_only_fields = ("note",)
