@@ -14,12 +14,13 @@ from recruitment.constants import (
 )
 from recruitment.models import (
     ApplicantResume,
-    Candidate,
     Company,
-    FunnelStage,
-    SubStage,
     Vacancy,
     WorkExperience,
+    Note,
+    Candidate,
+    FunnelStage,
+    SubStage,
 )
 from rest_framework.serializers import (
     CharField,
@@ -32,6 +33,7 @@ from rest_framework.serializers import (
     SerializerMethodField,
     StringRelatedField,
     ValidationError,
+    SlugRelatedField,
 )
 from users.models import User
 from users.validators import custom_validate_email
@@ -532,3 +534,40 @@ class FunnelDetailSerializer(ModelSerializer):
             "status",
             "substages",
         )
+
+
+class NoteSerializer(ModelSerializer):
+    """Сериализатор для заметок."""
+    author = SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
+
+    class Meta:
+        fields = (
+            "candidate",
+            "text",
+            "author",
+            "pub_date",
+
+        )
+        model = Note
+        read_only_fields = ('candidate',)
+
+
+class CommentSerializer(ModelSerializer):
+    """Сериализатор для ответов."""
+    author = SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
+
+    class Meta:
+        fields = (
+            "note",
+            "text",
+            "author",
+            "pub_date",
+
+        )
+        model = Comment
+        read_only_fields = ('note',)
+

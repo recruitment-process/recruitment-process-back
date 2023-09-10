@@ -608,7 +608,7 @@ class Note(models.Model):
     """Модель Заметок."""
 
     candidate = models.ForeignKey(
-        Candidate, on_delete=models.CASCADE, verbose_name="Кандидат"
+        Candidate, on_delete=models.CASCADE, related_name="user_notes"
     )
     text = models.TextField("Текст", help_text="Заметка")
     author = models.ForeignKey(
@@ -626,7 +626,7 @@ class Note(models.Model):
 class Comment(models.Model):
     """Модель комментария к заметкам."""
 
-    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name="notes")
+    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name="comments")
     text = models.TextField("Текст", help_text="Комментарий")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)

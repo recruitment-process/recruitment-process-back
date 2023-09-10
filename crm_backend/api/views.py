@@ -4,7 +4,14 @@ from django.http import HttpResponseRedirect
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recruitment.models import ApplicantResume, Candidate, Company, FunnelStage, Vacancy
+from recruitment.models import (
+    ApplicantResume,
+    Vacancy,
+    Candidate,
+    Note,
+    Company,
+    FunnelStage,
+    )
 from rest_framework import status
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -30,6 +37,8 @@ from .serializers import (
     UserSignupSerializer,
     VacanciesSerializer,
     VacancySerializer,
+    NoteSerializer,
+    CommentSerializer,
 )
 from .utils import send_mail_to_user
 
@@ -237,6 +246,34 @@ class ResumeViewSet(ModelViewSet):
         if self.action == "list":
             return ResumesSerializer
         return ResumeSerializer
+
+
+class NoteViewSet(ModelViewSet):
+    """Вьюсет для модели заметок."""
+    serializer_class = NoteSerializer
+    ordering = ("pub_date",)
+
+    def get_queryset(self):
+        candidate = get_object_or_404(Candidate, id=self.kwargs.get('candidate_id'))
+        return candidate.user_notes.all()
+
+    def perform_create(self, serializer):
+        candidate = get_object_or_404(Candidate, id=self.kwargs.get('candidate_id'))
+        serializer.save(author=self.request.user, candidate=candidate)
+    
+
+class CommentViewSet(ModelViewSet):
+    """Вьюсет для модели ответов к заметкам."""
+    serializer_class = CommentSerializer
+    ordering = ("pub_date",)
+
+    def get_queryset(self):
+        note = get_object_or_404(Note, id=self.kwargs.get('note_id'))
+        return note.comments.all()
+
+    def perform_create(self, serializer):
+        note = get_object_or_404(Note, id=self.kwargs.get('note_id'))
+        serializer.save(author=self.request.user, note=note)
 
 
 class CandidateViewSet(ModelViewSet):
