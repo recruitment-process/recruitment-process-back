@@ -8,6 +8,7 @@ from django.db import models
 from multiselectfield import MultiSelectField
 from multiselectfield.utils import get_max_length
 from recruitment.constants import (
+    CANDIDATE_STATUS,
     DEADLINE,
     EDUCATION,
     EMPLOYMENT_TYPE,
@@ -483,12 +484,18 @@ class Candidate(models.Model):
         null=True,
         blank=True,
     )
+    candidate_status = models.CharField(
+        max_length=1,
+        choices=CANDIDATE_STATUS,
+        default=CANDIDATE_STATUS[0][0],
+        verbose_name="Статус кандидата",
+    )
     interview_status = models.CharField(
         max_length=5,
         choices=INTERVIEW_STATUS,
         null=True,
         blank=True,
-        verbose_name="Статус",
+        verbose_name="Статус прохождения",
     )
     custom_status = models.CharField(
         max_length=255,

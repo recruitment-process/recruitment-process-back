@@ -7,6 +7,7 @@ from django_filters import (
     filters,
 )
 from recruitment.constants import (
+    CANDIDATE_STATUS,
     EDUCATION,
     EMPLOYMENT_TYPE,
     EXPERIENCE,
@@ -108,6 +109,9 @@ class CandidatesFilterSet(FilterSet):
     interview_status = ChoiceFilter(
         field_name="interview_status", choices=INTERVIEW_STATUS
     )
+    candidate_status = ChoiceFilter(
+        field_name="candidate_status", choices=CANDIDATE_STATUS
+    )
 
     class Meta:
         model = Candidate
@@ -127,4 +131,5 @@ class CandidatesFilterSet(FilterSet):
             "bday",
             "interview_status",
             "custom_status",
+            "candidate_status",
         ]

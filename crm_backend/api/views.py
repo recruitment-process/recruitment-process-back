@@ -6,12 +6,12 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from recruitment.models import (
     ApplicantResume,
-    Vacancy,
     Candidate,
-    Note,
     Company,
     FunnelStage,
-    )
+    Note,
+    Vacancy,
+)
 from rest_framework import status
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -26,10 +26,12 @@ from .serializers import (
     CandidateSerializer,
     CandidatesSerializer,
     ChangePasswordSerializer,
+    CommentSerializer,
     CompanySerializer,
     CompanyShortSerializer,
     FunnelDetailSerializer,
     FunnelSerializer,
+    NoteSerializer,
     ResumeSerializer,
     ResumesSerializer,
     SubStageSerializer,
@@ -37,8 +39,6 @@ from .serializers import (
     UserSignupSerializer,
     VacanciesSerializer,
     VacancySerializer,
-    NoteSerializer,
-    CommentSerializer,
 )
 from .utils import send_mail_to_user
 
@@ -250,29 +250,35 @@ class ResumeViewSet(ModelViewSet):
 
 class NoteViewSet(ModelViewSet):
     """Вьюсет для модели заметок."""
+
     serializer_class = NoteSerializer
     ordering = ("pub_date",)
 
     def get_queryset(self):
-        candidate = get_object_or_404(Candidate, id=self.kwargs.get('candidate_id'))
+        """Получаем заметки на кандидата."""
+        candidate = get_object_or_404(Candidate, id=self.kwargs.get("candidate_id"))
         return candidate.user_notes.all()
 
     def perform_create(self, serializer):
-        candidate = get_object_or_404(Candidate, id=self.kwargs.get('candidate_id'))
+        """Переопределение метода create для записи информация о заметке."""
+        candidate = get_object_or_404(Candidate, id=self.kwargs.get("candidate_id"))
         serializer.save(author=self.request.user, candidate=candidate)
-    
+
 
 class CommentViewSet(ModelViewSet):
     """Вьюсет для модели ответов к заметкам."""
+
     serializer_class = CommentSerializer
     ordering = ("pub_date",)
 
     def get_queryset(self):
-        note = get_object_or_404(Note, id=self.kwargs.get('note_id'))
+        """Получаем комментарии к заметке."""
+        note = get_object_or_404(Note, id=self.kwargs.get("note_id"))
         return note.comments.all()
 
     def perform_create(self, serializer):
-        note = get_object_or_404(Note, id=self.kwargs.get('note_id'))
+        """Переопределение метода create для записи информация о комментарии."""
+        note = get_object_or_404(Note, id=self.kwargs.get("note_id"))
         serializer.save(author=self.request.user, note=note)
 
 
@@ -290,6 +296,7 @@ class CandidateViewSet(ModelViewSet):
         "first_name",
         "last_name",
         "city",
+        "candidate_status",
         "last_job",
         "cur_position",
         "phone_number",
@@ -303,6 +310,7 @@ class CandidateViewSet(ModelViewSet):
     ordering_fields = (
         "last_name",
         "city",
+        "candidate_status",
         "last_job",
         "cur_position",
         "salary_expectations",
