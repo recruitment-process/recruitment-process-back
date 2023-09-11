@@ -3,10 +3,12 @@ from django.contrib import admin
 from .models import (
     ApplicantResume,
     Candidate,
+    Comment,
     Company,
     Education,
     Event,
     FunnelStage,
+    Note,
     SubStage,
     Vacancy,
     WorkExperience,
@@ -26,7 +28,7 @@ class ApplicantResumeAdmin(admin.ModelAdmin):
         "citizenship",
         "employment_type",
         "schedule_work",
-        "working_trip"
+        "working_trip",
     )
     list_filter = ("job_title", "education", "salary_expectations", "town")
     search_fields = (
@@ -196,3 +198,26 @@ class CandidateAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("pub_date",)
     empty_value_display = "-пусто-"
+
+
+class Comment(admin.TabularInline):
+    """Добавление InLine модели Comment в админку."""
+
+    model = Comment
+
+
+@admin.register(Note)
+class NoteAdmin(admin.ModelAdmin):
+    """Добавление модели Note в админку."""
+
+    inlines = [
+        Comment,
+    ]
+    list_display = (
+        "candidate",
+        "text",
+        "author",
+        "pub_date",
+    )
+    list_filter = ("candidate", "author", "pub_date")
+    search_fields = ("candidate", "author", "pub_date")
