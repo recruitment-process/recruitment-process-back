@@ -182,7 +182,6 @@ class VacancyViewSet(ModelViewSet):
     """Вьюсет для модели вакансий."""
 
     permission_classes = (IsAuthenticated,)
-    queryset = Vacancy.objects.all()
     filter_backends = (
         DjangoFilterBackend,
         SearchFilter,
@@ -201,6 +200,11 @@ class VacancyViewSet(ModelViewSet):
         "pub_date",
     )
     ordering = ("pub_date",)
+
+    def get_queryset(self):
+        """Получаем вакансии автора запроса."""
+        user = self.request.user
+        return Vacancy.objects.filter(author=user)
 
     def get_serializer_class(self):
         """Функция определяющая сериализатор в зависимости от действия."""
