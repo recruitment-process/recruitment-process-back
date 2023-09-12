@@ -26,6 +26,9 @@ class ApplicantResumeAdmin(admin.ModelAdmin):
         "salary_expectations",
         "town",
         "citizenship",
+        "employment_type",
+        "schedule_work",
+        "working_trip",
     )
     list_filter = ("job_title", "education", "salary_expectations", "town")
     search_fields = (
@@ -69,6 +72,8 @@ class VacancyAdmin(admin.ModelAdmin):
         "employment_type",
         "schedule_work",
         "skill_stack",
+        "vacancy_status",
+        "deadline",
     )
     list_filter = ("vacancy_title", "company", "employment_type", "schedule_work")
     search_fields = (
@@ -183,6 +188,7 @@ class CandidateAdmin(admin.ModelAdmin):
         "work_experiences",
         "education",
         "interview_status",
+        "custom_status",
         "pub_date",
     )
     list_filter = (
@@ -193,6 +199,8 @@ class CandidateAdmin(admin.ModelAdmin):
         "salary_expectations",
         "work_experiences",
         "city",
+        "interview_status",
+        "custom_status",
         "pub_date",
     )
     search_fields = (
@@ -204,6 +212,7 @@ class CandidateAdmin(admin.ModelAdmin):
         "schedule_work",
         "work_experiences",
         "interview_status",
+        "custom_status",
     )
     readonly_fields = ("pub_date",)
     empty_value_display = "-пусто-"
