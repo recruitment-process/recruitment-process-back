@@ -221,3 +221,4 @@ class NoteAdmin(admin.ModelAdmin):
     )
     list_filter = ("candidate", "author", "pub_date")
     search_fields = ("candidate", "author", "pub_date")
+    readonly_fields = ("pub_date",)
