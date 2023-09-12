@@ -43,16 +43,16 @@ class Skills(models.Model):
 class SkillStack(models.Model):
     """Модель навыков и опыта работы по ним."""
 
-    technology_stack = models.ForeignKey(Skills, on_delete=models.CASCADE)
-    technology_stack_time = models.IntegerField(null=True, blank=True)
+    skill_stack = models.ForeignKey(Skills, on_delete=models.CASCADE)
+    skill_stack_time = models.IntegerField(null=True, blank=True)
 
     class Meta:
-        ordering = ["technology_stack"]
-        verbose_name = "Скилл и опыт"
+        ordering = ["skill_stack"]
+        verbose_name = "Навык и опыт"
         verbose_name_plural = "Навыки и опыт"
 
     def __str__(self):
-        return f"{self.technology_stack} - {self.technology_stack_time} года"
+        return f"{self.skill_stack} - {self.skill_stack_time} года"
 
 
 class WorkExperience(models.Model):
@@ -368,8 +368,7 @@ class Vacancy(models.Model):
         blank=True,
         max_length=1400,
     )
-
-    technology_stack = models.ForeignKey(
+    skill_stack = models.ManyToManyField(
         SkillStack,
         on_delete=models.CASCADE,
         null=True,

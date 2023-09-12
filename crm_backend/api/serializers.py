@@ -206,7 +206,7 @@ class VacancySerializer(ModelSerializer):
             "pub_date",
             "job_conditions",
             "job_responsibilities",
-            "technology_stack",
+            "skill_stack",
             "vacancy_status",
             "deadline",
         )
@@ -252,7 +252,7 @@ class VacanciesSerializer(ModelSerializer):
             "schedule_work",
             "salary_range",
             "city",
-            "technology_stack",
+            "skill_stack",
             "deadline",
         )
 

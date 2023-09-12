@@ -68,7 +68,7 @@ class VacancyAdmin(admin.ModelAdmin):
         "required_experience",
         "employment_type",
         "schedule_work",
-        "technology_stack",
+        "skill_stack",
     )
     list_filter = ("vacancy_title", "company", "employment_type", "schedule_work")
     search_fields = (
@@ -155,8 +155,8 @@ class SkillStackAdmin(admin.ModelAdmin):
     """Добавление модели SkillStack в админку."""
 
     list_display = (
-        "technology_stack",
-        "technology_stack_time",
+        "skill_stack",
+        "skill_stack_time",
     )
 
 
