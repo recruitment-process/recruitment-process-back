@@ -5,6 +5,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.files.base import ContentFile
 from drf_extra_fields.fields import Base64ImageField
 from recruitment.constants import (
+    CANDIDATE_STATUS,
     EDUCATION,
     EMPLOYMENT_TYPE,
     EXPERIENCE,
@@ -15,8 +16,10 @@ from recruitment.constants import (
 from recruitment.models import (
     ApplicantResume,
     Candidate,
+    Comment,
     Company,
     FunnelStage,
+    Note,
     SubStage,
     Vacancy,
     WorkExperience,
@@ -30,6 +33,7 @@ from rest_framework.serializers import (
     MultipleChoiceField,
     Serializer,
     SerializerMethodField,
+    SlugRelatedField,
     StringRelatedField,
     ValidationError,
 )
@@ -83,10 +87,9 @@ class UserSignupSerializer(ModelSerializer):
 
     def create(self, validated_data):
         """Создание пользователя в БД."""
-        user = User.objects.create_user(
+        return User.objects.create_user(
             validated_data["email"], validated_data["password"]
         )
-        return user
 
     def validate_email(self, value):
         """Валидация email."""
@@ -108,13 +111,18 @@ class UserSignupSerializer(ModelSerializer):
 class UserSerializer(ModelSerializer):
     """Сериализатор для модели User."""
 
+    photo = Base64ImageField()
+
     class Meta:
         model = User
         fields = (
             "id",
             "first_name",
             "last_name",
-            "role",
+            "position",
+            "photo",
+            "phone_number",
+            "email",
             "is_hr",
         )
 
@@ -189,12 +197,14 @@ class WorkExperienceSerializer(ModelSerializer):
 
         Возвращает количество месяцев и лет работы.
         """
-        today = date.today()
         if obj.end_date:
+            experience_length = (obj.end_date - obj.start_date).days / 30
+        else:
+            today = date.today()
             experience_length = (today - obj.start_date).days / 30
-            years = experience_length // 12
-            months = experience_length % 12
-            return f"{int(years)} года/лет и {round(months)} месяца(ев)"
+        years = experience_length // 12
+        months = experience_length % 12
+        return f"{int(years)} года/лет и {round(months)} месяца(ев)"
 
 
 class VacancySerializer(ModelSerializer):
@@ -206,10 +216,12 @@ class VacancySerializer(ModelSerializer):
     employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
     education = ChoiceField(choices=EDUCATION)
     pub_date = DateOnlyField(read_only=True)
+    candidates_count = SerializerMethodField()
 
     class Meta:
         model = Vacancy
         fields = (
+            "id",
             "vacancy_title",
             "company",
             "author",
@@ -225,6 +237,7 @@ class VacancySerializer(ModelSerializer):
             "skill_stack",
             "vacancy_status",
             "deadline",
+            "candidates_count",
         )
         read_only_fields = ("author",)
 
@@ -236,8 +249,7 @@ class VacancySerializer(ModelSerializer):
         """
         company_data = validated_data.pop("company")
         company, created = Company.objects.update_or_create(**company_data)
-        vacancy = Vacancy.objects.create(company=company, **validated_data)
-        return vacancy
+        return Vacancy.objects.create(company=company, **validated_data)
 
     def update(self, instance, validated_data):
         """
@@ -249,6 +261,10 @@ class VacancySerializer(ModelSerializer):
         Company.objects.filter(id=instance.company.id).update(**company_data)
         return super().update(instance, validated_data)
 
+    def get_candidates_count(self, obj):
+        """Подсчет количества кандидатов на вакансию."""
+        return obj.candidates.count()
+
 
 class VacanciesSerializer(ModelSerializer):
     """Сериализатор для просмотра карточек вакансий."""
@@ -257,10 +273,12 @@ class VacanciesSerializer(ModelSerializer):
     schedule_work = SerializerMethodField()
     employment_type = SerializerMethodField()
     salary_range = SerializerMethodField()
+    candidates_count = SerializerMethodField()
 
     class Meta:
         model = Vacancy
         fields = (
+            "id",
             "vacancy_title",
             "company",
             "required_experience",
@@ -270,6 +288,7 @@ class VacanciesSerializer(ModelSerializer):
             "city",
             "skill_stack",
             "deadline",
+            "candidates_count",
         )
 
     def get_schedule_work(self, obj):
@@ -291,6 +310,10 @@ class VacanciesSerializer(ModelSerializer):
     def get_salary_range(self, obj):
         """Функция преобразования вывода информации для поля salary."""
         return get_salary_range(obj)
+
+    def get_candidates_count(self, obj):
+        """Подсчет количества кандидатов на вакансию."""
+        return obj.candidates.count()
 
 
 class ResumeSerializer(ModelSerializer):
@@ -365,14 +388,16 @@ class CandidateSerializer(ModelSerializer):
     education = ChoiceField(choices=EDUCATION)
     age = SerializerMethodField()
     interview_status = ChoiceField(choices=INTERVIEW_STATUS, required=False)
+    candidate_status = ChoiceField(choices=CANDIDATE_STATUS)
     salary_expectations = SerializerMethodField()
     schedule_work = MultipleChoiceField(choices=SCHEDULE_WORK)
     employment_type = MultipleChoiceField(choices=EMPLOYMENT_TYPE)
     work_experiences = ChoiceField(choices=EXPERIENCE)
     resume = Base64PDFField()
     photo = Base64ImageField()
-    custom_status = CharField(required=False)
+    custom_status = CharField(required=False, allow_null=True)
     pub_date = DateOnlyField(read_only=True)
+    vacancy = StringRelatedField(read_only=True)
 
     class Meta:
         model = Candidate
@@ -398,6 +423,7 @@ class CandidateSerializer(ModelSerializer):
             "schedule_work",
             "work_experiences",
             "education",
+            "candidate_status",
             "interview_status",
             "custom_status",
             "pub_date",
@@ -433,6 +459,7 @@ class CandidatesSerializer(ModelSerializer):
     """Сериализатор для карточек кандидатов."""
 
     interview_status = ChoiceField(choices=INTERVIEW_STATUS)
+    candidate_status = ChoiceField(choices=CANDIDATE_STATUS)
     custom_status = CharField(required=False)
     work_experiences = ChoiceField(choices=EXPERIENCE)
 
@@ -447,6 +474,7 @@ class CandidatesSerializer(ModelSerializer):
             "last_job",
             "interview_status",
             "custom_status",
+            "candidate_status",
         )
 
 
@@ -512,3 +540,35 @@ class FunnelDetailSerializer(ModelSerializer):
             "status",
             "substages",
         )
+
+
+class NoteSerializer(ModelSerializer):
+    """Сериализатор для заметок."""
+
+    author = SlugRelatedField(read_only=True, slug_field="username")
+
+    class Meta:
+        fields = (
+            "candidate",
+            "text",
+            "author",
+            "pub_date",
+        )
+        model = Note
+        read_only_fields = ("candidate",)
+
+
+class CommentSerializer(ModelSerializer):
+    """Сериализатор для ответов."""
+
+    author = SlugRelatedField(read_only=True, slug_field="username")
+
+    class Meta:
+        fields = (
+            "note",
+            "text",
+            "author",
+            "pub_date",
+        )
+        model = Comment
+        read_only_fields = ("note",)

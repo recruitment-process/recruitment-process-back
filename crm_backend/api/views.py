@@ -4,7 +4,14 @@ from django.http import HttpResponseRedirect
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recruitment.models import ApplicantResume, Candidate, Company, FunnelStage, Vacancy
+from recruitment.models import (
+    ApplicantResume,
+    Candidate,
+    Company,
+    FunnelStage,
+    Note,
+    Vacancy,
+)
 from rest_framework import status
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -19,10 +26,12 @@ from .serializers import (
     CandidateSerializer,
     CandidatesSerializer,
     ChangePasswordSerializer,
+    CommentSerializer,
     CompanySerializer,
     CompanyShortSerializer,
     FunnelDetailSerializer,
     FunnelSerializer,
+    NoteSerializer,
     ResumeSerializer,
     ResumesSerializer,
     SubStageSerializer,
@@ -73,16 +82,14 @@ class LoginView(APIView):
                 csrf.get_token(request)
                 response.data = {"id": user.id, "data": data}
                 return response
-            else:
-                return Response(
-                    {"No active": "This account is not active!!"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-        else:
             return Response(
-                {"Invalid": "Invalid email or password!!"},
+                {"No active": "This account is not active!!"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+        return Response(
+            {"Invalid": "Invalid email or password!!"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
 
 class UserSignupView(APIView):
@@ -241,6 +248,40 @@ class ResumeViewSet(ModelViewSet):
         return ResumeSerializer
 
 
+class NoteViewSet(ModelViewSet):
+    """Вьюсет для модели заметок."""
+
+    serializer_class = NoteSerializer
+    ordering = ("pub_date",)
+
+    def get_queryset(self):
+        """Получаем заметки на кандидата."""
+        candidate = get_object_or_404(Candidate, id=self.kwargs.get("candidate_id"))
+        return candidate.user_notes.all()
+
+    def perform_create(self, serializer):
+        """Переопределение метода create для записи информация о заметке."""
+        candidate = get_object_or_404(Candidate, id=self.kwargs.get("candidate_id"))
+        serializer.save(author=self.request.user, candidate=candidate)
+
+
+class CommentViewSet(ModelViewSet):
+    """Вьюсет для модели ответов к заметкам."""
+
+    serializer_class = CommentSerializer
+    ordering = ("pub_date",)
+
+    def get_queryset(self):
+        """Получаем комментарии к заметке."""
+        note = get_object_or_404(Note, id=self.kwargs.get("note_id"))
+        return note.comments.all()
+
+    def perform_create(self, serializer):
+        """Переопределение метода create для записи информация о комментарии."""
+        note = get_object_or_404(Note, id=self.kwargs.get("note_id"))
+        serializer.save(author=self.request.user, note=note)
+
+
 class CandidateViewSet(ModelViewSet):
     """Вьюсет для модели Candidate."""
 
@@ -255,6 +296,7 @@ class CandidateViewSet(ModelViewSet):
         "first_name",
         "last_name",
         "city",
+        "candidate_status",
         "last_job",
         "cur_position",
         "phone_number",
@@ -268,6 +310,7 @@ class CandidateViewSet(ModelViewSet):
     ordering_fields = (
         "last_name",
         "city",
+        "candidate_status",
         "last_job",
         "cur_position",
         "salary_expectations",
@@ -291,6 +334,16 @@ class CandidateViewSet(ModelViewSet):
         if self.action == "list":
             return CandidatesSerializer
         return CandidateSerializer
+
+    def perform_create(self, serializer):
+        """Переопределение метода create для записи информация о кандидате."""
+        vacancy = get_object_or_404(Vacancy, pk=self.kwargs.get("vacancy_id"))
+        serializer.save(vacancy=vacancy)
+
+    def perform_update(self, serializer):
+        """Переопределение метода update для записи информация о кандидате."""
+        vacancy = get_object_or_404(Vacancy, pk=self.kwargs.get("vacancy_id"))
+        serializer.save(vacancy=vacancy)
 
 
 class CompanyViewSet(ModelViewSet):

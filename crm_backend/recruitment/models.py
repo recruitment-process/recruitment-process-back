@@ -9,6 +9,7 @@ from django.db import models
 from multiselectfield import MultiSelectField
 from multiselectfield.utils import get_max_length
 from recruitment.constants import (
+    CANDIDATE_STATUS,
     DEADLINE,
     EDUCATION,
     EMPLOYMENT_TYPE,
@@ -514,12 +515,18 @@ class Candidate(models.Model):
         null=True,
         blank=True,
     )
+    candidate_status = models.CharField(
+        max_length=1,
+        choices=CANDIDATE_STATUS,
+        default=CANDIDATE_STATUS[0][0],
+        verbose_name="Статус кандидата",
+    )
     interview_status = models.CharField(
         max_length=5,
         choices=INTERVIEW_STATUS,
         null=True,
         blank=True,
-        verbose_name="Статус",
+        verbose_name="Статус прохождения",
     )
     custom_status = models.CharField(
         max_length=255,
@@ -639,7 +646,7 @@ class Note(models.Model):
     """Модель Заметок."""
 
     candidate = models.ForeignKey(
-        Candidate, on_delete=models.CASCADE, verbose_name="Кандидат"
+        Candidate, on_delete=models.CASCADE, related_name="user_notes"
     )
     text = models.TextField("Текст", help_text="Заметка")
     author = models.ForeignKey(
@@ -657,7 +664,7 @@ class Note(models.Model):
 class Comment(models.Model):
     """Модель комментария к заметкам."""
 
-    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name="notes")
+    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name="comments")
     text = models.TextField("Текст", help_text="Комментарий")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)

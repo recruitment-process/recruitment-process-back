@@ -17,8 +17,7 @@ class DateOnlyField(serializers.DateTimeField):
 def get_display_values(keys, choices):
     """Функция преобразования вывода информации для поля с ключа на значение."""
     if keys:
-        display_values = [dict(choices).get(key) for key in keys]
-        return display_values
+        return [dict(choices).get(key) for key in keys]
     return None
 
 

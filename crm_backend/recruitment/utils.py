@@ -11,14 +11,15 @@ def generate_logo_path(instance, filename):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     return f"images/company_logos/{company_name}/{timestamp}__{filename}"
 
+
 def upload_to_candidates(instance, filename):
     """
     Генерирует путь сохранения загружаемых резюме и фотографий.
 
     Возвращает путь сохранения файлов.
     """
-    if filename.endswith('.pdf'):
-        return f"candidates/{instance.last_name}{instance.first_name}/resumes/{filename}"
-    else:
-        return f"candidates/{instance.last_name}{instance.first_name}/photos/{filename}"
-    
+    if filename.endswith(".pdf"):
+        return (
+            f"candidates/{instance.last_name}{instance.first_name}/resumes/{filename}"
+        )
+    return f"candidates/{instance.last_name}{instance.first_name}/photos/{filename}"
