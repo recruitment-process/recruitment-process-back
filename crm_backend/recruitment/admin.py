@@ -7,6 +7,8 @@ from .models import (
     Education,
     Event,
     FunnelStage,
+    Skills,
+    SkillStack,
     SubStage,
     Vacancy,
     WorkExperience,
@@ -26,7 +28,7 @@ class ApplicantResumeAdmin(admin.ModelAdmin):
         "citizenship",
         "employment_type",
         "schedule_work",
-        "working_trip"
+        "working_trip",
     )
     list_filter = ("job_title", "education", "salary_expectations", "town")
     search_fields = (
@@ -69,6 +71,7 @@ class VacancyAdmin(admin.ModelAdmin):
         "required_experience",
         "employment_type",
         "schedule_work",
+        "skill_stack",
         "vacancy_status",
         "deadline",
     )
@@ -143,6 +146,23 @@ class FunnelStageAdmin(admin.ModelAdmin):
     )
     list_filter = ("candidate", "name", "date", "status")
     search_fields = ("candidate",)
+
+
+@admin.register(Skills)
+class SkillsAdmin(admin.ModelAdmin):
+    """Добавление модели Skills в админку."""
+
+    list_display = ("name",)
+
+
+@admin.register(SkillStack)
+class SkillStackAdmin(admin.ModelAdmin):
+    """Добавление модели SkillStack в админку."""
+
+    list_display = (
+        "skill_stack",
+        "skill_stack_time",
+    )
 
 
 @admin.register(Candidate)

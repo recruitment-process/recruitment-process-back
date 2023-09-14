@@ -234,7 +234,7 @@ class VacancySerializer(ModelSerializer):
             "pub_date",
             "job_conditions",
             "job_responsibilities",
-            "technology_stack",
+            "skill_stack",
             "vacancy_status",
             "deadline",
             "candidates_count",
@@ -286,7 +286,7 @@ class VacanciesSerializer(ModelSerializer):
             "schedule_work",
             "salary_range",
             "city",
-            "technology_stack",
+            "skill_stack",
             "deadline",
             "candidates_count",
         )
@@ -430,7 +430,7 @@ class CandidateSerializer(ModelSerializer):
         )
 
     def validate(self, data):
-        """Валидация полей."""
+        """Валидация полей на одновременное заполнение."""
         if data.get("custom_status") and data.get("interview_status"):
             raise ValidationError("Нельзя заполнить оба поля одновременно.")
         return data

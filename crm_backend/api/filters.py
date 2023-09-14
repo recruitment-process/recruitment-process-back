@@ -50,7 +50,7 @@ class VacancyFilterSet(FilterSet):
             "city",
             "pub_date",
             "vacancy_status",
-            "technology_stack",
+            "skill_stack",
             "deadline",
         ]
 
