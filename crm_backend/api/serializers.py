@@ -18,6 +18,7 @@ from recruitment.models import (
     Candidate,
     Comment,
     Company,
+    Education,
     FunnelStage,
     Note,
     SubStage,
@@ -146,6 +147,21 @@ class ChangePasswordSerializer(Serializer):
         if not new_password_1 == new_password_2:
             raise ValidationError("Новые пароли не совпадают!")
         return data
+
+
+class EducationSerializer(ModelSerializer):
+    """Сериализатор для модели Education."""
+
+    class Meta:
+        model = Education
+        fields = (
+            "id",
+            "educational_institution",
+            "faculty",
+            "specialization",
+            "graduation",
+            "resume",
+        )
 
 
 class CompanySerializer(ModelSerializer):

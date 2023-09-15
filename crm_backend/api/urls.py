@@ -6,6 +6,7 @@ from .views import (
     ChangePasswordView,
     CommentViewSet,
     CompanyViewSet,
+    EducationViewSet,
     EmailConfirmationView,
     FunnelViewSet,
     LoginView,
@@ -42,6 +43,7 @@ router.register(
     SubStageViewSet,
     "substage",
 )
+router.register("education", EducationViewSet, basename="education")
 
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
