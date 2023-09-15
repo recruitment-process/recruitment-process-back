@@ -371,7 +371,6 @@ class Vacancy(models.Model):
     )
     skill_stack = models.ManyToManyField(
         SkillStack,
-        on_delete=models.CASCADE,
         null=True,
         verbose_name="Ключевые навыки",
         related_name="vacancies",

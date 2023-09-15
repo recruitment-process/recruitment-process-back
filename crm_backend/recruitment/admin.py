@@ -71,7 +71,6 @@ class VacancyAdmin(admin.ModelAdmin):
         "required_experience",
         "employment_type",
         "schedule_work",
-        "skill_stack",
         "vacancy_status",
         "deadline",
     )
