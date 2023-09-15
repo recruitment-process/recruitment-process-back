@@ -73,7 +73,15 @@ class VacancyAdmin(admin.ModelAdmin):
         "schedule_work",
         "vacancy_status",
         "deadline",
+        "get_formatted_skills",
     )
+
+    def get_formatted_skills(self, obj):
+        """Метод возвращает строку, представляющую набор навыков вакансии."""
+        skills = obj.skill_stack.all()
+        formatted_skills = ", ".join([skill.name for skill in skills])
+        return formatted_skills
+
     list_filter = ("vacancy_title", "company", "employment_type", "schedule_work")
     search_fields = (
         "vacancy_title",
