@@ -8,6 +8,7 @@ from recruitment.models import (
     ApplicantResume,
     Candidate,
     Company,
+    Education,
     FunnelStage,
     Note,
     Vacancy,
@@ -29,6 +30,7 @@ from .serializers import (
     CommentSerializer,
     CompanySerializer,
     CompanyShortSerializer,
+    EducationSerializer,
     FunnelDetailSerializer,
     FunnelSerializer,
     NoteDetailSerializer,
@@ -443,3 +445,32 @@ class SubStageViewSet(ModelViewSet):
         """Переопределение метода update для записи информация о воронке."""
         funnel = get_object_or_404(FunnelStage, pk=self.kwargs.get("funnel_id"))
         serializer.save(stage=funnel)
+
+
+class EducationViewSet(ModelViewSet):
+    """Вьюсет для модели Education."""
+
+    serializer_class = EducationSerializer
+    permission_classes = (IsAuthenticated,)
+    queryset = Education.objects.all()
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    filterset_fields = (
+        "specialization",
+        "graduation",
+        "educational_institution",
+    )
+    search_fields = (
+        "specialization",
+        "graduation",
+        "educational_institution",
+    )
+    ordering_fields = (
+        "specialization",
+        "graduation",
+        "educational_institution",
+    )
+    ordering = ("specialization",)

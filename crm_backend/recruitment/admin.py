@@ -73,10 +73,17 @@ class VacancyAdmin(admin.ModelAdmin):
         "required_experience",
         "employment_type",
         "schedule_work",
-        "skill_stack",
         "vacancy_status",
         "deadline",
+        "display_skill_stack",
     )
+
+    def display_skill_stack(self, obj):
+        """Метод возвращает строку, представляющую набор навыков вакансии."""
+        return ", ".join([skill.skill_stack.name for skill in obj.skill_stack.all()])
+
+    display_skill_stack.short_description = "Ключевые навыки"
+
     list_filter = ("vacancy_title", "company", "employment_type", "schedule_work")
     search_fields = (
         "vacancy_title",

@@ -35,7 +35,7 @@ class Skills(models.Model):
     class Meta:
         ordering = ["name"]
         verbose_name = "Список навыков"
-        verbose_name_plural = "Списоки навыков"
+        verbose_name_plural = "Списки навыков"
 
     def __str__(self):
         return self.name
@@ -371,7 +371,6 @@ class Vacancy(models.Model):
     )
     skill_stack = models.ManyToManyField(
         SkillStack,
-        on_delete=models.CASCADE,
         null=True,
         verbose_name="Ключевые навыки",
         related_name="vacancies",
