@@ -192,7 +192,7 @@ class VacancyViewSet(ModelViewSet):
         "vacancy_title",
         "company__company_title",
         "city",
-        "technology_stack",
+        "skill_stack",
     )
     ordering_fields = (
         "vacancy_status",

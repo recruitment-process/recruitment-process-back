@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Literal
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -24,6 +25,35 @@ from users.models import User
 from users.validators import custom_validate_email
 
 from .utils import generate_logo_path, upload_to_candidates
+
+
+class Skills(models.Model):
+    """Модель для списка навыков."""
+
+    name = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Список навыков"
+        verbose_name_plural = "Списоки навыков"
+
+    def __str__(self):
+        return self.name
+
+
+class SkillStack(models.Model):
+    """Модель навыков и опыта работы по ним."""
+
+    skill_stack = models.ForeignKey(Skills, on_delete=models.CASCADE)
+    skill_stack_time = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["skill_stack"]
+        verbose_name = "Навык и опыт"
+        verbose_name_plural = "Навыки и опыт"
+
+    def __str__(self):
+        return f"{self.skill_stack} - {self.skill_stack_time} года"
 
 
 class WorkExperience(models.Model):
@@ -150,7 +180,7 @@ class ApplicantResume(models.Model):
         max_length=50,
         blank=True,
         null=True,
-        verbose_name="Текущяя должность",
+        verbose_name="Текущая должность",
     )
     pub_date = models.DateTimeField(
         "Дата публикации резюме",
@@ -339,11 +369,12 @@ class Vacancy(models.Model):
         blank=True,
         max_length=1400,
     )
-    technology_stack = (
-        # позже нужно будет сделать бд со всеми навыками
-        models.TextField(
-            verbose_name="Ключевые навыки",
-        )
+    skill_stack = models.ManyToManyField(
+        SkillStack,
+        on_delete=models.CASCADE,
+        null=True,
+        verbose_name="Ключевые навыки",
+        related_name="vacancies",
     )
     vacancy_status = models.CharField(
         max_length=1,
@@ -627,7 +658,7 @@ class Note(models.Model):
     pub_date = models.DateTimeField(verbose_name="Дата публикации", auto_now_add=True)
 
     class Meta:
-        ordering = ("-pub_date",)
+        ordering: tuple[Literal["-pub_date"]] = ("-pub_date",)
         verbose_name = "Заметка"
         verbose_name_plural = "Заметки"
 
