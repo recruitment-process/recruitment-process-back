@@ -31,6 +31,7 @@ from .serializers import (
     CompanyShortSerializer,
     FunnelDetailSerializer,
     FunnelSerializer,
+    NoteDetailSerializer,
     NoteSerializer,
     ResumeSerializer,
     ResumesSerializer,
@@ -181,7 +182,6 @@ class VacancyViewSet(ModelViewSet):
     """Вьюсет для модели вакансий."""
 
     permission_classes = (IsAuthenticated,)
-    queryset = Vacancy.objects.all()
     filter_backends = (
         DjangoFilterBackend,
         SearchFilter,
@@ -200,6 +200,11 @@ class VacancyViewSet(ModelViewSet):
         "pub_date",
     )
     ordering = ("pub_date",)
+
+    def get_queryset(self):
+        """Получаем вакансии автора запроса."""
+        user = self.request.user
+        return Vacancy.objects.filter(author=user)
 
     def get_serializer_class(self):
         """Функция определяющая сериализатор в зависимости от действия."""
@@ -251,8 +256,14 @@ class ResumeViewSet(ModelViewSet):
 class NoteViewSet(ModelViewSet):
     """Вьюсет для модели заметок."""
 
-    serializer_class = NoteSerializer
+    permission_classes = (IsAuthenticated,)
     ordering = ("pub_date",)
+
+    def get_serializer_class(self):
+        """Функция определяющая сериализатор в зависимости от действия."""
+        if self.action == "list":
+            return NoteDetailSerializer
+        return NoteSerializer
 
     def get_queryset(self):
         """Получаем заметки на кандидата."""
@@ -264,10 +275,16 @@ class NoteViewSet(ModelViewSet):
         candidate = get_object_or_404(Candidate, id=self.kwargs.get("candidate_id"))
         serializer.save(author=self.request.user, candidate=candidate)
 
+    def perform_update(self, serializer):
+        """Переопределение метода update для записи информация о заметке."""
+        candidate = get_object_or_404(Candidate, id=self.kwargs.get("candidate_id"))
+        serializer.save(author=self.request.user, candidate=candidate)
+
 
 class CommentViewSet(ModelViewSet):
     """Вьюсет для модели ответов к заметкам."""
 
+    permission_classes = (IsAuthenticated,)
     serializer_class = CommentSerializer
     ordering = ("pub_date",)
 
@@ -278,6 +295,11 @@ class CommentViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         """Переопределение метода create для записи информация о комментарии."""
+        note = get_object_or_404(Note, id=self.kwargs.get("note_id"))
+        serializer.save(author=self.request.user, note=note)
+
+    def perform_update(self, serializer):
+        """Переопределение метода update для записи информация о комментарии."""
         note = get_object_or_404(Note, id=self.kwargs.get("note_id"))
         serializer.save(author=self.request.user, note=note)
 
@@ -378,7 +400,6 @@ class FunnelViewSet(ModelViewSet):
     """Вьюсет для воронки кандидата Funnel."""
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = FunnelSerializer
 
     def get_serializer_class(self):
         """Функция определяющая сериализатор в зависимости от действия."""

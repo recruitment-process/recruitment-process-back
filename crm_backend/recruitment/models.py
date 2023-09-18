@@ -646,16 +646,21 @@ class Note(models.Model):
     """Модель Заметок."""
 
     candidate = models.ForeignKey(
-        Candidate, on_delete=models.CASCADE, related_name="user_notes"
+        Candidate,
+        on_delete=models.CASCADE,
+        related_name="user_notes",
+        verbose_name="Кандидат",
     )
-    text = models.TextField("Текст", help_text="Заметка")
+    text = models.TextField(max_length=200, verbose_name="Текст", help_text="Заметка")
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="user_notes"
+        User, on_delete=models.CASCADE, related_name="user_notes", verbose_name="Автор"
     )
-    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
+    pub_date = models.DateTimeField(verbose_name="Дата публикации", auto_now_add=True)
 
     class Meta:
         ordering: tuple[Literal["-pub_date"]] = ("-pub_date",)
+        verbose_name = "Заметка"
+        verbose_name_plural = "Заметки"
 
     def __str__(self):
         return self.text
@@ -664,12 +669,28 @@ class Note(models.Model):
 class Comment(models.Model):
     """Модель комментария к заметкам."""
 
-    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name="comments")
-    text = models.TextField("Текст", help_text="Комментарий")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
-    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
+    note = models.ForeignKey(
+        Note,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name="Заметка",
+    )
+    text = models.TextField(
+        max_length=200,
+        help_text="Комментарий",
+        verbose_name="Текст",
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name="Автор",
+    )
+    pub_date = models.DateTimeField(verbose_name="Дата публикации", auto_now_add=True)
 
     class Meta:
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"
         ordering = ("-pub_date",)
 
     def __str__(self):

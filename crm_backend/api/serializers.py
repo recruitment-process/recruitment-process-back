@@ -31,9 +31,9 @@ from rest_framework.serializers import (
     FileField,
     ModelSerializer,
     MultipleChoiceField,
+    PrimaryKeyRelatedField,
     Serializer,
     SerializerMethodField,
-    SlugRelatedField,
     StringRelatedField,
     ValidationError,
 )
@@ -173,7 +173,7 @@ class CompanyShortSerializer(ModelSerializer):
 
     class Meta:
         model = Company
-        fields = ("company_title", "website")
+        fields = ("id", "company_title", "website")
 
 
 class WorkExperienceSerializer(ModelSerializer):
@@ -466,6 +466,7 @@ class CandidatesSerializer(ModelSerializer):
     class Meta:
         model = Candidate
         fields = (
+            "id",
             "first_name",
             "last_name",
             "patronymic",
@@ -545,13 +546,14 @@ class FunnelDetailSerializer(ModelSerializer):
 class NoteSerializer(ModelSerializer):
     """Сериализатор для заметок."""
 
-    author = SlugRelatedField(read_only=True, slug_field="username")
+    author_id = PrimaryKeyRelatedField(read_only=True, source="author")
 
     class Meta:
         fields = (
+            "id",
             "candidate",
             "text",
-            "author",
+            "author_id",
             "pub_date",
         )
         model = Note
@@ -561,14 +563,37 @@ class NoteSerializer(ModelSerializer):
 class CommentSerializer(ModelSerializer):
     """Сериализатор для ответов."""
 
-    author = SlugRelatedField(read_only=True, slug_field="username")
+    author_id = PrimaryKeyRelatedField(read_only=True, source="author")
+    note_id = PrimaryKeyRelatedField(read_only=True, source="note")
 
     class Meta:
         fields = (
-            "note",
+            "id",
+            "note_id",
             "text",
-            "author",
+            "author_id",
             "pub_date",
         )
         model = Comment
-        read_only_fields = ("note",)
+        read_only_fields = ("note_id",)
+
+
+class NoteDetailSerializer(ModelSerializer):
+    """Сериализатор для заметок с комментариями."""
+
+    author_id = PrimaryKeyRelatedField(read_only=True, source="author")
+    comments = CommentSerializer(
+        many=True,
+    )
+
+    class Meta:
+        fields = (
+            "id",
+            "candidate",
+            "text",
+            "author_id",
+            "pub_date",
+            "comments",
+        )
+        model = Note
+        read_only_fields = ("candidate",)
