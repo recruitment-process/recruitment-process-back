@@ -1,5 +1,8 @@
 ### recruitment-process-back
 
+![recruitment-process](https://github.com/recruitment-process/recruitment-process-back/actions/workflows/commit-tests.yml/badge.svg) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+
 # Бэкенд CRM для HR
 
 ### О проекте:
