@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect
@@ -70,18 +72,22 @@ class LoginView(APIView):
         user = authenticate(email=email, password=password)
         if user is not None:
             if user.is_active:
+                expires = (
+                    datetime.utcnow() + settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"]
+                )
+                if not remember_me:
+                    request.session.set_expiry(0)
+                    expires = settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"]
                 data = get_tokens_for_user(user)
                 response.set_cookie(
                     key=settings.SIMPLE_JWT["AUTH_COOKIE"],
                     value=data["access"],
-                    expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
+                    expires=expires,
                     secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
                     httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
                     samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
                 )
                 login(request, user)
-                if not remember_me:
-                    request.session.set_expiry(0)
                 csrf.get_token(request)
                 response.data = {"id": user.id, "data": data}
                 return response

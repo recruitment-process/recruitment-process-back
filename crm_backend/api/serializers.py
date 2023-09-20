@@ -12,6 +12,7 @@ from recruitment.constants import (
     FUNNEL_STATUS,
     INTERVIEW_STATUS,
     SCHEDULE_WORK,
+    VACANCY_STATUS,
 )
 from recruitment.models import (
     ApplicantResume,
@@ -233,6 +234,7 @@ class VacancySerializer(ModelSerializer):
     education = ChoiceField(choices=EDUCATION)
     pub_date = DateOnlyField(read_only=True)
     candidates_count = SerializerMethodField()
+    vacancy_status = ChoiceField(choices=VACANCY_STATUS)
 
     class Meta:
         model = Vacancy
@@ -290,6 +292,8 @@ class VacanciesSerializer(ModelSerializer):
     employment_type = SerializerMethodField()
     salary_range = SerializerMethodField()
     candidates_count = SerializerMethodField()
+    vacancy_status = SerializerMethodField()
+    required_experience = SerializerMethodField()
 
     class Meta:
         model = Vacancy
@@ -305,6 +309,7 @@ class VacanciesSerializer(ModelSerializer):
             "skill_stack",
             "deadline",
             "candidates_count",
+            "vacancy_status",
         )
 
     def get_schedule_work(self, obj):
@@ -326,6 +331,22 @@ class VacanciesSerializer(ModelSerializer):
     def get_salary_range(self, obj):
         """Функция преобразования вывода информации для поля salary."""
         return get_salary_range(obj)
+
+    def get_vacancy_status(self, obj):
+        """
+        Функция преобразования вывода информации.
+
+        Возвращает значение поля vacancy_status.
+        """
+        return get_display_values(obj.vacancy_status, VACANCY_STATUS)[0]
+
+    def get_required_experience(self, obj):
+        """
+        Функция преобразования вывода информации.
+
+        Возвращает значение поля required_experience.
+        """
+        return get_display_values(obj.required_experience, EXPERIENCE)[0]
 
     def get_candidates_count(self, obj):
         """Подсчет количества кандидатов на вакансию."""
