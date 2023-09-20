@@ -21,6 +21,7 @@ from recruitment.models import (
     Education,
     FunnelStage,
     Note,
+    SkillStack,
     SubStage,
     Vacancy,
     WorkExperience,
@@ -223,6 +224,14 @@ class WorkExperienceSerializer(ModelSerializer):
         return f"{int(years)} года/лет и {round(months)} месяца(ев)"
 
 
+class SkillStackSerializer(ModelSerializer):
+    """Сериализатор для навыков."""
+
+    class Meta:
+        model = SkillStack
+        fields = ("skill_stack", "skill_stack_time")
+
+
 class VacancySerializer(ModelSerializer):
     """Сериализатор карточки вакансии."""
 
@@ -233,6 +242,7 @@ class VacancySerializer(ModelSerializer):
     education = ChoiceField(choices=EDUCATION)
     pub_date = DateOnlyField(read_only=True)
     candidates_count = SerializerMethodField()
+    skill_stack = SkillStackSerializer(many=True)
 
     class Meta:
         model = Vacancy
@@ -265,7 +275,17 @@ class VacancySerializer(ModelSerializer):
         """
         company_data = validated_data.pop("company")
         company, created = Company.objects.update_or_create(**company_data)
-        return Vacancy.objects.create(company=company, **validated_data)
+        skill_stack_data_list = validated_data.pop("skill_stack")
+        skill_stack_list = []
+        for skill_stack_data in skill_stack_data_list:
+            skill_stack, created = SkillStack.objects.update_or_create(
+                **skill_stack_data
+            )
+            skill_stack_list.append(skill_stack)
+
+        vacancy = Vacancy.objects.create(company=company, **validated_data)
+        vacancy.skill_stack.set(skill_stack_list)  # Используйте set() здесь
+        return vacancy
 
     def update(self, instance, validated_data):
         """
