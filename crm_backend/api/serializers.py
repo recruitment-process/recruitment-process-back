@@ -269,7 +269,7 @@ class VacancySerializer(ModelSerializer):
 
     def create(self, validated_data):
         """
-        Функция для создания или обновления экземпляра Company.
+        Функция для создания или обновления экземпляра Company, SkillStack.
 
         Возвращает новый созданный экземпляр Vacancy.
         """
@@ -289,12 +289,20 @@ class VacancySerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         """
-        Функция для обновления экземпляра Company.
+        Функция для обновления экземпляра Company, SkillStack.
 
         Возвращает обновленный экземпляр Vacancy.
         """
         company_data = validated_data.pop("company")
         Company.objects.filter(id=instance.company.id).update(**company_data)
+        skill_stack_data_list = validated_data.pop("skill_stack")
+        instance.skill_stack.clear()
+        for skill_stack_data in skill_stack_data_list:
+            skill_stack, created = SkillStack.objects.update_or_create(
+                **skill_stack_data
+            )
+            instance.skill_stack.add(skill_stack)
+
         return super().update(instance, validated_data)
 
     def get_candidates_count(self, obj):
