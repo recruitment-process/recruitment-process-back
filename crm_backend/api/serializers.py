@@ -290,6 +290,7 @@ class VacanciesSerializer(ModelSerializer):
     employment_type = SerializerMethodField()
     salary_range = SerializerMethodField()
     candidates_count = SerializerMethodField()
+    skill_stack = StringRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Vacancy
