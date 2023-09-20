@@ -284,7 +284,7 @@ class VacancySerializer(ModelSerializer):
             skill_stack_list.append(skill_stack)
 
         vacancy = Vacancy.objects.create(company=company, **validated_data)
-        vacancy.skill_stack.set(skill_stack_list)  # Используйте set() здесь
+        vacancy.skill_stack.set(skill_stack_list)
         return vacancy
 
     def update(self, instance, validated_data):
