@@ -18,6 +18,35 @@ from recruitment.constants import (
 from recruitment.models import ApplicantResume, Candidate, Vacancy
 
 
+class BaseFilterSet(FilterSet):
+    """Базовый класс фильтра."""
+
+    salary_expectations = filters.BaseCSVFilter(
+        field_name="salary_expectations", lookup_expr="contains"
+    )
+    employment_type = MultipleChoiceFilter(
+        field_name="employment_type", choices=EMPLOYMENT_TYPE, lookup_expr="contains"
+    )
+    schedule_work = MultipleChoiceFilter(
+        field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains"
+    )
+    education = ChoiceFilter(field_name="education", choices=EDUCATION)
+    work_experiences = ChoiceFilter(field_name="work_experiences", choices=EXPERIENCE)
+    interview_status = ChoiceFilter(
+        field_name="interview_status", choices=INTERVIEW_STATUS
+    )
+
+    class Meta:
+        fields = [
+            "salary_expectations",
+            "employment_type",
+            "schedule_work",
+            "education",
+            "work_experiences",
+            "interview_status",
+        ]
+
+
 class VacancyFilterSet(FilterSet):
     """Кастомный фильтр для вакансий."""
 
@@ -55,81 +84,41 @@ class VacancyFilterSet(FilterSet):
         ]
 
 
-class ResumeFilterSet(FilterSet):
+class ResumeFilterSet(BaseFilterSet):
     """Кастомный фильтр для резюме."""
 
-    salary_expectations = filters.BaseCSVFilter(
-        field_name="salary_expectations", lookup_expr="contains"
-    )
-    employment_type = MultipleChoiceFilter(
-        field_name="employment_type", choices=EMPLOYMENT_TYPE, lookup_expr="contains"
-    )
-    schedule_work = MultipleChoiceFilter(
-        field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains"
-    )
-    education = ChoiceFilter(field_name="education", choices=EDUCATION)
-    work_experiences = ChoiceFilter(field_name="work_experiences", choices=EXPERIENCE)
-    interview_status = ChoiceFilter(
-        field_name="interview_status", choices=INTERVIEW_STATUS
-    )
     working_trip = BooleanFilter(field_name="working_trip")
 
     class Meta:
         model = ApplicantResume
-        fields = [
-            "salary_expectations",
+        fields = BaseFilterSet.Meta.fields + [
             "job_title",
-            "employment_type",
-            "schedule_work",
             "working_trip",
             "pub_date",
-            "education",
             "town",
             "citizenship",
             "bday",
-            "work_experiences",
-            "interview_status",
         ]
 
 
-class CandidatesFilterSet(FilterSet):
+class CandidatesFilterSet(BaseFilterSet):
     """Кастомный фильтр для кандидатов."""
 
-    salary_expectations = filters.BaseCSVFilter(
-        field_name="salary_expectations", lookup_expr="contains"
-    )
-    employment_type = MultipleChoiceFilter(
-        field_name="employment_type", choices=EMPLOYMENT_TYPE, lookup_expr="contains"
-    )
-    schedule_work = MultipleChoiceFilter(
-        field_name="schedule_work", choices=SCHEDULE_WORK, lookup_expr="contains"
-    )
-    education = ChoiceFilter(field_name="education", choices=EDUCATION)
-    work_experiences = ChoiceFilter(field_name="work_experiences", choices=EXPERIENCE)
-    interview_status = ChoiceFilter(
-        field_name="interview_status", choices=INTERVIEW_STATUS
-    )
     candidate_status = ChoiceFilter(
         field_name="candidate_status", choices=CANDIDATE_STATUS
     )
 
     class Meta:
         model = Candidate
-        fields = [
+        fields = BaseFilterSet.Meta.fields + [
             "first_name",
             "last_name",
             "city",
             "last_job",
             "cur_position",
             "vacancy",
-            "salary_expectations",
-            "employment_type",
-            "schedule_work",
-            "work_experiences",
             "pub_date",
-            "education",
             "bday",
-            "interview_status",
             "custom_status",
             "candidate_status",
         ]
