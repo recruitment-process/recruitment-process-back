@@ -246,7 +246,6 @@ class VacancySerializer(ModelSerializer):
     skill_stack = SkillStackSerializer(many=True)
     vacancy_status = ChoiceField(choices=VACANCY_STATUS)
 
-
     class Meta:
         model = Vacancy
         fields = (
