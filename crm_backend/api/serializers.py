@@ -22,6 +22,7 @@ from recruitment.models import (
     Education,
     FunnelStage,
     Note,
+    SkillStack,
     SubStage,
     Vacancy,
     WorkExperience,
@@ -224,6 +225,14 @@ class WorkExperienceSerializer(ModelSerializer):
         return f"{int(years)} года/лет и {round(months)} месяца(ев)"
 
 
+class SkillStackSerializer(ModelSerializer):
+    """Сериализатор для навыков."""
+
+    class Meta:
+        model = SkillStack
+        fields = ("skill_stack", "skill_stack_time")
+
+
 class VacancySerializer(ModelSerializer):
     """Сериализатор карточки вакансии."""
 
@@ -234,7 +243,9 @@ class VacancySerializer(ModelSerializer):
     education = ChoiceField(choices=EDUCATION)
     pub_date = DateOnlyField(read_only=True)
     candidates_count = SerializerMethodField()
+    skill_stack = SkillStackSerializer(many=True)
     vacancy_status = ChoiceField(choices=VACANCY_STATUS)
+
 
     class Meta:
         model = Vacancy
@@ -261,22 +272,40 @@ class VacancySerializer(ModelSerializer):
 
     def create(self, validated_data):
         """
-        Функция для создания или обновления экземпляра Company.
+        Функция для создания или обновления экземпляра Company, SkillStack.
 
         Возвращает новый созданный экземпляр Vacancy.
         """
         company_data = validated_data.pop("company")
         company, created = Company.objects.update_or_create(**company_data)
-        return Vacancy.objects.create(company=company, **validated_data)
+        skill_stack_data_list = validated_data.pop("skill_stack")
+        skill_stack_list = []
+        for skill_stack_data in skill_stack_data_list:
+            skill_stack, created = SkillStack.objects.update_or_create(
+                **skill_stack_data
+            )
+            skill_stack_list.append(skill_stack)
+
+        vacancy = Vacancy.objects.create(company=company, **validated_data)
+        vacancy.skill_stack.set(skill_stack_list)
+        return vacancy
 
     def update(self, instance, validated_data):
         """
-        Функция для обновления экземпляра Company.
+        Функция для обновления экземпляра Company, SkillStack.
 
         Возвращает обновленный экземпляр Vacancy.
         """
         company_data = validated_data.pop("company")
         Company.objects.filter(id=instance.company.id).update(**company_data)
+        skill_stack_data_list = validated_data.pop("skill_stack")
+        instance.skill_stack.clear()
+        for skill_stack_data in skill_stack_data_list:
+            skill_stack, created = SkillStack.objects.update_or_create(
+                **skill_stack_data
+            )
+            instance.skill_stack.add(skill_stack)
+
         return super().update(instance, validated_data)
 
     def get_candidates_count(self, obj):
@@ -292,6 +321,7 @@ class VacanciesSerializer(ModelSerializer):
     employment_type = SerializerMethodField()
     salary_range = SerializerMethodField()
     candidates_count = SerializerMethodField()
+    skill_stack = StringRelatedField(many=True, read_only=True)
     vacancy_status = SerializerMethodField()
     required_experience = SerializerMethodField()
 
