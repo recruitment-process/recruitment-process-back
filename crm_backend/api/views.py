@@ -30,6 +30,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
 
+from .constants import ERROR_401
 from .filters import CandidatesFilterSet, ResumeFilterSet, VacancyFilterSet
 from .serializers import (
     CandidateSerializer,
@@ -274,6 +275,11 @@ class EmailConfirmationView(APIView):
         summary="Получить список пользователей",
         description="Получает список пользователей, которые не являются персоналом.",
         tags=["Users"],
+        auth=["bearerAuth"],
+        responses={
+            status.HTTP_200_OK: UserSerializer(many=True),
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
 )
 class UserViewSet(ModelViewSet):
@@ -341,26 +347,57 @@ class ChangePasswordView(APIView):
     list=extend_schema(
         summary="Получить список вакансий",
         description="Получает список вакансий, созданных автором запроса.",
+        responses={
+            status.HTTP_200_OK: VacanciesSerializer(many=True),
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
     create=extend_schema(
         summary="Создать новую вакансию",
         description="Создает новую вакансию от имени автора запроса.",
+        responses={
+            status.HTTP_201_CREATED: VacancySerializer(),
+            status.HTTP_400_BAD_REQUEST: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
     retrieve=extend_schema(
         summary="Получить информацию о вакансии",
         description="Получает информацию о конкретной вакансии.",
+        responses={
+            status.HTTP_200_OK: VacancySerializer(),
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
     update=extend_schema(
         summary="Обновить информацию о вакансии",
         description="Обновляет информацию о конкретной вакансии.",
+        responses={
+            status.HTTP_200_OK: VacancySerializer(),
+            status.HTTP_400_BAD_REQUEST: "string",
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
     partial_update=extend_schema(
         summary="Частично обновить информацию о вакансии",
         description="Частично обновляет информацию о конкретной вакансии.",
+        responses={
+            status.HTTP_200_OK: VacancySerializer(),
+            status.HTTP_400_BAD_REQUEST: "string",
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
     destroy=extend_schema(
         summary="Удалить вакансию",
         description="Удаляет конкретную вакансию, созданную автором запроса.",
+        responses={
+            status.HTTP_204_NO_CONTENT: None,
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
 )
 class VacancyViewSet(ModelViewSet):
@@ -411,26 +448,57 @@ class VacancyViewSet(ModelViewSet):
     list=extend_schema(
         summary="Получить список вакансий",
         description="Возвращает список всех вакансий, доступных текущему пользователю.",
+        responses={
+            status.HTTP_200_OK: ResumesSerializer(many=True),
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
     create=extend_schema(
         summary="Создать новую вакансию",
         description="Создает новую вакансию и сохраняет ее в базу данных.",
+        responses={
+            status.HTTP_201_CREATED: ResumeSerializer(),
+            status.HTTP_400_BAD_REQUEST: "Некорректные данные.",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
     retrieve=extend_schema(
         summary="Получить детальную информацию о вакансии.",
         description="Возвращает детальную информацию о выбранной вакансии.",
+        responses={
+            status.HTTP_200_OK: ResumeSerializer(),
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
     update=extend_schema(
         summary="Обновить существующую вакансию",
         description="Обновляет данные существующей вакансии.",
+        responses={
+            status.HTTP_200_OK: ResumeSerializer(),
+            status.HTTP_400_BAD_REQUEST: "string",
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
     partial_update=extend_schema(
         summary="Частично обновить существующую вакансию",
-        description="Обновляет одно или несколько полей существующей вакансии.",
+        description="Частично обновляет одно или несколько полей вакансии.",
+        responses={
+            status.HTTP_200_OK: ResumeSerializer(),
+            status.HTTP_400_BAD_REQUEST: "string",
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
     destroy=extend_schema(
         summary="Удалить вакансию",
         description="Удаляет выбранную вакансию из базы данных.",
+        responses={
+            status.HTTP_204_NO_CONTENT: None,
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
     ),
 )
 class ResumeViewSet(ModelViewSet):
