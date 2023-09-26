@@ -6,6 +6,11 @@ from django.http import HttpResponseRedirect
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import (  # OpenApiExample,; OpenApiParameter,
+    extend_schema,
+    extend_schema_view,
+    inline_serializer,
+)
 from recruitment.models import (
     ApplicantResume,
     Candidate,
@@ -19,11 +24,13 @@ from rest_framework import status
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.serializers import BooleanField, CharField, EmailField, IntegerField
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
 
+from .constants import ERROR_401
 from .filters import CandidatesFilterSet, ResumeFilterSet, VacancyFilterSet
 from .serializers import (
     CandidateSerializer,
@@ -49,7 +56,15 @@ from .utils import send_mail_to_user
 
 
 def get_tokens_for_user(user):
-    """Получение токенов для пользователя."""
+    """
+    Функция для получения токенов доступа для пользователя.
+
+    Аргументы:
+    user -- экземпляр модели User, для которого необходимо получить токены.
+
+    Возвращает:
+    Словарь с токенами "refresh" и "access".
+    """
     refresh = RefreshToken.for_user(user)
     return {
         "refresh": str(refresh),
@@ -57,13 +72,55 @@ def get_tokens_for_user(user):
     }
 
 
+@extend_schema_view(
+    post=extend_schema(
+        summary="Аутентификация пользователя",
+        description="POST запрос для получения токенов доступа.",
+        tags=["Аутентификация"],
+        responses={
+            200: inline_serializer(
+                name="Response",
+                fields={
+                    "id": IntegerField(),
+                    "data": inline_serializer(
+                        name="Tokens",
+                        fields={"refresh": CharField(), "access": CharField()},
+                    ),
+                },
+            )
+        },
+        request=inline_serializer(
+            name="Request",
+            fields={
+                "email": EmailField(),
+                "password": CharField(),
+                "remember_me": BooleanField(required=False),
+            },
+        ),
+    )
+)
 class LoginView(APIView):
-    """Аутентификация пользователя."""
+    """
+    Представление для аутентификации пользователя.
+
+    Разрешения:
+    AllowAny -- доступ разрешен всем пользователям.
+    """
 
     permission_classes = [AllowAny]
 
     def post(self, request, format=None):
-        """POST запрос на получение токенов."""
+        """
+        POST запрос для получения токенов доступа.
+
+        Аргументы:
+        request -- объект запроса Django.
+        format -- формат ответа (необязательный).
+
+        Возвращает:
+        Response с токенами доступа в случае успешной аутентификации.
+        Response с сообщением об ошибке в случае неудачной аутентификации.
+        """
         data = request.data
         response = Response()
         email = data.get("email", None)
@@ -101,14 +158,34 @@ class LoginView(APIView):
         )
 
 
+@extend_schema(tags=["Аутентификация"])
+@extend_schema_view(
+    post=extend_schema(
+        summary="Регистрация пользователя",
+        description="Создает нового пользователя и отправляет ему подтверждение.",
+    ),
+)
 class UserSignupView(APIView):
-    """Регистрация пользователя."""
+    """
+    Представление для регистрации пользователя.
+
+    Разрешения:
+    AllowAny -- доступ разрешен всем пользователям.
+    """
 
     pagination_class = None
     permission_classes = [AllowAny]
 
     def post(self, request):
-        """POST запрос создания пользователя."""
+        """
+        POST запрос для создания пользователя.
+
+        Аргументы:
+        request -- объект запроса Django.
+
+        Возвращает:
+        Response с данными пользователя в случае успешной регистрации.
+        """
         serializer = UserSignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -116,21 +193,67 @@ class UserSignupView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(tags=["Аутентификация"])
+@extend_schema_view(
+    post=extend_schema(
+        summary="Выход из системы",
+        description="Выходит из системы и удаляет cookie с токеном доступа.",
+    ),
+)
 class LogoutView(APIView):
-    """Выход пользователя."""
+    """
+    Представление для выхода пользователя из системы.
+
+    Разрешения:
+    IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
+    """
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        """POST запрос выхода пользователя."""
+        """
+        POST запрос для выхода пользователя из системы.
+
+        Аргументы:
+        request -- объект запроса Django.
+
+        Возвращает:
+        HttpResponseRedirect на страницу входа в систему.
+        """
         logout(request)
         response = HttpResponseRedirect(f"http://{settings.DOMAIN_NAME}/login/")
         response.delete_cookie(settings.SIMPLE_JWT["AUTH_COOKIE"])
         return response
 
 
+@extend_schema_view(
+    get=extend_schema(
+        summary="Подтверждение email пользователя",
+        description="GET запрос для подтверждения email пользователя.",
+        tags=["Аутентификация"],
+        responses={
+            200: inline_serializer(
+                name="Success",
+                fields={
+                    "status": CharField(),
+                },
+            ),
+            400: inline_serializer(
+                name="Error",
+                fields={
+                    "status": CharField(),
+                },
+            ),
+        },
+    )
+)
 class EmailConfirmationView(APIView):
-    """Подтверждение email пользователя."""
+    """
+    Представление для подтверждения email пользователя.
+
+    Разрешения:
+    AllowAny -- доступ разрешен всем пользователям.
+    """
 
     pagination_class = None
     permission_classes = [AllowAny]
@@ -147,6 +270,18 @@ class EmailConfirmationView(APIView):
         )
 
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="Получить список пользователей",
+        description="Получает список пользователей, которые не являются персоналом.",
+        tags=["Users"],
+        auth=["bearerAuth"],
+        responses={
+            status.HTTP_200_OK: UserSerializer(many=True),
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+)
 class UserViewSet(ModelViewSet):
     """Вьюсет для модели пользователей."""
 
@@ -160,6 +295,27 @@ class UserViewSet(ModelViewSet):
     ]
 
 
+@extend_schema_view(
+    put=extend_schema(
+        summary="Смена пароля пользователя",
+        description="PUT запрос для смены пароля пользователя.",
+        tags=["Аутентификация"],
+        responses={
+            204: inline_serializer(
+                name="Success",
+                fields={
+                    "status": CharField(),
+                },
+            ),
+            400: inline_serializer(
+                name="Error",
+                fields={
+                    "неверный текущий пароль.": CharField(),
+                },
+            ),
+        },
+    )
+)
 class ChangePasswordView(APIView):
     """Смена пароля пользователя."""
 
@@ -186,6 +342,64 @@ class ChangePasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(tags=["Вакансии"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Получить список вакансий",
+        description="Получает список вакансий, созданных автором запроса.",
+        responses={
+            status.HTTP_200_OK: VacanciesSerializer(many=True),
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+    create=extend_schema(
+        summary="Создать новую вакансию",
+        description="Создает новую вакансию от имени автора запроса.",
+        responses={
+            status.HTTP_201_CREATED: VacancySerializer(),
+            status.HTTP_400_BAD_REQUEST: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+    retrieve=extend_schema(
+        summary="Получить информацию о вакансии",
+        description="Получает информацию о конкретной вакансии.",
+        responses={
+            status.HTTP_200_OK: VacancySerializer(),
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+    update=extend_schema(
+        summary="Обновить информацию о вакансии",
+        description="Обновляет информацию о конкретной вакансии.",
+        responses={
+            status.HTTP_200_OK: VacancySerializer(),
+            status.HTTP_400_BAD_REQUEST: "string",
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить информацию о вакансии",
+        description="Частично обновляет информацию о конкретной вакансии.",
+        responses={
+            status.HTTP_200_OK: VacancySerializer(),
+            status.HTTP_400_BAD_REQUEST: "string",
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+    destroy=extend_schema(
+        summary="Удалить вакансию",
+        description="Удаляет конкретную вакансию, созданную автором запроса.",
+        responses={
+            status.HTTP_204_NO_CONTENT: None,
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+)
 class VacancyViewSet(ModelViewSet):
     """Вьюсет для модели вакансий."""
 
@@ -229,8 +443,71 @@ class VacancyViewSet(ModelViewSet):
         serializer.save(author=self.request.user)
 
 
+@extend_schema(tags=["Резюме"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Получить список вакансий",
+        description="Возвращает список всех вакансий, доступных текущему пользователю.",
+        responses={
+            status.HTTP_200_OK: ResumesSerializer(many=True),
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+    create=extend_schema(
+        summary="Создать новую вакансию",
+        description="Создает новую вакансию и сохраняет ее в базу данных.",
+        responses={
+            status.HTTP_201_CREATED: ResumeSerializer(),
+            status.HTTP_400_BAD_REQUEST: "Некорректные данные.",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+    retrieve=extend_schema(
+        summary="Получить детальную информацию о вакансии.",
+        description="Возвращает детальную информацию о выбранной вакансии.",
+        responses={
+            status.HTTP_200_OK: ResumeSerializer(),
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+    update=extend_schema(
+        summary="Обновить существующую вакансию",
+        description="Обновляет данные существующей вакансии.",
+        responses={
+            status.HTTP_200_OK: ResumeSerializer(),
+            status.HTTP_400_BAD_REQUEST: "string",
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить существующую вакансию",
+        description="Частично обновляет одно или несколько полей вакансии.",
+        responses={
+            status.HTTP_200_OK: ResumeSerializer(),
+            status.HTTP_400_BAD_REQUEST: "string",
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+    destroy=extend_schema(
+        summary="Удалить вакансию",
+        description="Удаляет выбранную вакансию из базы данных.",
+        responses={
+            status.HTTP_204_NO_CONTENT: None,
+            status.HTTP_404_NOT_FOUND: "string",
+            status.HTTP_401_UNAUTHORIZED: ERROR_401,
+        },
+    ),
+)
 class ResumeViewSet(ModelViewSet):
-    """Вьюсет для модели резюме."""
+    """
+    Вьюсет для модели резюме.
+
+    Разрешения:
+    IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
+    """
 
     permission_classes = (IsAuthenticated,)
     queryset = ApplicantResume.objects.all()
@@ -261,8 +538,40 @@ class ResumeViewSet(ModelViewSet):
         return ResumeSerializer
 
 
+@extend_schema(tags=["Заметки"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Получить список заметок",
+        description="Возвращает список всех заметок на кандидата.",
+    ),
+    create=extend_schema(
+        summary="Создать новую заметку",
+        description="Создает новую заметку и сохраняет ее в базу данных.",
+    ),
+    retrieve=extend_schema(
+        summary="Получить детали заметки",
+        description="Возвращает детальную информацию о выбранной заметке.",
+    ),
+    update=extend_schema(
+        summary="Обновить существующую заметку",
+        description="Обновляет данные существующей заметки.",
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить существующую заметку",
+        description="Обновляет одно или несколько полей существующей заметки.",
+    ),
+    destroy=extend_schema(
+        summary="Удалить заметку",
+        description="Удаляет выбранную заметку из базы данных.",
+    ),
+)
 class NoteViewSet(ModelViewSet):
-    """Вьюсет для модели заметок."""
+    """
+    Вьюсет для модели заметок.
+
+    Разрешения:
+    IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
+    """
 
     permission_classes = (IsAuthenticated,)
     ordering = ("pub_date",)
@@ -289,8 +598,40 @@ class NoteViewSet(ModelViewSet):
         serializer.save(author=self.request.user, candidate=candidate)
 
 
+@extend_schema(tags=["Заметки"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Получить список комментариев к заметке",
+        description="Возвращает список всех комментариев к заметке.",
+    ),
+    create=extend_schema(
+        summary="Добавить новый комментарий к заметке",
+        description="Добавляет новый комментарий к заметке и сохраняет его в БД.",
+    ),
+    retrieve=extend_schema(
+        summary="Получить детали комментария",
+        description="Возвращает детальную информацию о выбранном комментарии.",
+    ),
+    update=extend_schema(
+        summary="Обновить существующий комментарий",
+        description="Обновляет данные существующего комментария.",
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить существующий комментарий",
+        description="Обновляет одно или несколько полей существующего комментария.",
+    ),
+    destroy=extend_schema(
+        summary="Удалить комментарий",
+        description="Удаляет выбранный комментарий из базы данных.",
+    ),
+)
 class CommentViewSet(ModelViewSet):
-    """Вьюсет для модели ответов к заметкам."""
+    """
+    Вьюсет для модели комментариев к заметкам.
+
+    Разрешения:
+    IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
+    """
 
     permission_classes = (IsAuthenticated,)
     serializer_class = CommentSerializer
@@ -312,8 +653,40 @@ class CommentViewSet(ModelViewSet):
         serializer.save(author=self.request.user, note=note)
 
 
+@extend_schema(tags=["Кандидаты"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Получить список кандидатов",
+        description="Возвращает список всех кандидатов на вакансию.",
+    ),
+    create=extend_schema(
+        summary="Добавить нового кандидата",
+        description="Добавляет нового кандидата на вакансию и сохраняет его в БД.",
+    ),
+    retrieve=extend_schema(
+        summary="Получить детали кандидата",
+        description="Возвращает детальную информацию о выбранном кандидате.",
+    ),
+    update=extend_schema(
+        summary="Обновить существующего кандидата",
+        description="Обновляет данные существующего кандидата.",
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить существующего кандидата",
+        description="Обновляет одно или несколько полей существующего кандидата.",
+    ),
+    destroy=extend_schema(
+        summary="Удалить кандидата",
+        description="Удаляет выбранного кандидата из базы данных.",
+    ),
+)
 class CandidateViewSet(ModelViewSet):
-    """Вьюсет для модели Candidate."""
+    """
+    Вьюсет для модели Candidate.
+
+    Разрешения:
+    IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
+    """
 
     permission_classes = (IsAuthenticated,)
     filter_backends = (
@@ -376,8 +749,40 @@ class CandidateViewSet(ModelViewSet):
         serializer.save(vacancy=vacancy)
 
 
+@extend_schema(tags=["Компании"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Получить список компаний",
+        description="Возвращает список всех компаний, доступных текущему пользователю.",
+    ),
+    create=extend_schema(
+        summary="Создать новую компанию",
+        description="Создает новую компанию и сохраняет ее в базу данных.",
+    ),
+    retrieve=extend_schema(
+        summary="Получить детали компании",
+        description="Возвращает детальную информацию о выбранной компании.",
+    ),
+    update=extend_schema(
+        summary="Обновить существующую компанию",
+        description="Обновляет данные существующей компании.",
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить компанию",
+        description="Обновляет одно или несколько полей существующей компании.",
+    ),
+    destroy=extend_schema(
+        summary="Удалить компанию",
+        description="Удаляет выбранную компанию из базы данных.",
+    ),
+)
 class CompanyViewSet(ModelViewSet):
-    """Вьюсет для модели Company."""
+    """
+    Вьюсет для модели Company.
+
+    Разрешения:
+    IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
+    """
 
     permission_classes = (IsAuthenticated,)
     queryset = Company.objects.all()
@@ -404,8 +809,40 @@ class CompanyViewSet(ModelViewSet):
         return CompanySerializer
 
 
+@extend_schema(tags=["Воронки кандидатов"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Получить список этапов воронки",
+        description="Возвращает список всех этапов воронки кандидата.",
+    ),
+    create=extend_schema(
+        summary="Добавить новый этап в воронку",
+        description="Добавляет новый этап в воронку кандидата и сохраняет его в БД.",
+    ),
+    retrieve=extend_schema(
+        summary="Получить детали этапа воронки",
+        description="Возвращает детальную информацию о выбранном этапе воронки.",
+    ),
+    update=extend_schema(
+        summary="Обновить существующий этап в воронке",
+        description="Обновляет данные существующего этапа в воронке.",
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить существующий этап в воронке",
+        description="Обновляет одно или несколько полей существующего этапа в воронке.",
+    ),
+    destroy=extend_schema(
+        summary="Удалить этап из воронки",
+        description="Удаляет выбранный этап из воронки кандидата.",
+    ),
+)
 class FunnelViewSet(ModelViewSet):
-    """Вьюсет для воронки кандидата Funnel."""
+    """
+    Вьюсет для воронки кандидата Funnel.
+
+    Разрешения:
+    IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
+    """
 
     permission_classes = (IsAuthenticated,)
 
@@ -431,8 +868,40 @@ class FunnelViewSet(ModelViewSet):
         serializer.save(candidate=candidate)
 
 
+@extend_schema(tags=["Воронки кандидатов"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Получить список подэтапов",
+        description="Возвращает список всех подэтапов воронки кандидата.",
+    ),
+    create=extend_schema(
+        summary="Добавить новый подэтап в воронку",
+        description="Добавляет новый подэтап в воронку кандидата и сохраняет его в БД.",
+    ),
+    retrieve=extend_schema(
+        summary="Получить детали подэтапа",
+        description="Возвращает детальную информацию о выбранном подэтапе воронки.",
+    ),
+    update=extend_schema(
+        summary="Обновить существующий подэтап в воронке",
+        description="Обновляет данные существующего подэтапа в воронке.",
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить существующий подэтап в воронке",
+        description="Обновляет одно или несколько полей подэтапа в воронке.",
+    ),
+    destroy=extend_schema(
+        summary="Удалить подэтап из воронки",
+        description="Удаляет выбранный подэтап из воронки кандидата.",
+    ),
+)
 class SubStageViewSet(ModelViewSet):
-    """Вьюсет для подэтапов воронки кандидата SubStage."""
+    """
+    Вьюсет для подэтапов воронки кандидата SubStage.
+
+    Разрешения:
+    IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
+    """
 
     permission_classes = (IsAuthenticated,)
     serializer_class = SubStageSerializer
@@ -453,8 +922,40 @@ class SubStageViewSet(ModelViewSet):
         serializer.save(stage=funnel)
 
 
+@extend_schema(tags=["Образование"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Получить список образовательных учреждений",
+        description="Возвращает список всех образовательных учреждений.",
+    ),
+    create=extend_schema(
+        summary="Добавить новое образовательное учреждение",
+        description="Добавляет новое образовательное учреждение и сохраняет его в БД.",
+    ),
+    retrieve=extend_schema(
+        summary="Получить детали образовательного учреждения",
+        description="Возвращает детальную информацию о выбранном учреждении.",
+    ),
+    update=extend_schema(
+        summary="Обновить существующее образовательное учреждение",
+        description="Обновляет данные существующего образовательного учреждения.",
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить существующее образовательное учреждение",
+        description="Обновляет одно или несколько полей образовательного учреждения.",
+    ),
+    destroy=extend_schema(
+        summary="Удалить образовательное учреждение",
+        description="Удаляет выбранное образовательное учреждение из базы данных.",
+    ),
+)
 class EducationViewSet(ModelViewSet):
-    """Вьюсет для модели Education."""
+    """
+    Вьюсет для модели Education.
+
+    Разрешения:
+    IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
+    """
 
     serializer_class = EducationSerializer
     permission_classes = (IsAuthenticated,)
