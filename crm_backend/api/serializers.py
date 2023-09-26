@@ -246,7 +246,6 @@ class VacancySerializer(ModelSerializer):
     skill_stack = SkillStackSerializer(many=True)
     vacancy_status = ChoiceField(choices=VACANCY_STATUS)
 
-
     class Meta:
         model = Vacancy
         fields = (
@@ -525,10 +524,10 @@ class CandidateSerializer(ModelSerializer):
 class CandidatesSerializer(ModelSerializer):
     """Сериализатор для карточек кандидатов."""
 
-    interview_status = ChoiceField(choices=INTERVIEW_STATUS)
-    candidate_status = ChoiceField(choices=CANDIDATE_STATUS)
+    interview_status = SerializerMethodField()
+    candidate_status = SerializerMethodField()
     custom_status = CharField(required=False)
-    work_experiences = ChoiceField(choices=EXPERIENCE)
+    work_experiences = SerializerMethodField()
 
     class Meta:
         model = Candidate
@@ -544,6 +543,30 @@ class CandidatesSerializer(ModelSerializer):
             "custom_status",
             "candidate_status",
         )
+
+    def get_interview_status(self, obj):
+        """
+        Функция преобразования вывода информации.
+
+        Возвращает значение поля interview_status.
+        """
+        return get_display_values([obj.interview_status], INTERVIEW_STATUS)[0]
+
+    def get_work_experiences(self, obj):
+        """
+        Функция преобразования вывода информации.
+
+        Возвращает значение поля work_experiences.
+        """
+        return get_display_values(obj.work_experiences, EXPERIENCE)[0]
+
+    def get_candidate_status(self, obj):
+        """
+        Функция преобразования вывода информации.
+
+        Возвращает значение поля candidate_status.
+        """
+        return get_display_values(obj.candidate_status, CANDIDATE_STATUS)[0]
 
 
 class SubStageSerializer(ModelSerializer):
