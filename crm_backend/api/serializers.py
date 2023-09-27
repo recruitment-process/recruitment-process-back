@@ -22,6 +22,7 @@ from recruitment.models import (
     Education,
     FunnelStage,
     Note,
+    Skills,
     SkillStack,
     SubStage,
     Vacancy,
@@ -225,12 +226,35 @@ class WorkExperienceSerializer(ModelSerializer):
         return f"{int(years)} года/лет и {round(months)} месяца(ев)"
 
 
+class SkillsSerializer(ModelSerializer):
+    """Сериализатор для модели Skills."""
+
+    class Meta:
+        model = Skills
+        fields = ["name"]
+
+
 class SkillStackSerializer(ModelSerializer):
-    """Сериализатор для навыков."""
+    """Сериализатор для модели SkillStack."""
+
+    skill_stack = SkillsSerializer()
 
     class Meta:
         model = SkillStack
-        fields = ("skill_stack", "skill_stack_time")
+        fields = ["skill_stack", "skill_stack_time"]
+
+    def create(self, validated_data):
+        """
+        Создает новый объект SkillStack, связанный с объектом Skills.
+
+        Если объект Skills с заданным именем не существует, он создается.
+        """
+        skill_data = validated_data.pop("skill_stack")
+        skill, created = Skills.objects.get_or_create(**skill_data)
+        skill_stack_object = SkillStack.objects.create(
+            skill_stack=skill, **validated_data
+        )
+        return skill_stack_object
 
 
 class VacancySerializer(ModelSerializer):
@@ -271,22 +295,18 @@ class VacancySerializer(ModelSerializer):
 
     def create(self, validated_data):
         """
-        Функция для создания или обновления экземпляра Company, SkillStack.
+        Создает новый объект Vacancy, связанный с объектами Company и SkillStack.
 
-        Возвращает новый созданный экземпляр Vacancy.
+        Если объекты Company или SkillStack не существуют, они создаются.
         """
+        skill_stack_data = validated_data.pop("skill_stack")
         company_data = validated_data.pop("company")
         company, created = Company.objects.update_or_create(**company_data)
-        skill_stack_data_list = validated_data.pop("skill_stack")
-        skill_stack_list = []
-        for skill_stack_data in skill_stack_data_list:
-            skill_stack, created = SkillStack.objects.update_or_create(
-                **skill_stack_data
-            )
-            skill_stack_list.append(skill_stack)
-
         vacancy = Vacancy.objects.create(company=company, **validated_data)
-        vacancy.skill_stack.set(skill_stack_list)
+        for skill_data in skill_stack_data:
+            skill_stack_serializer = SkillStackSerializer(data=skill_data)
+            if skill_stack_serializer.is_valid():
+                skill_stack_serializer.save(vacancy=vacancy)
         return vacancy
 
     def update(self, instance, validated_data):

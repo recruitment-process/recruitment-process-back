@@ -30,7 +30,7 @@ from .utils import generate_logo_path, upload_to_candidates
 class Skills(models.Model):
     """Модель для списка навыков."""
 
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50)
 
     class Meta:
         ordering = ["name"]
@@ -46,6 +46,9 @@ class SkillStack(models.Model):
 
     skill_stack = models.ForeignKey(Skills, on_delete=models.CASCADE)
     skill_stack_time = models.IntegerField(null=True, blank=True)
+    vacancy = models.ForeignKey(
+        "Vacancy", on_delete=models.CASCADE, related_name="skill_stacks"
+    )
 
     class Meta:
         ordering = ["skill_stack"]

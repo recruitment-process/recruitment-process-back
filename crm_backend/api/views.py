@@ -11,6 +11,7 @@ from drf_spectacular.utils import (  # OpenApiExample,; OpenApiParameter,
     extend_schema_view,
     inline_serializer,
 )
+from drf_standardized_errors.openapi import AutoSchema
 from recruitment.models import (
     ApplicantResume,
     Candidate,
@@ -30,7 +31,6 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
 
-from .constants import ERROR_401
 from .filters import CandidatesFilterSet, ResumeFilterSet, VacancyFilterSet
 from .serializers import (
     CandidateSerializer,
@@ -107,6 +107,7 @@ class LoginView(APIView):
     AllowAny -- доступ разрешен всем пользователям.
     """
 
+    schema = AutoSchema()
     permission_classes = [AllowAny]
 
     def post(self, request, format=None):
@@ -158,21 +159,25 @@ class LoginView(APIView):
         )
 
 
-@extend_schema(tags=["Аутентификация"])
 @extend_schema_view(
     post=extend_schema(
         summary="Регистрация пользователя",
         description="Создает нового пользователя и отправляет ему подтверждение.",
+        tags=["Аутентификация"],
+        request=UserSignupSerializer,
     ),
 )
 class UserSignupView(APIView):
     """
     Представление для регистрации пользователя.
 
+    Создает нового пользователя и отправляет ему подтверждение.
+
     Разрешения:
     AllowAny -- доступ разрешен всем пользователям.
     """
 
+    schema = AutoSchema()
     pagination_class = None
     permission_classes = [AllowAny]
 
@@ -193,11 +198,11 @@ class UserSignupView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-@extend_schema(tags=["Аутентификация"])
 @extend_schema_view(
     post=extend_schema(
         summary="Выход из системы",
         description="Выходит из системы и удаляет cookie с токеном доступа.",
+        tags=["Аутентификация"],
     ),
 )
 class LogoutView(APIView):
@@ -208,6 +213,7 @@ class LogoutView(APIView):
     IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
     """
 
+    schema = AutoSchema()
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -226,27 +232,7 @@ class LogoutView(APIView):
         return response
 
 
-@extend_schema_view(
-    get=extend_schema(
-        summary="Подтверждение email пользователя",
-        description="GET запрос для подтверждения email пользователя.",
-        tags=["Аутентификация"],
-        responses={
-            200: inline_serializer(
-                name="Success",
-                fields={
-                    "status": CharField(),
-                },
-            ),
-            400: inline_serializer(
-                name="Error",
-                fields={
-                    "status": CharField(),
-                },
-            ),
-        },
-    )
-)
+@extend_schema(tags=["Аутентификация"])
 class EmailConfirmationView(APIView):
     """
     Представление для подтверждения email пользователя.
@@ -255,6 +241,7 @@ class EmailConfirmationView(APIView):
     AllowAny -- доступ разрешен всем пользователям.
     """
 
+    schema = AutoSchema()
     pagination_class = None
     permission_classes = [AllowAny]
 
@@ -270,21 +257,15 @@ class EmailConfirmationView(APIView):
         )
 
 
+@extend_schema(tags=["Users"])
 @extend_schema_view(
-    list=extend_schema(
-        summary="Получить список пользователей",
-        description="Получает список пользователей, которые не являются персоналом.",
-        tags=["Users"],
-        auth=["bearerAuth"],
-        responses={
-            status.HTTP_200_OK: UserSerializer(many=True),
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
-    ),
+    summary="Получить список пользователей",
+    description="Получает список пользователей, которые не являются персоналом.",
 )
 class UserViewSet(ModelViewSet):
     """Вьюсет для модели пользователей."""
 
+    schema = AutoSchema()
     queryset = User.objects.filter(is_staff=False)
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
@@ -300,25 +281,13 @@ class UserViewSet(ModelViewSet):
         summary="Смена пароля пользователя",
         description="PUT запрос для смены пароля пользователя.",
         tags=["Аутентификация"],
-        responses={
-            204: inline_serializer(
-                name="Success",
-                fields={
-                    "status": CharField(),
-                },
-            ),
-            400: inline_serializer(
-                name="Error",
-                fields={
-                    "неверный текущий пароль.": CharField(),
-                },
-            ),
-        },
+        request=ChangePasswordSerializer,
     )
 )
 class ChangePasswordView(APIView):
     """Смена пароля пользователя."""
 
+    schema = AutoSchema()
     permission_classes = [IsAuthenticated]
 
     def get_object(self, queryset=None):
@@ -326,7 +295,7 @@ class ChangePasswordView(APIView):
         return self.request.user
 
     def put(self, request, *args, **kwargs):
-        """PUT запрос мены пароля пользователя."""
+        """PUT запрос смены пароля пользователя."""
         self.object = self.get_object()
         serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
@@ -347,62 +316,32 @@ class ChangePasswordView(APIView):
     list=extend_schema(
         summary="Получить список вакансий",
         description="Получает список вакансий, созданных автором запроса.",
-        responses={
-            status.HTTP_200_OK: VacanciesSerializer(many=True),
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
     create=extend_schema(
         summary="Создать новую вакансию",
         description="Создает новую вакансию от имени автора запроса.",
-        responses={
-            status.HTTP_201_CREATED: VacancySerializer(),
-            status.HTTP_400_BAD_REQUEST: "string",
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
     retrieve=extend_schema(
         summary="Получить информацию о вакансии",
         description="Получает информацию о конкретной вакансии.",
-        responses={
-            status.HTTP_200_OK: VacancySerializer(),
-            status.HTTP_404_NOT_FOUND: "string",
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
     update=extend_schema(
         summary="Обновить информацию о вакансии",
         description="Обновляет информацию о конкретной вакансии.",
-        responses={
-            status.HTTP_200_OK: VacancySerializer(),
-            status.HTTP_400_BAD_REQUEST: "string",
-            status.HTTP_404_NOT_FOUND: "string",
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
     partial_update=extend_schema(
         summary="Частично обновить информацию о вакансии",
         description="Частично обновляет информацию о конкретной вакансии.",
-        responses={
-            status.HTTP_200_OK: VacancySerializer(),
-            status.HTTP_400_BAD_REQUEST: "string",
-            status.HTTP_404_NOT_FOUND: "string",
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
     destroy=extend_schema(
         summary="Удалить вакансию",
         description="Удаляет конкретную вакансию, созданную автором запроса.",
-        responses={
-            status.HTTP_204_NO_CONTENT: None,
-            status.HTTP_404_NOT_FOUND: "string",
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
 )
 class VacancyViewSet(ModelViewSet):
     """Вьюсет для модели вакансий."""
 
+    schema = AutoSchema()
     permission_classes = (IsAuthenticated,)
     filter_backends = (
         DjangoFilterBackend,
@@ -448,57 +387,26 @@ class VacancyViewSet(ModelViewSet):
     list=extend_schema(
         summary="Получить список вакансий",
         description="Возвращает список всех вакансий, доступных текущему пользователю.",
-        responses={
-            status.HTTP_200_OK: ResumesSerializer(many=True),
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
     create=extend_schema(
         summary="Создать новую вакансию",
         description="Создает новую вакансию и сохраняет ее в базу данных.",
-        responses={
-            status.HTTP_201_CREATED: ResumeSerializer(),
-            status.HTTP_400_BAD_REQUEST: "Некорректные данные.",
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
     retrieve=extend_schema(
         summary="Получить детальную информацию о вакансии.",
         description="Возвращает детальную информацию о выбранной вакансии.",
-        responses={
-            status.HTTP_200_OK: ResumeSerializer(),
-            status.HTTP_404_NOT_FOUND: "string",
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
     update=extend_schema(
         summary="Обновить существующую вакансию",
         description="Обновляет данные существующей вакансии.",
-        responses={
-            status.HTTP_200_OK: ResumeSerializer(),
-            status.HTTP_400_BAD_REQUEST: "string",
-            status.HTTP_404_NOT_FOUND: "string",
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
     partial_update=extend_schema(
         summary="Частично обновить существующую вакансию",
         description="Частично обновляет одно или несколько полей вакансии.",
-        responses={
-            status.HTTP_200_OK: ResumeSerializer(),
-            status.HTTP_400_BAD_REQUEST: "string",
-            status.HTTP_404_NOT_FOUND: "string",
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
     destroy=extend_schema(
         summary="Удалить вакансию",
         description="Удаляет выбранную вакансию из базы данных.",
-        responses={
-            status.HTTP_204_NO_CONTENT: None,
-            status.HTTP_404_NOT_FOUND: "string",
-            status.HTTP_401_UNAUTHORIZED: ERROR_401,
-        },
     ),
 )
 class ResumeViewSet(ModelViewSet):
@@ -509,6 +417,7 @@ class ResumeViewSet(ModelViewSet):
     IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
     """
 
+    schema = AutoSchema()
     permission_classes = (IsAuthenticated,)
     queryset = ApplicantResume.objects.all()
     filter_backends = (
@@ -573,6 +482,7 @@ class NoteViewSet(ModelViewSet):
     IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
     """
 
+    schema = AutoSchema()
     permission_classes = (IsAuthenticated,)
     ordering = ("pub_date",)
 
@@ -633,6 +543,7 @@ class CommentViewSet(ModelViewSet):
     IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
     """
 
+    schema = AutoSchema()
     permission_classes = (IsAuthenticated,)
     serializer_class = CommentSerializer
     ordering = ("pub_date",)
@@ -688,6 +599,7 @@ class CandidateViewSet(ModelViewSet):
     IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
     """
 
+    schema = AutoSchema()
     permission_classes = (IsAuthenticated,)
     filter_backends = (
         DjangoFilterBackend,
@@ -784,6 +696,7 @@ class CompanyViewSet(ModelViewSet):
     IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
     """
 
+    schema = AutoSchema()
     permission_classes = (IsAuthenticated,)
     queryset = Company.objects.all()
     filter_backends = (
@@ -844,6 +757,7 @@ class FunnelViewSet(ModelViewSet):
     IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
     """
 
+    schema = AutoSchema()
     permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
@@ -903,6 +817,7 @@ class SubStageViewSet(ModelViewSet):
     IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
     """
 
+    schema = AutoSchema()
     permission_classes = (IsAuthenticated,)
     serializer_class = SubStageSerializer
 
@@ -957,6 +872,7 @@ class EducationViewSet(ModelViewSet):
     IsAuthenticated -- доступ разрешен только аутентифицированным пользователям.
     """
 
+    schema = AutoSchema()
     serializer_class = EducationSerializer
     permission_classes = (IsAuthenticated,)
     queryset = Education.objects.all()

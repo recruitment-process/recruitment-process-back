@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "drf_spectacular_sidecar",
+    "drf_standardized_errors",
 ]
 
 MIDDLEWARE = [
@@ -136,24 +137,47 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "api.authentication.CustomAuthentication",
     ],
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+DRF_STANDARDIZED_ERRORS = {
+    "EXCEPTION_FORMATTER_CLASS": "api.exceptions.MyExceptionFormatter"
 }
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "MeetingRoom",
     "DESCRIPTION": "API CRM платформы управления процессом найма для HR.",
     "VERSION": "1.0.0",
+    "AUTHENTICATION_SCHEMES": [
+        "api.authentication_scheme.MyAuthenticationScheme",
+    ],
     "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_DIST": "SIDECAR",
     "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
     "SWAGGER_UI_SETTINGS": {
         "deepLinking": True,
-        "persistAuthorization": True,
         "displayOperationId": True,
         "filter": True,
     },
     "COMPONENT_SPLIT_REQUEST": True,
     "REDOC_DIST": "SIDECAR",
+    "ENUM_NAME_OVERRIDES": {
+        "ValidationErrorEnum": "drf_standardized_errors.openapi_serializers.ValidationErrorEnum.values",
+        "ClientErrorEnum": "drf_standardized_errors.openapi_serializers.ClientErrorEnum.values",
+        "ServerErrorEnum": "drf_standardized_errors.openapi_serializers.ServerErrorEnum.values",
+        "ErrorCode401Enum": "drf_standardized_errors.openapi_serializers.ErrorCode401Enum.values",
+        "ErrorCode403Enum": "drf_standardized_errors.openapi_serializers.ErrorCode403Enum.values",
+        "ErrorCode404Enum": "drf_standardized_errors.openapi_serializers.ErrorCode404Enum.values",
+        "ErrorCode405Enum": "drf_standardized_errors.openapi_serializers.ErrorCode405Enum.values",
+        "ErrorCode406Enum": "drf_standardized_errors.openapi_serializers.ErrorCode406Enum.values",
+        "ErrorCode415Enum": "drf_standardized_errors.openapi_serializers.ErrorCode415Enum.values",
+        "ErrorCode429Enum": "drf_standardized_errors.openapi_serializers.ErrorCode429Enum.values",
+        "ErrorCode500Enum": "drf_standardized_errors.openapi_serializers.ErrorCode500Enum.values",
+    },
+    "POSTPROCESSING_HOOKS": [
+        "drf_standardized_errors.openapi_hooks.postprocess_schema_enums"
+    ],
 }
 
 # CORS_ORIGIN_ALLOW_ALL = True
