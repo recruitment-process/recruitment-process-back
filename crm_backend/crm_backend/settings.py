@@ -12,22 +12,14 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG", default=True)
 
+DOMAIN_NAME = os.getenv("DOMAIN_NAME")
+
 ALLOWED_HOSTS = [
     "backend",
     "localhost",
     "127.0.0.1",
     "80.87.107.166",
-    "80.87.109.74",
-    "80.87.109.82",
-    "80.87.109.248",
-    "80.87.109.8",
-    "80.87.109.229",
-    "meetingroom.acceleratorpracticum.ru",
-    "bugaton1.acceleratorpracticum.ru",
-    "bugaton2.acceleratorpracticum.ru",
-    "bugaton3.acceleratorpracticum.ru",
-    "bugaton4.acceleratorpracticum.ru",
-    "bugaton5.acceleratorpracticum.ru",
+    DOMAIN_NAME,
 ]
 
 
@@ -144,17 +136,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://localhost:3000",
     "https://127.0.0.1:3000",
     "https://80.87.107.166:3000",
-    "https://80.87.109.74:3000",
-    "https://80.87.109.82:3000",
-    "https://80.87.109.248:3000",
-    "https://80.87.109.8:3000",
-    "https://80.87.109.229:3000",
-    "https://meetingroom.acceleratorpracticum.ru:3000",
-    "https://bugaton1.acceleratorpracticum.ru:3000",
-    "https://bugaton2.acceleratorpracticum.ru:3000",
-    "https://bugaton3.acceleratorpracticum.ru:3000",
-    "https://bugaton4.acceleratorpracticum.ru:3000",
-    "https://bugaton5.acceleratorpracticum.ru:3000",
+    f"https://{DOMAIN_NAME}:3000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -173,17 +155,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://localhost",
     "https://127.0.0.1",
     "https://80.87.107.166",
-    "https://80.87.109.74",
-    "https://80.87.109.82",
-    "https://80.87.109.248",
-    "https://80.87.109.8",
-    "https://80.87.109.229",
-    "https://meetingroom.acceleratorpracticum.ru",
-    "https://bugaton1.acceleratorpracticum.ru",
-    "https://bugaton2.acceleratorpracticum.ru",
-    "https://bugaton3.acceleratorpracticum.ru",
-    "https://bugaton4.acceleratorpracticum.ru",
-    "https://bugaton5.acceleratorpracticum.ru",
+    f"https://{DOMAIN_NAME}.ru",
 ]
 
 SIMPLE_JWT = {
@@ -219,7 +191,7 @@ SIMPLE_JWT = {
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
-DOMAIN_NAME = "meetingroom.acceleratorpracticum.ru"
+
 EMAIL_HOST_USER = "noreply@" + DOMAIN_NAME
 
 TELEGRAM_CHAT_ID = os.getenv("TG_CHAT_ID")
