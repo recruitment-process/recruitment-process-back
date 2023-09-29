@@ -205,19 +205,23 @@ class Education(models.Model):
     educational_institution = models.CharField(
         max_length=250,
         verbose_name="Учебное заведение",
+        help_text="Укажите учебное заведение",
     )
     faculty = models.CharField(
         max_length=100,
         verbose_name="Факультет",
+        help_text="Укажите факультет",
         blank=True,
         null=True,
     )
     specialization = models.CharField(
         max_length=100,
         verbose_name="Специальность",
+        help_text="Укажите специальность",
     )
     graduation = models.DateField(
         verbose_name="Год окончания",
+        help_text="Укажите год окончания обучения",
         null=True,
         blank=True,
     )
@@ -243,29 +247,35 @@ class Company(models.Model):
     company_title = models.CharField(
         max_length=100,
         verbose_name="Название компании",
+        help_text="Введите название компании",
     )
     about_company = models.TextField(
         verbose_name="О компании",
-        help_text="Введите информацию о компани",
+        help_text="Введите информацию о компании",
         null=True,
         blank=True,
     )
     company_address = models.CharField(
         max_length=100,
         verbose_name="Адрес компании",
+        help_text="Укажите адрес компании",
         null=True,
         blank=True,
     )
     website = models.URLField(
         max_length=255,
         verbose_name="Сайт компании",
+        help_text="Добавьте сайт компании",
     )
     email = models.EmailField(
         verbose_name="Эл.почта",
+        help_text="Укажите электронную почту компании",
         null=True,
         blank=True,
     )
     phone_number = models.CharField(
+        verbose_name="Номер телефона",
+        help_text="Укажите контактный номер телефона компании",
         validators=[PHONE_NUMBER_REGEX],
         max_length=16,
         null=True,
@@ -274,12 +284,14 @@ class Company(models.Model):
     link_hr = models.URLField(
         max_length=250,
         verbose_name="Ссылка на HR",
+        help_text="Добавьте ссылку на HR",
         null=True,
         blank=True,
     )
     logo = models.ImageField(
         upload_to=generate_logo_path,
         verbose_name="Логотип компании",
+        help_text="Прикрепите логотип компании",
         null=True,
         blank=True,
     )
@@ -593,13 +605,18 @@ class Event(models.Model):
 class FunnelStage(models.Model):
     """Этапы воронки."""
 
-    name = models.CharField(max_length=100, verbose_name="Название этапа")
+    name = models.CharField(
+        max_length=100,
+        verbose_name="Название этапа",
+        help_text="Введите название этапа",
+    )
     date = models.DateField(blank=True, null=True, verbose_name="Дата")
     status = models.CharField(
         choices=FUNNEL_STATUS,
         max_length=get_max_length(FUNNEL_STATUS, None),
         default=FUNNEL_STATUS[0][0],
         verbose_name="Статус этапа",
+        help_text="Укажите статус этапа",
     )
     candidate = models.ForeignKey(
         Candidate,
@@ -627,6 +644,7 @@ class SubStage(models.Model):
         max_length=get_max_length(FUNNEL_STATUS, None),
         default=FUNNEL_STATUS[0][0],
         verbose_name="Статус подэтапа",
+        help_text="Укажите статус подэтапа",
     )
     stage = models.ForeignKey(
         FunnelStage,
@@ -653,7 +671,11 @@ class Note(models.Model):
         related_name="user_notes",
         verbose_name="Кандидат",
     )
-    text = models.TextField(max_length=200, verbose_name="Текст", help_text="Заметка")
+    text = models.TextField(
+        max_length=200,
+        verbose_name="Текст",
+        help_text="Введите текст заметки",
+    )
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="user_notes", verbose_name="Автор"
     )
@@ -678,9 +700,7 @@ class Comment(models.Model):
         verbose_name="Заметка",
     )
     text = models.TextField(
-        max_length=200,
-        help_text="Комментарий",
-        verbose_name="Текст",
+        max_length=200, verbose_name="Комментарий", help_text="Введите комментарий"
     )
     author = models.ForeignKey(
         User,
