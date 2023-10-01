@@ -65,6 +65,7 @@ class VacancyFilterSet(FilterSet):
         field_name="company",
         lookup_expr="exact",
     )
+    city = CharFilter(lookup_expr="icontains")
 
     class Meta:
         model = Vacancy
@@ -88,6 +89,8 @@ class ResumeFilterSet(BaseFilterSet):
     """Кастомный фильтр для резюме."""
 
     working_trip = BooleanFilter(field_name="working_trip")
+    town = CharFilter(lookup_expr="icontains")
+    job_title = CharFilter(lookup_expr="icontains")
 
     class Meta:
         model = ApplicantResume
@@ -107,6 +110,10 @@ class CandidatesFilterSet(BaseFilterSet):
     candidate_status = ChoiceFilter(
         field_name="candidate_status", choices=CANDIDATE_STATUS
     )
+    first_name = CharFilter(lookup_expr="icontains")
+    last_name = CharFilter(lookup_expr="icontains")
+    city = CharFilter(lookup_expr="icontains")
+    last_job = CharFilter(lookup_expr="icontains")
 
     class Meta:
         model = Candidate
