@@ -45,3 +45,17 @@ repos:
     -   id: black
         exclude: (migrations|crm_backend/crm_backend/settings/)
         args: [--line-length=88]
+
+
+-   repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+    -   id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package.lock.json
+
+-   repo:  https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.21.0
+    hooks:
+        - id: check-github-workflows
+        - id: check-dependabot
