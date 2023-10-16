@@ -2,7 +2,15 @@ from datetime import date
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from recruitment.models import Skills, SkillStack, WorkExperience
+from recruitment.models import (
+    Candidate,
+    Event,
+    FunnelStage,
+    Skills,
+    SkillStack,
+    SubStage,
+    WorkExperience,
+)
 
 
 class SkillsModelTest(TestCase):
@@ -53,3 +61,45 @@ class WorkExperienceModelTest(TestCase):
         )
         with self.assertRaises(ValidationError):
             experience.clean()
+
+
+class CandidateModelTest(TestCase):
+    """Тестирование модели Candidate."""
+
+    def test_candidate_creation(self):
+        """Тестирование метода __str__."""
+        candidate = Candidate(
+            first_name="Иван",
+            last_name="Иванов",
+            bday=date(1990, 1, 1),
+            city="Москва",
+            email="ivan@example.com",
+        )
+        self.assertEqual(candidate.__str__(), "Иванов")
+
+
+class EventModelTest(TestCase):
+    """Тестирование модели Event."""
+
+    def test_event_model_str(self):
+        """Тестирование метода __str__."""
+        event = Event(title="Собеседование", start_date=date(2023, 1, 1))
+        self.assertEqual(event.__str__(), "Собеседование")
+
+
+class FunnelStageModelTest(TestCase):
+    """Тестирование модели FunnelStage."""
+
+    def test_funnel_stage_creation(self):
+        """Тестирование метода __str__."""
+        funnel_stage = FunnelStage(name="Собеседование", date=date(2023, 1, 1))
+        self.assertEqual(funnel_stage.__str__(), "Собеседование")
+
+
+class SubStageModelTest(TestCase):
+    """Тестирование модели SubStage."""
+
+    def test_sub_stage_creation(self):
+        """Тестирование метода __str__."""
+        sub_stage = SubStage(name="Техническое собеседование", date=date(2023, 2, 1))
+        self.assertEqual(sub_stage.__str__(), "Техническое собеседование")
