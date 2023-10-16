@@ -251,10 +251,7 @@ class SkillStackSerializer(ModelSerializer):
         """
         skill_data = validated_data.pop("skill_stack")
         skill, created = Skills.objects.get_or_create(**skill_data)
-        skill_stack_object = SkillStack.objects.create(
-            skill_stack=skill, **validated_data
-        )
-        return skill_stack_object
+        return SkillStack.objects.create(skill_stack=skill, **validated_data)
 
 
 class VacancySerializer(ModelSerializer):
