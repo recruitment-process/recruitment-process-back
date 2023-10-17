@@ -46,7 +46,6 @@ repos:
         exclude: (migrations|crm_backend/crm_backend/settings/)
         args: [--line-length=88]
 
-
 -   repo: https://github.com/Yelp/detect-secrets
     rev: v1.4.0
     hooks:
@@ -59,3 +58,12 @@ repos:
     hooks:
         - id: check-github-workflows
         - id: check-dependabot
+
+-   repo: local
+    hooks:
+    -   id: nose2
+        name: Run nose2 tests
+        entry: nose2
+        language: system
+        types: [python]
+        pass_filenames: false

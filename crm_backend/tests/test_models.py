@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.core.exceptions import ValidationError
+from django.db import DataError
 from django.test import TestCase
 from recruitment.models import (
     Candidate,
@@ -20,6 +21,12 @@ class SkillsModelTest(TestCase):
         """Тестирование метода __str__ модели Skills."""
         skill = Skills(name="Python")
         self.assertEqual(str(skill), "Python")
+
+    def test_skills_model_max_length(self):
+        """Тестирование ограничения max_length для поля name в модели Skills."""
+        with self.assertRaises(DataError):
+            skills = Skills(name="P" * 51)
+            skills.save()
 
 
 class SkillStackModelTest(TestCase):
