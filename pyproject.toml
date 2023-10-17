@@ -1,0 +1,37 @@
+[tool.commitizen]
+name = "cz_customize"
+
+[tool.commitizen.customize]
+message_template = "{{change_type}}:{% if show_message %} {{message}}{% endif %}"
+example = "feature: this feature enable customize through config file"
+schema = "<type>: <body>"
+schema_pattern = "(feature|bug fix|add test|docs|chore|ci):(\\s.*)"
+bump_pattern = "^(break|new|fix|add test|docs|chore|ci)"
+bump_map = {"break" = "MAJOR", "new" = "MINOR", "fix" = "PATCH", "docs" = "PATCH", 'chore' = "PATCH"}
+change_type_order = ["BREAKING CHANGE", "feat", "fix", "refactor"]
+info_path = "cz_customize_info.txt"
+info = """
+This is customized info
+"""
+commit_parser = "^(?P<change_type>feature|bug fix|add test|docs|chore|ci):\\s(?P<message>.*)?"
+changelog_pattern = "^(feature|bug fix|add test|docs|chore|ci)?(!)?"
+change_type_map = {"feature" = "Feat", "bug fix" = "Fix", "add test" = "Test", "ci" = "CI", "docs" = "Docs"}
+
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "change_type"
+choices = [{value = "feature", name = "feature: Добавление нового функционала."}, {value = "bug fix", name = "bug fix: Исправление ошибок."},
+{value = "chore", name = "chore: Прочие изменения проекта или изменения внешних зависимостей."}, {value = "ci", name = "ci: Настройка CI и работа со скриптами."},
+{value = "docs", name = "update docs: Обновление документации."}, {value = "add test", name = "add test: Добавление тестов."}]
+# choices = ["feature", "fix"]  # short version
+message = "Выберите тип изменения, которое вы вносите:"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "message"
+message = "Напишите что было изменено и почему/для чего."
+
+[[tool.commitizen.customize.questions]]
+type = "confirm"
+name = "show_message"
+message = "Вы хотите добавить введенное сообщение в commit?"
