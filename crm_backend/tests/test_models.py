@@ -1,7 +1,6 @@
 from datetime import date
 
 from django.core.exceptions import ValidationError
-from django.db import DataError
 from django.test import TestCase
 from recruitment.models import (
     Candidate,
@@ -17,16 +16,26 @@ from recruitment.models import (
 class SkillsModelTest(TestCase):
     """Тестирование модели Skills."""
 
+    def setUp(self):
+        """Настройка данных для тестирования."""
+        self.skill = Skills(name="Python")
+
     def test_skills_model_str(self):
         """Тестирование метода __str__ модели Skills."""
-        skill = Skills(name="Python")
-        self.assertEqual(str(skill), "Python")
+        self.assertEqual(str(self.skill), "Python")
 
     def test_skills_model_max_length(self):
         """Тестирование ограничения max_length для поля name в модели Skills."""
-        with self.assertRaises(DataError):
-            skills = Skills(name="P" * 50)
-            skills.save()
+        self.skill.name = "P" * 51
+        with self.assertRaises(ValidationError):
+            self.skill.full_clean()
+
+    def test_verbose_name(self):
+        """Проверка verbose_name."""
+        verbose_name = self.skill._meta.verbose_name
+        self.assertEqual(verbose_name, "Список навыков")
+        verbose_name_plural = self.skill._meta.verbose_name_plural
+        self.assertEqual(verbose_name_plural, "Списки навыков")
 
 
 class SkillStackModelTest(TestCase):
@@ -42,47 +51,46 @@ class SkillStackModelTest(TestCase):
 class WorkExperienceModelTest(TestCase):
     """Тестирование модели WorkExperience."""
 
-    def test_workexperience_model_str(self):
-        """Тестирование метода __str__ модели WorkExperience."""
-        experience = WorkExperience(
+    def setUp(self):
+        """Настройка данных для тестирования."""
+        self.experience = WorkExperience(
             start_date=date(2020, 1, 1),
             end_date=date(2022, 12, 31),
-            position="Developer",
-            organization="ABC Inc",
+            position="Разработчик",
+            organization="Яндекс",
         )
-        self.assertEqual(str(experience), "Developer - ABC Inc")
+
+    def test_workexperience_model_str(self):
+        """Тестирование метода __str__ модели WorkExperience."""
+        self.assertEqual(str(self.experience), "Разработчик - Яндекс")
 
     def test_workexperience_model_clean_valid_dates(self):
         """Тестирование метода clean с корректными датами."""
-        experience = WorkExperience(
-            start_date=date(2020, 1, 1),
-            end_date=date(2022, 12, 31),
-        )
-        experience.clean()
+        self.experience.clean()
 
     def test_workexperience_model_clean_invalid_dates(self):
         """Тестирование метода clean с некорректными датами."""
-        experience = WorkExperience(
-            start_date=date(2023, 1, 1),
-            end_date=date(2022, 12, 31),
-        )
+        self.experience.start_date = date(2023, 1, 1)
         with self.assertRaises(ValidationError):
-            experience.clean()
+            self.experience.clean()
 
 
 class CandidateModelTest(TestCase):
     """Тестирование модели Candidate."""
 
-    def test_candidate_creation(self):
-        """Тестирование метода __str__."""
-        candidate = Candidate(
+    def setUp(self):
+        """Настройка данных для тестирования."""
+        self.candidate = Candidate(
             first_name="Иван",
             last_name="Иванов",
             bday=date(1990, 1, 1),
             city="Москва",
             email="ivan@example.com",
         )
-        self.assertEqual(candidate.__str__(), "Иванов")
+
+    def test_candidate_creation(self):
+        """Тестирование метода __str__."""
+        self.assertEqual(self.candidate.__str__(), "Иванов")
 
 
 class EventModelTest(TestCase):
