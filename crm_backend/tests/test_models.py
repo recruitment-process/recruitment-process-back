@@ -26,7 +26,7 @@ class SkillsModelTest(TestCase):
 
     def test_skills_model_max_length(self):
         """Тестирование ограничения max_length для поля name в модели Skills."""
-        self.skill.name = "P" * 50
+        self.skill.name = "P" * 51
         with self.assertRaises(ValidationError):
             self.skill.full_clean()
 
