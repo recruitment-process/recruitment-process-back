@@ -26,12 +26,12 @@ class SkillsModelTest(TestCase):
 
     def test_skills_model_max_length(self):
         """Тестирование ограничения max_length для поля name в модели Skills."""
-        self.skill.name = "P" * 51
+        self.skill.name = "P" * 50
         with self.assertRaises(ValidationError):
             self.skill.full_clean()
 
     def test_verbose_name(self):
-        """Проверка verbose_name."""
+        """Проверка verbose_name модели Skills."""
         verbose_name = self.skill._meta.verbose_name
         self.assertEqual(verbose_name, "Список навыков")
         verbose_name_plural = self.skill._meta.verbose_name_plural
