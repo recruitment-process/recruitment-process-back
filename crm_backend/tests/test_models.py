@@ -85,12 +85,30 @@ class CandidateModelTest(TestCase):
             last_name="Иванов",
             bday=date(1990, 1, 1),
             city="Москва",
-            email="ivan@example.com",
+            email="ivanov@example.com",
         )
 
     def test_candidate_creation(self):
-        """Тестирование метода __str__."""
-        self.assertEqual(self.candidate.__str__(), "Иванов")
+        """Проверка создания полей."""
+        self.assertEqual(self.candidate.first_name, "Иван")
+        self.assertEqual(self.candidate.last_name, "Иванов")
+        self.assertEqual(self.candidate.city, "Москва")
+        self.assertEqual(self.candidate.email, "ivanov@example.com")
+
+    def test_candidate_str(self):
+        """Проверка строкового представления (__str__)."""
+        self.assertEqual(str(self.candidate), "Иванов")
+
+    def test_candidate_email_validation(self):
+        """Проверка валидации email адреса."""
+        self.candidate.email = "invalid_email"
+        with self.assertRaises(ValidationError):
+            self.candidate.full_clean()
+
+    def test_candidate_default_values(self):
+        """Проверка значения по умолчанию для полей."""
+        self.assertIsNone(self.candidate.telegram)
+        self.assertIsNone(self.candidate.custom_status)
 
 
 class EventModelTest(TestCase):
