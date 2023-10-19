@@ -16,10 +16,26 @@ from recruitment.models import (
 class SkillsModelTest(TestCase):
     """Тестирование модели Skills."""
 
+    def setUp(self):
+        """Настройка данных для тестирования."""
+        self.skill = Skills(name="Python")
+
     def test_skills_model_str(self):
         """Тестирование метода __str__ модели Skills."""
-        skill = Skills(name="Python")
-        self.assertEqual(str(skill), "Python")
+        self.assertEqual(str(self.skill), "Python")
+
+    def test_skills_model_max_length(self):
+        """Тестирование ограничения max_length для поля name в модели Skills."""
+        self.skill.name = "P" * 51
+        with self.assertRaises(ValidationError):
+            self.skill.full_clean()
+
+    def test_verbose_name(self):
+        """Проверка verbose_name модели Skills."""
+        verbose_name = self.skill._meta.verbose_name
+        self.assertEqual(verbose_name, "Список навыков")
+        verbose_name_plural = self.skill._meta.verbose_name_plural
+        self.assertEqual(verbose_name_plural, "Списки навыков")
 
 
 class SkillStackModelTest(TestCase):
@@ -35,47 +51,64 @@ class SkillStackModelTest(TestCase):
 class WorkExperienceModelTest(TestCase):
     """Тестирование модели WorkExperience."""
 
-    def test_workexperience_model_str(self):
-        """Тестирование метода __str__ модели WorkExperience."""
-        experience = WorkExperience(
+    def setUp(self):
+        """Настройка данных для тестирования."""
+        self.experience = WorkExperience(
             start_date=date(2020, 1, 1),
             end_date=date(2022, 12, 31),
-            position="Developer",
-            organization="ABC Inc",
+            position="Разработчик",
+            organization="Яндекс",
         )
-        self.assertEqual(str(experience), "Developer - ABC Inc")
+
+    def test_workexperience_model_str(self):
+        """Тестирование метода __str__ модели WorkExperience."""
+        self.assertEqual(str(self.experience), "Разработчик - Яндекс")
 
     def test_workexperience_model_clean_valid_dates(self):
         """Тестирование метода clean с корректными датами."""
-        experience = WorkExperience(
-            start_date=date(2020, 1, 1),
-            end_date=date(2022, 12, 31),
-        )
-        experience.clean()
+        self.experience.clean()
 
     def test_workexperience_model_clean_invalid_dates(self):
         """Тестирование метода clean с некорректными датами."""
-        experience = WorkExperience(
-            start_date=date(2023, 1, 1),
-            end_date=date(2022, 12, 31),
-        )
+        self.experience.start_date = date(2023, 1, 1)
         with self.assertRaises(ValidationError):
-            experience.clean()
+            self.experience.clean()
 
 
 class CandidateModelTest(TestCase):
     """Тестирование модели Candidate."""
 
-    def test_candidate_creation(self):
-        """Тестирование метода __str__."""
-        candidate = Candidate(
+    def setUp(self):
+        """Настройка данных для тестирования."""
+        self.candidate = Candidate(
             first_name="Иван",
             last_name="Иванов",
             bday=date(1990, 1, 1),
             city="Москва",
-            email="ivan@example.com",
+            email="ivanov@example.com",
         )
-        self.assertEqual(candidate.__str__(), "Иванов")
+
+    def test_candidate_creation(self):
+        """Проверка создания полей."""
+        self.assertEqual(self.candidate.first_name, "Иван")
+        self.assertEqual(self.candidate.last_name, "Иванов")
+        self.assertEqual(self.candidate.city, "Москва")
+        self.assertEqual(self.candidate.email, "ivanov@example.com")
+
+    def test_candidate_str(self):
+        """Проверка строкового представления (__str__)."""
+        self.assertEqual(str(self.candidate), "Иванов")
+
+    def test_candidate_email_validation(self):
+        """Проверка валидации email адреса."""
+        self.candidate.email = "invalid_email"
+        with self.assertRaises(ValidationError):
+            self.candidate.full_clean()
+
+    def test_candidate_default_values(self):
+        """Проверка значения по умолчанию для полей."""
+        self.assertIsNone(self.candidate.telegram)
+        self.assertIsNone(self.candidate.custom_status)
 
 
 class EventModelTest(TestCase):
