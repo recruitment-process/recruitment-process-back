@@ -15,12 +15,6 @@ repos:
     -   id: check-merge-conflict
     -   id: check-json
 
--   repo: https://github.com/commitizen-tools/commitizen
-    rev: 3.6.0
-    hooks:
-    -   id: commitizen
-        stages: [commit-msg]
-
 -   repo: https://github.com/pycqa/isort
     rev: 5.12.0
     hooks:
