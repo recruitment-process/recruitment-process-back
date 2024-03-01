@@ -162,3 +162,8 @@ cython_debug/
 
 #linter
 .editorconfig
+
+# папки со статикой и медиа
+media/
+static_backend/
+static/
